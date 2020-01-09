@@ -1,3 +1,8 @@
+*Note*: To clone this repository please run the following command instead:
+git clone --recursive [URL to Git Repo]
+
+This is due to the presence of submodules within the repository.
+
 ns3-gym
 ============
 
