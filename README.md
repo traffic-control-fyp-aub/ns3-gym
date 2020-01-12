@@ -1,7 +1,57 @@
-*Note*: To clone this repository please run the following command instead:
-git clone --recursive [URL to Git Repo]
+*Note*: To clone this repository please run the following command instead:\git clone --recursive [URL to Git Repo]
 
 This is due to the presence of submodules within the repository.
+
+Below are other dependencies that are required due to the presence of the stable-baselines repository as a submodule.\
+
+# Stable Baselines
+
+Stable Baselines is a set of improved implementations of reinforcement learning algorithms based on OpenAI [Baselines](https://github.com/openai/baselines/).
+
+# Documentation
+
+Documentation is available online: [https://stable-baselines.readthedocs.io/](https://stable-baselines.readthedocs.io/)
+
+## RL Baselines Zoo: A Collection of 100+ Trained RL Agents
+
+[RL Baselines Zoo](https://github.com/araffin/rl-baselines-zoo). is a collection of pre-trained Reinforcement Learning agents using Stable-Baselines.
+
+## Installation
+
+**Note:** Stabe-Baselines supports Tensorflow versions from 1.8.0 to 1.14.0. Support for Tensorflow 2 API is planned.
+
+### Prerequisites
+Baselines requires python3 (>=3.5) with the development headers. You'll also need system packages CMake, OpenMPI and zlib. Those can be installed as follows
+
+#### Ubuntu
+
+```bash
+sudo apt-get update && sudo apt-get install cmake libopenmpi-dev python3-dev zlib1g-dev
+```
+
+#### Mac OS X
+Installation of system packages on Mac requires [Homebrew](https://brew.sh). With Homebrew installed, run the following:
+```bash
+brew install cmake openmpi
+```
+
+#### Windows 10
+
+To install stable-baselines on Windows, please look at the [documentation](https://stable-baselines.readthedocs.io/en/master/guide/install.html#prerequisites).
+
+### Install using pip
+Install the Stable Baselines package:
+```
+pip install stable-baselines[mpi]
+```
+
+This includes an optional dependency on MPI, enabling algorithms DDPG, GAIL, PPO1 and TRPO. If you do not need these algorithms, you can install without MPI:
+```
+pip install stable-baselines
+```
+
+Please read the [documentation](https://stable-baselines.readthedocs.io/) for more details and alternatives (from source, using docker).
+
 
 ns3-gym
 ============
