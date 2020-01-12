@@ -1,8 +1,10 @@
-*Note*: To clone this repository please run the following command instead:\git clone --recursive [URL to Git Repo]
+*Note*: To clone this repository please run the following command instead:
+
+git clone --recursive [URL to Git Repo]
 
 This is due to the presence of submodules within the repository.
 
-Below are other dependencies that are required due to the presence of the stable-baselines repository as a submodule.\
+Below are other dependencies that are required due to the presence of the stable-baselines repository as a submodule.
 
 # Stable Baselines
 
