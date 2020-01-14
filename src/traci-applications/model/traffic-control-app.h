@@ -57,10 +57,10 @@ private:
   void Send (void);
   void ChangeSpeed (void);
 
-  uint16_t m_port; //!< Port on which traffic information is sent
+  uint16_t tx_port; //!< Port on which traffic information is sent
   Time m_interval; //!< Packet inter-send time
   uint32_t m_count; //!< Maximum number of packets the application will send
-  Ptr<Socket> m_socket; //!< IPv4 Socket
+  Ptr<Socket> tx_socket; //!< IPv4 Socket
   uint16_t m_velocity; //!< transmitted velocity
   EventId m_sendEvent; //!< Event to send the next packet
   Ptr<TraciClient> m_client;
@@ -101,8 +101,8 @@ private:
    */
   void HandleRead (Ptr<Socket> socket);
 
-  Ptr<Socket> m_socket; //!< Socket
-  uint16_t m_port; //!< Port on which client will listen for traffic information
+  Ptr<Socket> rx_socket; //!< Socket
+  uint16_t rx_port; //!< Port on which client will listen for traffic information
   Ptr<TraciClient> m_client;
   double last_velocity;
 };
