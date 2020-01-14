@@ -1,15 +1,9 @@
 <routes>
-<<<<<<< HEAD
-	<vType id="car" type="passenger" length="5" accel="2" decel="4.5" sigma="0.5" carFollowModel="IDM" impatience="0.5" minGap="0" tau="1.0"/>
-       	<flow id="carflow" type="car" beg="0" end="0" number="3" from="gneE9" to="gneE8" />
-=======
 	<vTypeDistribution id="typedist1">
 		<vType id="car" type="passenger" length="5" accel="2" decel="4.5" sigma="0.5" carFollowModel="IDM" impatience="0.5" minGap="0" tau="2.5" probability="0.8" color="green"/>
 
 		<vType id="agent" type="passenger" length="5" accel="2" decel="4.5" sigma="0.5" carFollowModel="IDM" impatience="0.5" minGap="1" tau="2.5" probability="0.2" guiShape="evehicle" color="red"/>
 	</vTypeDistribution>
 
-	<flow id="carflow" type="typedist1" beg="0" end="0" number="5" from="gneE9" to="gneE8" />
-
->>>>>>> 8954be35f6cecd1bf7437212c980e9133eeb40bc
+	<flow id="carflow" type="typedist1" beg="0" end="0" number="3" from="gneE9" to="gneE8" />
 </routes>	
