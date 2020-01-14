@@ -1,4 +1,4 @@
-# Custom OpenAI Gym environment
+# Custom OpenAI Gym Environment
 
 This environment is a custom gym environment for the sole purpose of training the agent.
 
@@ -16,7 +16,7 @@ After installing and registering the custom environment you can use it with the 
 
 ```bash 
 import gym
-import gym-rsu
+import rl-fyp.gym-rsu
 
 env = gym.make('rsu-v0')
 ```

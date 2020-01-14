@@ -18,8 +18,8 @@ following code block:
 
 ```bash 
 import gym
-import gym-rsu
+import rl-fyp.gym-car
 
-env = gym.make('rsu-v0')
+env = gym.make('car-v0')
 ```
 
