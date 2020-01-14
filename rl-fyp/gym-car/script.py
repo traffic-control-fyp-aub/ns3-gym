@@ -3,7 +3,7 @@ import gym
 import rl-fyp.rl-baselines.stable-baselines.stable_baselines import DQN
 from rl-fyp.rl-baselines.stable-baselines.stable_baselines.common.evaluation import evaluate_policy
 
-import rl-fyp.gym-car
+import gym-car
 
 # Create environment
 env = gym.make('car-v0')

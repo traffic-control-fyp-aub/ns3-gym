@@ -16,7 +16,7 @@ After installing and registering the custom environment you can use it with the 
 
 ```bash 
 import gym
-import rl-fyp.gym-rsu
+import gym-rsu
 
 env = gym.make('rsu-v0')
 ```

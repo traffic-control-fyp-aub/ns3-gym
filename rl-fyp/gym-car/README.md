@@ -18,7 +18,7 @@ following code block:
 
 ```bash 
 import gym
-import rl-fyp.gym-car
+import gym-car
 
 env = gym.make('car-v0')
 ```
