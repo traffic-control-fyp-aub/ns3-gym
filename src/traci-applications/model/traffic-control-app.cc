@@ -122,7 +122,7 @@ namespace ns3
         m_socket->Connect (remote);
 
         ScheduleTransmit (Seconds (0.0));
-        Simulator::Schedule (Seconds (10.0), &RsuSpeedControl::ChangeSpeed, this);
+        Simulator::Schedule (Seconds (0.5), &RsuSpeedControl::ChangeSpeed, this);
       }
   }
 
@@ -172,7 +172,7 @@ namespace ns3
   RsuSpeedControl::ChangeSpeed ()
   {
     m_velocity = rand () % 60; // between 0 and 60 m/s
-    Simulator::Schedule (Seconds (10.0), &RsuSpeedControl::ChangeSpeed, this);
+    Simulator::Schedule (Seconds (0.5), &RsuSpeedControl::ChangeSpeed, this);
   }
 
   TypeId
