@@ -5,6 +5,10 @@
 
 rl-fyp/rl-baselines/other-agents/HIRO/envs
 
+# ignore the custom environment registration files
+ns3-gym/rl_fyp/gym_rsu/rl_fyp.gym_rsu
+ns3-gym/rl_fyp/gym_car/rl_fyp.gym_car
+
 # User-specific stuff
 .idea
 .idea/**/workspace.xml
