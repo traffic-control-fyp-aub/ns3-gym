@@ -7,7 +7,7 @@ This environment is a custom gym environment for the sole purpose of training th
 To install and register the environment with OpenAI Gym run the following script in the working directory of the **setup.py** file.
 
 ```bash 
-pip install -e .
+pip3 install -e .
 ```
 
 ## Environment Usage
@@ -16,7 +16,13 @@ After installing and registering the custom environment you can use it with the 
 
 ```bash 
 import gym
-import gym-rsu
+import gym_rsu
 
-env = gym.make('rsu-v0')
+env = gym.make('rsu_v0')
+```
+
+## Running script file
+To run the **script.py** file in the custom environment directory type the following command:
+```bash
+python3 script.py
 ```

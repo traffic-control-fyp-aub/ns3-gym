@@ -62,5 +62,5 @@ class RSUEnv(gym.Env):
             necessary that the function output some visual
             graphics to the screen.
         """
-        pass
+        print("Test")
 

@@ -5,7 +5,7 @@
 
     Usage:
     ------
-    import gym-car
+    import gym_car
 """
 from setuptools import setup
 
