@@ -54,7 +54,7 @@ namespace ns3
     .AddConstructor<RsuSpeedControl> ()
     .AddAttribute ("Port", "Port on which we send packets.",
                    UintegerValue (9),
-                   MakeUintegerAccessor (&RsuSpeedControl::tx_port),
+                   MakeUintegerAccessor (&RsuSpeedControl::m_port),
                    MakeUintegerChecker<uint16_t> ())
     .AddAttribute ("Interval",
                    "The time to wait between packets",
@@ -86,7 +86,8 @@ namespace ns3
   {
     NS_LOG_FUNCTION(this);
     m_sendEvent = EventId ();
-    tx_port = 0;
+    m_port = 0;
+    rx_socket = 0;
     tx_socket = 0;
     m_velocity = 0;
     m_count = 1e9;
@@ -117,13 +118,19 @@ namespace ns3
         Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
         Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
         Ipv4Address ipAddr = iaddr.GetBroadcast ();
-        InetSocketAddress remote = InetSocketAddress (ipAddr, tx_port);
+        InetSocketAddress remote = InetSocketAddress (ipAddr, m_port);
         tx_socket->SetAllowBroadcast (true);
         tx_socket->Connect (remote);
 
         ScheduleTransmit (Seconds (0.0));
         Simulator::Schedule (Seconds (0.5), &RsuSpeedControl::ChangeSpeed, this);
       }
+            TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
+    rx_socket = Socket::CreateSocket (GetNode (), tid);
+    InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), m_port);
+    rx_socket->Bind (local);
+    rx_socket->SetRecvCallback (MakeCallback (&RsuSpeedControl::HandleRead, this));
+
   }
 
   void
@@ -161,7 +168,7 @@ namespace ns3
     Ipv4Address ipAddr = iaddr.GetLocal ();
 
     tx_socket->Send (packet);
-    NS_LOG_INFO("##### Packet sent at time " << Simulator::Now().GetSeconds()
+    NS_LOG_INFO("##### Packet sent from RSU at time " << Simulator::Now().GetSeconds()
                 << "s - [ip:" << ipAddr << "]"
                 << "[tx vel:" << m_velocity << "m/s]");
 
@@ -175,6 +182,28 @@ namespace ns3
     Simulator::Schedule (Seconds (0.5), &RsuSpeedControl::ChangeSpeed, this);
   }
 
+void
+  RsuSpeedControl::HandleRead (Ptr<Socket> socket)
+  {
+    NS_LOG_FUNCTION(this << socket);
+    Ptr<Packet> packet;
+    packet = socket->Recv ();
+
+    uint8_t *buffer = new uint8_t[packet->GetSize ()];
+    packet->CopyData (buffer, packet->GetSize ());
+    std::string s = std::string ((char*) buffer);
+    double velocity = (double) std::stoi (s);
+
+    Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
+    Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
+    Ipv4Address ipAddr = iaddr.GetLocal ();
+
+    NS_LOG_INFO("##### Packet received from Vehicle - "
+        << "[id:" << m_client->GetVehicleId(this->GetNode()) << "]"
+        << "[ip:" << ipAddr << "]"
+        << "[rx vel:" << velocity << "m/s]");
+  }
+
   TypeId
   VehicleSpeedControl::GetTypeId (void)
   {
@@ -186,8 +215,13 @@ namespace ns3
         .AddAttribute (
             "Port", "The port on which the client will listen for incoming packets.",
             UintegerValue (0),
-            MakeUintegerAccessor (&VehicleSpeedControl::rx_port),
+            MakeUintegerAccessor (&VehicleSpeedControl::m_port),
             MakeUintegerChecker<uint16_t> ())
+        .AddAttribute ("Interval",
+                   "The time to wait between packets",
+                   TimeValue (Seconds (2.0)),
+                   MakeTimeAccessor (&VehicleSpeedControl::m_interval),
+                   MakeTimeChecker ())
         .AddAttribute (
             "Client", "TraCI client for SUMO",
             PointerValue (0),
@@ -199,8 +233,9 @@ namespace ns3
   VehicleSpeedControl::VehicleSpeedControl ()
   {
     NS_LOG_FUNCTION(this);
+    m_sendEvent = EventId ();
     rx_socket = 0;
-    rx_port = 0;
+    m_port = 0;
     m_client = nullptr;
     last_velocity = -1;
   }
@@ -225,9 +260,24 @@ namespace ns3
 
     TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
     rx_socket = Socket::CreateSocket (GetNode (), tid);
-    InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), rx_port);
+    InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), m_port);
     rx_socket->Bind (local);
     rx_socket->SetRecvCallback (MakeCallback (&VehicleSpeedControl::HandleRead, this));
+
+    if (tx_socket == 0)
+      {
+        TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
+        tx_socket = Socket::CreateSocket (GetNode (), tid);
+        Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
+        Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
+        Ipv4Address ipAddr = iaddr.GetBroadcast ();
+        InetSocketAddress remote = InetSocketAddress (ipAddr, m_port);
+        tx_socket->SetAllowBroadcast (true);
+        tx_socket->Connect (remote);
+
+        ScheduleTransmit (Seconds (0.0));
+        Simulator::Schedule (Seconds (0.5), &VehicleSpeedControl::Send, this);
+      }
   }
 
   void
@@ -266,7 +316,7 @@ namespace ns3
     Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
     Ipv4Address ipAddr = iaddr.GetLocal ();
 
-    NS_LOG_INFO("***** Packet received - "
+    NS_LOG_INFO("***** Packet received from RSU- "
         << "[id:" << m_client->GetVehicleId(this->GetNode()) << "]"
         << "[ip:" << ipAddr << "]"
         << "[vel:" << m_client->TraCIAPI::vehicle.getSpeed(m_client->GetVehicleId(this->GetNode())) << "m/s]"
@@ -278,7 +328,35 @@ namespace ns3
         m_client->TraCIAPI::vehicle.setSpeed (m_client->GetVehicleId (this->GetNode ()), velocity);
         last_velocity = velocity;
       }
-
   }
+  
+void
+  VehicleSpeedControl::Send ()
+  {
+    NS_LOG_FUNCTION(this << tx_socket);
+
+    std::ostringstream msg;
+    msg << std::to_string (last_velocity) << '\0';
+    Ptr<Packet> packet = Create<Packet> ((uint8_t*) msg.str ().c_str (), msg.str ().length ());
+
+    Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
+    Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
+    Ipv4Address ipAddr = iaddr.GetLocal ();
+
+   tx_socket->Send (packet);
+    NS_LOG_INFO("***** Packet sent from Vehicle at time" << Simulator::Now().GetSeconds()
+                << "s - [ip:" << ipAddr << "]"
+                << "[tx vel:" << last_velocity << "m/s]");
+
+    ScheduleTransmit (m_interval);
+  }
+
+ void
+  VehicleSpeedControl::ScheduleTransmit (Time dt)
+  {
+    NS_LOG_FUNCTION(this << dt);
+    m_sendEvent = Simulator::Schedule (dt, &VehicleSpeedControl::Send, this);
+  }
+
 
 } // Namespace ns3
