@@ -8,7 +8,7 @@ To install and register the environment with OpenAI Gym run the following script
  in the working directory of the **setup.py** file.
 
 ```bash 
-pip install -e .
+pip3 install -e .
 ```
 
 ## Environment Usage
@@ -18,8 +18,13 @@ following code block:
 
 ```bash 
 import gym
-import gym-car
+import gym_car
 
 env = gym.make('car-v0')
 ```
 
+## Running script file
+To run the **script.py** file in the custom environment directory type the following command:
+```bash
+python3 script.py
+```

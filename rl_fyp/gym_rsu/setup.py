@@ -5,7 +5,7 @@
 
     Usage:
     ------
-    import gym-rsu
+    import gym_rsu
 """
 from setuptools import setup
 

@@ -10,6 +10,6 @@
 from gym.envs.registration import register
 
 register(
-        id='rsu_v0',
+        id='rsu-v0',
         entry_point='gym_rsu.envs:RSUEnv',
         )
