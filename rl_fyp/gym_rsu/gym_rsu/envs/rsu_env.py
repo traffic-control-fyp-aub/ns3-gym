@@ -8,7 +8,6 @@ import pandas as pd
     Custom OpenAI Gym environment from the perspective
     of the road side unit (RSU).
 """
-MAX_REWARD_RANGE = 1  # Upper bound on reward range
 PATH_TO_DATA_FRAME = "/path/to/data_frame"  # FIXME - set correct path
 MAX_HEADWAY_TIME = 2
 MAX_VELOCITY_VALUE = 3.5
@@ -71,7 +70,7 @@ class RSUEnv(gym.Env):
                                            np.array([1]),
                                            dtype=np.float16)
 
-        self.reward_range = (0, MAX_REWARD_RANGE)
+        self.reward = 0
 
         self.df = pd.read_csv(PATH_TO_DATA_FRAME)
 
@@ -132,18 +131,18 @@ class RSUEnv(gym.Env):
         #
         #   Below is mathematical form of our reward function:
         #   ||v_desired|| - (1-alpha)(||v_desired - v_i(t)||) - (alpha)( summation(max(h_max - h_i(t), 0)) )
-        reward = abs(DESIRED_VELOCITY)\
+        self.reward = abs(DESIRED_VELOCITY)\
             - (1-ALPHA)*abs((np.sum(
                 np.subtract(desired_velocity_dataframe.values,
                             self.df['Velocity'].values))))\
             - ALPHA*(sum(list_of_maximums))
 
-        reward *= delay_modifier
+        self.reward *= delay_modifier
         done = False  # FIXME - define ending condition
 
         obs = self._next_observation()
 
-        return obs, reward, done, {}
+        return obs, self.reward, done, {}
 
     def reset(self):
         """
