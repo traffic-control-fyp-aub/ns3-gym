@@ -15,6 +15,8 @@ MAX_VELOCITY_VALUE = 3.5
 MAX_STEPS = 5
 ALPHA = 0.1  # gain used to diminish the magnitude of the penalty
 DESIRED_VELOCITY = 3  # desired system wide target (average) velocity
+NUMBER_OF_VEHICLES = 3  # number of vehicles present in the environment
+TOTAL_SECONDS_OF_INTEREST = 60*60  # 60 seconds/minute * 60 minutes
 
 
 class RSUEnv(gym.Env):
@@ -96,6 +98,8 @@ class RSUEnv(gym.Env):
                     Diagnostic information useful for debugging.
         """
         # Execute one time step within the environment
+        if not isinstance(action, np.ndarray):
+            raise Exception(f'Action must be of type Numpy Array instead is of type {type(action)}')
         self._take_action(action)
         self.current_step += 1
 
@@ -122,6 +126,12 @@ class RSUEnv(gym.Env):
 
         list_of_maximums = np.asarray(temp)
 
+        #   Based on a modified version of the reward function present in the following paper:
+        #   Dissipating stop-and-go waves in closed and open networks via deep reinforcement learning
+        #   By A. Kreidieh
+        #
+        #   Below is mathematical form of our reward function:
+        #   ||v_desired|| - (1-alpha)(||v_desired - v_i(t)||) - (alpha)( summation(max(h_max - h_i(t), 0)) )
         reward = abs(DESIRED_VELOCITY)\
             - (1-ALPHA)*abs((np.sum(
                 np.subtract(desired_velocity_dataframe.values,
@@ -156,8 +166,13 @@ class RSUEnv(gym.Env):
             definition of the render function. It is not
             necessary that the function output some visual
             graphics to the screen.
+
+            Here we chose to print the velocities of all the vehicles
+            at each time step.
         """
-        print(f'Step: {self.current_step}')  # FIXME - decide on what to render
+        print(f'Step: {self.current_step}')
+        print(f'Velocity of all vehicles: {self.df["Velocity"]}')
+        print(f'********************')
 
     def _next_observation(self):
         """
@@ -188,6 +203,79 @@ class RSUEnv(gym.Env):
 
     def _take_action(self, action):
         """
-            _take_action()
+            Take the action provided by the agent/model
+            and physically perform it on the environment.
+
+            Specifically what happens is that based on the
+            received action the RSU then modifies the following
+            time step's velocities. These future time step velocity
+            values can be accessed from the recorded data in the
+            data frame specified within the RSU environment.
+            This can be viewed as the equivalent of training from
+            scratch without any previously recorded data.
+
+            * Note:
+            -------
+            This is not to be confused with the action function within the
+            agent that is responsible for actually taking the decision of speeding
+            up or slowing down and by a certain amount.
+
+            Parameter(s):
+            -------------
+            action: type(Numpy Array(dtype=Float))
+                Since this is an environment from the perspective of the RSU
+                then the action received will be a individual de/acceleration(s)
+                to be performed on the vehicle(s). The length of this vector
+                is equal to the number of vehicles in the environment.
         """
-        pass
+        if action.__len__() < NUMBER_OF_VEHICLES:
+            raise Exception(f"Size of action list does not match number of vehicles: {NUMBER_OF_VEHICLES}")
+        else:
+            for index, elem in self.df['Velocity'].__len__():
+                self.df['Velocity'].loc[index] = elem + action[index] if action[index] >= 0 else elem - action[index]
+
+            # Knowing the new set of velocities for the vehicles we now need to compute the
+            # new set of headways since the previously recorded ones are useless. The following
+            # proposed solution methodology is what we follow through with:
+            #     1) Derive the new system average velocity over all the vehicles after applying the action.
+            #     2) Derive the average number of vehicles arriving per hour.
+            #     3) If the value is < 2000 vehicles/hr then the headway time follows a poisson distribution
+            #     4) Else if the value is > 2000 vehicles/hr then the headway times follows the exponential distribution
+            #     5) Sample from the chosen headway distribution and update the headway times.
+            average_velocity = sum(self.df['Velocity']) / self.df['Velocity'].__len__()
+            q_flow_value = average_velocity * TOTAL_SECONDS_OF_INTEREST
+
+            if q_flow_value < 2000:
+                # poisson distribution
+                self._sample_poisson_value(q_flow_value)
+            elif q_flow_value >= 2000:
+                # exponential distribution
+                self._sample_exponential_value(q_flow_value)
+
+    def _sample_poisson_value(self, q):
+        """
+            Draws samples from a Poisson Distribution
+            and updates the previously recorded headway times
+            accordingly.
+
+            Parameter(s):
+            -------------
+            q: type(Float)
+                Flow value
+        """
+        for ii in self.df['Headway'].__len__():
+            self.df['Headway'].loc[ii] = np.random.poisson(q)
+
+    def _sample_exponential_value(self, q):
+        """
+            Draws samples from an Exponential Distribution
+            centered around "q" and updates the previously
+            recorded headway times accordingly.
+
+            Parameter(s):
+            -------------
+            q: type(Float)
+                Flow value
+        """
+        for ii in self.df['Headway'].__len__():
+            self.df['Headway'].loc[ii] = np.random.exponential(q)
