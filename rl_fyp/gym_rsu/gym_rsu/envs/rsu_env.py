@@ -132,10 +132,8 @@ class RSUEnv(gym.Env):
         #   Below is mathematical form of our reward function:
         #   ||v_desired|| - (1-alpha)(||v_desired - v_i(t)||) - (alpha)( summation(max(h_max - h_i(t), 0)) )
         self.reward = abs(DESIRED_VELOCITY)\
-            - (1-ALPHA)*abs((np.sum(
-                np.subtract(desired_velocity_dataframe.values,
-                            self.df['Velocity'].values))))\
-            - ALPHA*(sum(list_of_maximums))
+            - (1-ALPHA)*abs((np.sum(np.subtract(desired_velocity_dataframe.values,
+                            self.df['Velocity'].values)))) - ALPHA*(sum(list_of_maximums))
 
         self.reward *= delay_modifier
         done = False  # FIXME - define ending condition
