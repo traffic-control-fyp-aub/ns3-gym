@@ -13,6 +13,8 @@ PATH_TO_DATA_FRAME = "/path/to/data_frame"  # FIXME - set correct path
 MAX_HEADWAY_TIME = 2
 MAX_VELOCITY_VALUE = 3.5
 MAX_STEPS = 5
+ALPHA = 0.1  # gain used to diminish the magnitude of the penalty
+DESIRED_VELOCITY = 3  # desired system wide target (average) velocity
 
 
 class RSUEnv(gym.Env):
@@ -102,8 +104,32 @@ class RSUEnv(gym.Env):
 
         delay_modifier = (self.current_step / MAX_STEPS)
 
-        reward = 0 * delay_modifier  # FIXME - set reward function
-        done = reward <= 0  # FIXME - define ending condition
+        # create a dataframe of values all set to desired velocity but same size as Velocity column
+        desired_velocity = {'V_Desired': [DESIRED_VELOCITY]}
+        desired_velocity_dataframe = pd.DataFrame(desired_velocity, columns=['V_Desired'])
+
+        # create a dataframe of values all set to desired headway but same size as Headway column
+        desired_headway = {'Head_Desired': [MAX_HEADWAY_TIME]}
+        desired_headway_dataframe = pd.DataFrame(desired_headway, columns=['Head_Desired'])
+
+        for ii in self.df['Velocity'].__len__() - 1:
+            desired_velocity_dataframe.append(DESIRED_VELOCITY)
+            desired_headway_dataframe.append(MAX_HEADWAY_TIME)
+
+        temp = []
+        for jj in self.df['Headway'].__len__():
+            temp.append(max(desired_headway_dataframe.loc[jj] - self.df['Headway'].loc[jj], 0))
+
+        list_of_maximums = np.asarray(temp)
+
+        reward = abs(DESIRED_VELOCITY)\
+            - (1-ALPHA)*abs((np.sum(
+                np.subtract(desired_velocity_dataframe.values,
+                            self.df['Velocity'].values))))\
+            - ALPHA*(sum(list_of_maximums))
+
+        reward *= delay_modifier
+        done = False  # FIXME - define ending condition
 
         obs = self._next_observation()
 
