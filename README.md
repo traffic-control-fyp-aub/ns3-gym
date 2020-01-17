@@ -1,16 +1,41 @@
-*Note*: To clone this repository please run the following command instead:
+Welcome to an augmented version of the repository originally developed by [tkn-tub](https://github.com/tkn-tub/ns3-gym). 
 
-git clone --recursive [URL to Git Repo]
+In this augmented version we have managed to additionally integrate the SUMO traffic simulator. Hence all SUMO traffic scenarios are also supported.
 
-This is due to the presence of submodules within the repository.
+Additionally, we performed all of our reinforcement learning using the agents present in the [stable-baselines](https://github.com/hill-a/stable-baselines) repository. Which is a repository with high-quality implementations of well known Deep RL algorithms.
 
-Below are other dependencies that are required due to the presence of the stable-baselines repository as a submodule.
+Continuing to scroll down, you will find the three different subsections that will explains the required dependencies for:
+* SUMO
+* Stable Baselines
+* ns3-gym
+
+# SUMO
+
+## What is SUMO
+
+["Simulation of Urban MObility" (SUMO)](https://sumo.dlr.de/) is an open source,
+highly portable, microscopic traffic simulation package designed to handle
+large road networks and different modes of transport.
+
+It is mainly developed by employees of the [Institute of Transportation Systems
+at the German Aerospace Center](https://www.dlr.de/ts).
+
+
+## Where to get it
+
+You can download SUMO via our [downloads site](https://sumo.dlr.de/docs/Downloads.html).
+
+As the program is still under development and is extended continuously, we advice you to
+use the latest sources from our GitHub repository. Using a command line client
+the following command should work:
+
+        git clone --recursive https://github.com/eclipse/sumo
 
 # Stable Baselines
 
 Stable Baselines is a set of improved implementations of reinforcement learning algorithms based on OpenAI [Baselines](https://github.com/openai/baselines/).
 
-# Documentation
+## Documentation
 
 Documentation is available online: [https://stable-baselines.readthedocs.io/](https://stable-baselines.readthedocs.io/)
 
