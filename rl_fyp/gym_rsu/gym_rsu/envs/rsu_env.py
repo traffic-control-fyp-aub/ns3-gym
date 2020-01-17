@@ -63,7 +63,7 @@ class RSUEnv(gym.Env):
         """
         super(RSUEnv, self).__init__()
         self.observation_space = gym.spaces.Box(np.array([0, 0]),
-                                                np.array([2, 3.5]),
+                                                np.array([MAX_HEADWAY_TIME, MAX_VELOCITY_VALUE]),
                                                 dtype=np.float16)
 
         self.action_space = gym.spaces.Box(np.array([-1]),
