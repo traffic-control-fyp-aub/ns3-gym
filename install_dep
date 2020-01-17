@@ -6,6 +6,10 @@
 #
 # The full list of requirements is listed in the README file
 # this is because some dependencies are additional or OS dependent.
+#
+#
+# To run this script just enter the following command in the terminal
+# >> ./install_dep
 
 echo "Installing pip3"
 sudo apt-get update
