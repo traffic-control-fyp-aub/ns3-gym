@@ -9,6 +9,15 @@ Continuing to scroll down, you will find the three different subsections that wi
 * Stable Baselines
 * ns3-gym
 
+**Note**: You can go through the steps below for a more hands on installation process or you can run the installation helper script by entering the following command in the terminal:
+```bash
+./install_dep
+```
+
+The above command must be run the working directory of ns3-gym.
+
+**The above script does not take care of the entire set up of SUMO.**
+
 # SUMO
 
 ## What is SUMO

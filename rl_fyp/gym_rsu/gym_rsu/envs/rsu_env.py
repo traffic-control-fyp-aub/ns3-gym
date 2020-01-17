@@ -8,7 +8,7 @@ import pandas as pd
     Custom OpenAI Gym environment from the perspective
     of the road side unit (RSU).
 """
-PATH_TO_DATA_FRAME = "/path/to/data_frame"  # FIXME - set correct path
+PATH_TO_DATA_FRAME = "/home/rayyan/Desktop/FYP/repos/ns3-gym/rl_fyp/training_data/training_data_frame.csv"
 MAX_HEADWAY_TIME = 2
 MAX_VELOCITY_VALUE = 3.5
 MAX_STEPS = 5
@@ -69,10 +69,14 @@ class RSUEnv(gym.Env):
         self.action_space = gym.spaces.Box(np.array([-1]),
                                            np.array([1]),
                                            dtype=np.float16)
-
         self.reward = 0
 
-        self.df = pd.read_csv(PATH_TO_DATA_FRAME)
+        try:
+            self.df = pd.read_csv(PATH_TO_DATA_FRAME)
+        except FileNotFoundError:
+            print(f'The provided path to training data frame does not exist: {PATH_TO_DATA_FRAME}')
+
+        self.current_step = 0
 
     def step(self, action):
         """
