@@ -1,8 +1,8 @@
 import pytest
 import gym
 import numpy as np
-# from gym_rsu.envs.rsu_env import RSUEnv
-from rl_fyp.gym_rsu.gym_rsu.envs.rsu_env import RSUEnv
+from gym_rsu.envs.rsu_env import RSUEnv
+# from rl_fyp.gym_rsu.gym_rsu.envs.rsu_env import RSUEnv
 
 """
     This is a test suite for the purpose of
