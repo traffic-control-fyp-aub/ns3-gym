@@ -12,13 +12,14 @@ sudo: required
 before_install:
         - sudo apt-get update
         - sudo apt-get -y install python3-pip
+        - sudo apt-get -y install python-pip
         - export PYTHONPATH=$PYTHONPATH:$(pwd)
 
 install:
         - pip3 install pytest
         - pip install gym
         - pip3 install numpy
-        - pip3 install .
+        - pip install .
 
 script:
         - pytest -q rl_fyp/gym_rsu/gym_rsu/envs/env_test_suite/test_rsu_env.py
