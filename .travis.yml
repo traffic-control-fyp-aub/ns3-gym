@@ -1,0 +1,26 @@
+# This file is required to enable continuous integration testing in our repository. For more information on TravisCI please visit the following link:
+# -------------------------
+# https://www.travis-ci.org
+# -------------------------
+
+language: python
+
+cache: pip3
+
+python:
+        -"3.6.9"
+
+os: linux
+
+sudo: required
+
+before_install:
+        # install pytest to test suite
+        - pip3 install pytest
+        # install OpenAI Gym
+        - pip install gym
+        # Install Numpy
+        - pip3 install numpy
+
+script:
+        - pytest -q rl_fyp/gym_rsu/gym_rsu/envs/env_test_suite/test_rsu_env.py
