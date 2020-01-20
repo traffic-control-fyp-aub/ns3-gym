@@ -20,6 +20,7 @@ install:
         - pip3 install pytest
         - pip install gym
         - pip3 install numpy
+        - pip3 install pandas
         - pip install .
 
 script:
