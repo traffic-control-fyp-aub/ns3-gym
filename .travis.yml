@@ -18,6 +18,7 @@ install:
         - pip3 install pytest
         - pip install gym
         - pip3 install numpy
+        - pip3 install .
 
 script:
         - pytest -q rl_fyp/gym_rsu/gym_rsu/envs/env_test_suite/test_rsu_env.py
