@@ -16,7 +16,7 @@ before_install:
           # install pip
         - sudo apt-get -y install python-pip
           # install distutils
-        - sudo apt-get install python-distutils-extra
+        - sudo apt-get install python-distutils
         - export PYTHONPATH=$PYTHONPATH:$(pwd)
 
 install:
