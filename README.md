@@ -20,6 +20,13 @@ The above command must be run the working directory of ns3-gym.
 
 **The above script does not take care of the entire set up of SUMO. You still have to set the SUMO paths in your terminal.**
 
+* We recommend you run the following **pip** command in the main directory to get rid of any weird module import errors:
+```bash
+pip install .
+# -- or -- #
+pip install NGS
+```
+
 # SUMO
 
 ## What is SUMO
