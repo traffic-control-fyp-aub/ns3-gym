@@ -2,6 +2,7 @@ import gym
 import numpy as np
 import random
 import pandas as pd
+import math
 
 
 """
@@ -16,6 +17,7 @@ ALPHA = 0.1  # gain used to diminish the magnitude of the penalty
 DESIRED_VELOCITY = 3  # desired system wide target (average) velocity
 NUMBER_OF_VEHICLES = 3  # number of vehicles present in the environment
 TOTAL_SECONDS_OF_INTEREST = 60*60  # 60 seconds/minute * 60 minutes
+EPSILON_THRESHOLD = math.pow(10, -5)  # threshold used to check if reward is advancing or not
 
 
 class RSUEnv(gym.Env):
@@ -46,10 +48,16 @@ class RSUEnv(gym.Env):
                     - Headway Time in seconds: [0, 2]
                     - Vehicle Velocity in m/s: [0, 3.5]
 
-            self.reward: type(Float)
+            self.current_reward: type(Float)
                 This is the cumulative reward range allowed during
                 an episode of interaction between the agent
                 and the gym environment.
+
+            self.old_reward: type(Float)
+                This is the reward that was observed 10 time steps ago
+                in the environment. It is used in the step function to
+                tell if there is any advancement in the training and
+                to determine whether or not to end the training episode.
 
             self.df: type(String)
                 Path to the dataframe that contains the information
@@ -69,7 +77,8 @@ class RSUEnv(gym.Env):
         self.action_space = gym.spaces.Box(np.array([-1]),
                                            np.array([1]),
                                            dtype=np.float16)
-        self.reward = 0
+
+        self.current_reward, self.old_reward = 0, 0
 
         try:
             self.df = pd.read_csv(PATH_TO_DATA_FRAME)
@@ -134,17 +143,36 @@ class RSUEnv(gym.Env):
         #   By A. Kreidieh
         #
         #   Below is mathematical form of our reward function:
-        #   ||v_desired|| - (1-alpha)(||v_desired - v_i(t)||) - (alpha)( summation(max(h_max - h_i(t), 0)) )
-        self.reward = abs(DESIRED_VELOCITY)\
-            - (1-ALPHA)*abs((np.sum(np.subtract(desired_velocity_dataframe.values,
-                            self.df['Velocity'].values)))) - ALPHA*(sum(list_of_maximums))
+        #   ||v_desired|| - (||v_desired - v_i(t)||)/N - (alpha)( summation(max(h_max - h_i(t), 0)) )
+        #
+        #   where:
+        #       - v_desired is the desired velocity of the system calculated by the road side unit
+        #       - v_i(t) is the velocity of vehicle "i" at time "t"
+        #       - h_i(t) is the headway time observed by vehicle "i" at time "t"
+        #       - N is the total number of vehicles in the environment
 
-        self.reward *= delay_modifier
-        done = False  # FIXME - define ending condition
+        self.current_reward = abs(DESIRED_VELOCITY)\
+            - abs((np.sum(np.subtract(desired_velocity_dataframe.values,
+                                      self.df['Velocity'].values))))/(self.df['Velocity'].__len__())\
+            - ALPHA*(sum(list_of_maximums))
+
+        #   Multiply by a delay modifier in order to encourage exploration in the long
+        #   term and not just settle with a local maximum (i.e.: prefer long term to
+        #   short term planning)
+        self.current_reward *= delay_modifier
+
+        if self.current_step % 10 == 0:
+            self.old_reward = self.current_reward
+
+        #   Condition that would trigger the end of an episode.
+        #   If the Mean Squared Error between the current reward and the reward
+        #   that was observed 10 time steps ago did not change beyond a certain
+        #   threshold then the training is done.
+        done = True if math.pow(abs(self.old_reward - self.current_reward), 2) < EPSILON_THRESHOLD else False
 
         obs = self._next_observation()
 
-        return obs, self.reward, done, {}
+        return obs, self.current_reward, done, {}
 
     def reset(self):
         """
