@@ -10,14 +10,17 @@ import math
     of the road side unit (RSU).
 """
 PATH_TO_DATA_FRAME = "/home/rayyan/Desktop/FYP/repos/ns3-gym/rl_fyp/training_data/training_data_frame.csv"
-MAX_HEADWAY_TIME = 2
-MAX_VELOCITY_VALUE = 3.5
-MAX_STEPS = 5
+MAX_HEADWAY_TIME = 2  # maximum allowed headway time for vehicles in seconds
+MAX_VELOCITY_VALUE = 3.5  # maximum allowed velocity for vehicles in meters per second
+MAX_STEPS = 5  # maximum time steps for training horizon
 ALPHA = 0.1  # gain used to diminish the magnitude of the penalty
 DESIRED_VELOCITY = 3  # desired system wide target (average) velocity
 NUMBER_OF_VEHICLES = 3  # number of vehicles present in the environment
-TOTAL_SECONDS_OF_INTEREST = 60*60  # 60 seconds/minute * 60 minutes
+TOTAL_SECONDS_OF_INTEREST = 60*15  # 60 seconds/minute * 15 minutes
 EPSILON_THRESHOLD = math.pow(10, -5)  # threshold used to check if reward is advancing or not
+CIRCUIT_LENGTH = 1500  # length of the traffic circuit environment
+FLOW_WINDOW_CONSTANT = 15  # flow volume within the window frame of 15 minutes
+TRAFFIC_FLOW_THRESHOLD = 2000  # Flow Q-value threshold (reported commonly in traffic literature)
 
 
 class RSUEnv(gym.Env):
@@ -271,13 +274,23 @@ class RSUEnv(gym.Env):
             #     3) If the value is < 2000 vehicles/hr then the headway time follows a poisson distribution
             #     4) Else if the value is > 2000 vehicles/hr then the headway times follows the exponential distribution
             #     5) Sample from the chosen headway distribution and update the headway times.
-            average_velocity = sum(self.df['Velocity']) / self.df['Velocity'].__len__()
-            q_flow_value = average_velocity * TOTAL_SECONDS_OF_INTEREST
 
-            if q_flow_value < 2000:
+            # Average velocity of all vehicles in the traffic circuit environment
+            average_velocity = sum(self.df['Velocity']) / self.df['Velocity'].__len__()
+
+            # Total time it would take one vehicle on average to travel the entire traffic ciruict
+            time_to_travel_circuit = CIRCUIT_LENGTH / average_velocity
+
+            # Total amount of traffic volume in the circuit in a 15 minute time frame
+            traffic_volume = TOTAL_SECONDS_OF_INTEREST / time_to_travel_circuit
+
+            # Traffic Q-value flow rate
+            q_flow_value = traffic_volume * FLOW_WINDOW_CONSTANT
+
+            if q_flow_value < TRAFFIC_FLOW_THRESHOLD:
                 # poisson distribution
                 self._sample_poisson_value(q_flow_value)
-            elif q_flow_value >= 2000:
+            elif q_flow_value >= TRAFFIC_FLOW_THRESHOLD:
                 # exponential distribution
                 self._sample_exponential_value(q_flow_value)
 
