@@ -90,8 +90,8 @@ def test_poisson_sampling(rsu_env, q_value, epsilon):
     # instead we can only check that the mean squared error between
     # what we got and what we would get if we sampled again is less
     # than a certain epsilon threshold.
-    for index, elem in rsu_env.df['Headway'].__len__():
-        assert math.pow(abs(elem - np.random.poisson(q_value)), 2) < epsilon
+    for index, row in rsu_env.df.iterrows():
+        assert math.pow(abs(rsu_env.df.at[index, 'Headway'] - np.random.poisson(q_value)), 2) < epsilon
 
 
 @pytest.mark.parametrize("q_value, epsilon",
@@ -121,8 +121,8 @@ def test_exponential_sampling(rsu_env, q_value, epsilon):
     # instead we can only check that the mean squared error between
     # what we got and what we would get if we sampled again is less
     # than a certain epsilon threshold.
-    for index, elem in rsu_env.df['Headway'].__len__():
-        assert math.pow(abs(elem - np.random.exponential(q_value)), 2) < epsilon
+    for index, row in rsu_env.df.iterrows():
+        assert math.pow(abs(rsu_env.df.at[index, 'Headway'] - np.random.exponential(q_value)), 2) < epsilon
 
 
 def test_take_action(rsu_env):  #, action):
