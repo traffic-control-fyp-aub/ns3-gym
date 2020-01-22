@@ -306,7 +306,7 @@ class RSUEnv(gym.Env):
                 Flow value
         """
         for index, row in self.df.iterrows():
-            self.df.at[index, 'Headway'] = np.random.poisson(q)
+            self.df.at[index, 'Headway'] = np.random.poisson(q) % MAX_HEADWAY_TIME
 
     def _sample_exponential_value(self, q):
         """
@@ -320,4 +320,4 @@ class RSUEnv(gym.Env):
                 Flow value
         """
         for index, row in self.df.iterrows():
-            self.df.at[index, 'Headway'] = np.random.exponential(q)
+            self.df.at[index, 'Headway'] = np.random.exponential(q) % MAX_HEADWAY_TIME

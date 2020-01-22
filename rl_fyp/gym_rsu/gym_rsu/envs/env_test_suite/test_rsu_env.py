@@ -63,9 +63,9 @@ def test_env_init(rsu_env, obs_space, action_space, reward):
     assert rsu_env.current_reward == reward
 
 
-@pytest.mark.parametrize("q_value, epsilon",
-                         [(5, math.pow(10, -2))])
-def test_poisson_sampling(rsu_env, q_value, epsilon):
+@pytest.mark.parametrize("q_value, epsilon, headway",
+                         [(5, 5, 2)])
+def test_poisson_sampling(rsu_env, q_value, epsilon, headway):
     """
         Test the Poisson sampling utility function
         in the RSU gym environment.
@@ -91,12 +91,12 @@ def test_poisson_sampling(rsu_env, q_value, epsilon):
     # what we got and what we would get if we sampled again is less
     # than a certain epsilon threshold.
     for index, row in rsu_env.df.iterrows():
-        assert math.pow(abs(rsu_env.df.at[index, 'Headway'] - np.random.poisson(q_value)), 2) < epsilon
+        assert math.pow(abs(rsu_env.df.at[index, 'Headway'] - np.random.poisson(q_value)) % headway, 2) < epsilon
 
 
-@pytest.mark.parametrize("q_value, epsilon",
-                         [(5, math.pow(10, -2))])
-def test_exponential_sampling(rsu_env, q_value, epsilon):
+@pytest.mark.parametrize("q_value, epsilon, headway",
+                         [(5, 5, 2)])
+def test_exponential_sampling(rsu_env, q_value, epsilon, headway):
     """
         Test the Exponential sampling utility function
         in the RSU gym environment.
@@ -122,7 +122,7 @@ def test_exponential_sampling(rsu_env, q_value, epsilon):
     # what we got and what we would get if we sampled again is less
     # than a certain epsilon threshold.
     for index, row in rsu_env.df.iterrows():
-        assert math.pow(abs(rsu_env.df.at[index, 'Headway'] - np.random.exponential(q_value)), 2) < epsilon
+        assert math.pow(abs(rsu_env.df.at[index, 'Headway'] - np.random.exponential(q_value)) % headway, 2) < epsilon
 
 
 def test_take_action(rsu_env):  #, action):
