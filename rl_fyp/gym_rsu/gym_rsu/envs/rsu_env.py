@@ -305,7 +305,7 @@ class RSUEnv(gym.Env):
             q: type(Float)
                 Flow value
         """
-        for ii in self.df['Headway'].__len__():
+        for ii in self.df['Headway'].to_numpy().__len__():
             self.df['Headway'].loc[ii] = np.random.poisson(q)
 
     def _sample_exponential_value(self, q):
@@ -319,5 +319,5 @@ class RSUEnv(gym.Env):
             q: type(Float)
                 Flow value
         """
-        for ii in self.df['Headway'].__len__():
+        for ii in self.df['Headway'].to_numpy().__len__():
             self.df['Headway'].loc[ii] = np.random.exponential(q)
