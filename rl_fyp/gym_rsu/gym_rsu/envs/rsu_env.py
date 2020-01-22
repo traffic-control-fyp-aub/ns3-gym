@@ -184,7 +184,7 @@ class RSUEnv(gym.Env):
         """
         # Set the current step to a random point within frame
         self.current_step = random.randint(0, len(self.df.loc[:, 'Headway'].values))\
-            % len(self.df.loc[:, 'Headway'].values)
+            % len(self.df.loc[:, 'Headway'].values - 2)
 
         self._next_observation()
 
