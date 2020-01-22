@@ -1,6 +1,7 @@
 import pytest
 import gym
 import numpy as np
+import math
 
 from rl_fyp.gym_rsu.gym_rsu.envs.rsu_env import RSUEnv
 
@@ -57,7 +58,9 @@ def test_env_init(rsu_env, obs_space, action_space, reward):
     assert rsu_env.reward == reward
 
 
-def test_poisson_sampling(rsu_env, q_value):
+@pytest.mark.parametrize("q_value, epsilon",
+                         [(5, math.pow(10, -2))])
+def test_poisson_sampling(rsu_env, q_value, epsilon):
     """
         Test the Poisson sampling utility function
         in the RSU gym environment.
@@ -69,10 +72,26 @@ def test_poisson_sampling(rsu_env, q_value):
         q_value: type(Float)
             Flow value
     """
-    pass
+    # Doing this only to get rid of an IDE glitch that does not
+    # let me access the dataframe of the RSUEnv()
+    if not isinstance(rsu_env, RSUEnv):
+        raise Exception("Wrong environment")
+
+    rsu_env._sample_poisson_value(q_value)
+
+    # Go through each element in the newly populated headway times
+    # and make sure that they are correct. But since we are sampling
+    # from a probability distribution we can not get the exact value
+    # instead we can only check that the mean squared error between
+    # what we got and what we would get if we sampled again is less
+    # than a certain epsilon threshold.
+    for index, elem in rsu_env.df['Headway'].__len__():
+        assert math.pow(abs(elem - np.random.poisson(q_value)), 2) < epsilon
 
 
-def test_exponential_sampling(rsu_env, q_value):
+@pytest.mark.parametrize("q_value, epsilon",
+                         [(5, math.pow(10, -2))])
+def test_exponential_sampling(rsu_env, q_value, epsilon):
     """
         Test the Exponential sampling utility function
         in the RSU gym environment.
@@ -84,7 +103,21 @@ def test_exponential_sampling(rsu_env, q_value):
         q_value: type(Float)
             Flow value
     """
-    pass
+    # Doing this only to get rid of an IDE glitch that does not
+    # let me access the dataframe of the RSUEnv()
+    if not isinstance(rsu_env, RSUEnv):
+        raise Exception("Wrong environment")
+
+    rsu_env._sample_exponential_value(q_value)
+
+    # Go through each element in the newly populated headway times
+    # and make sure that they are correct. But since we are sampling
+    # from a probability distribution we can not get the exact value
+    # instead we can only check that the mean squared error between
+    # what we got and what we would get if we sampled again is less
+    # than a certain epsilon threshold.
+    for index, elem in rsu_env.df['Headway'].__len__():
+        assert math.pow(abs(elem - np.random.exponential(q_value)), 2) < epsilon
 
 
 def test_take_action(rsu_env, action):
