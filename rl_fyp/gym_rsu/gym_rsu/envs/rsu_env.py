@@ -259,14 +259,14 @@ class RSUEnv(gym.Env):
                 to be performed on the vehicle(s). The length of this vector
                 is equal to the number of vehicles in the environment.
         """
-        if not isinstance(action, np.ndarray):
+        if type(action.__module__) != np.__name__:
             raise Exception(f'Action must be of type Numpy Array instead is of type {type(action)}')
 
         if len(action) < NUMBER_OF_VEHICLES:
             raise Exception(f"Size of action list does not match number of vehicles: {NUMBER_OF_VEHICLES}")
         else:
             for index, row in self.df.iterrows():
-                self.df.at[index, 'Velocity'] = self.df.at[index, 'Velocity'] + action[index]
+                self.df.at[index, 'Velocity'] += action[index]
 
             # Knowing the new set of velocities for the vehicles we now need to compute the
             # new set of headways since the previously recorded ones are useless. The following
