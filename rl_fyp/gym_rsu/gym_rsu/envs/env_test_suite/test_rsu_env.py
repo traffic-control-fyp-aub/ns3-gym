@@ -179,7 +179,9 @@ def test_env_reset(rsu_env, next_headway, next_velocity, max_headway, max_veloci
     assert rsu_env.df.loc[new_time_step + 1, 'Velocity'] / max_velocity == next_velocity / max_velocity
 
 
-def test_take_action(rsu_env):  #, action):
+@pytest.mark.parametrize("action",
+                         [(np.array([-1, 0.5, -0.75, 0.3]))])
+def test_take_action(rsu_env, action):
     """
         Test the take action utility function
         in the RSUEnv.
@@ -192,7 +194,24 @@ def test_take_action(rsu_env):  #, action):
             Array of de/acceleration values for the vehicles
             present in the RSUEnv
     """
-    pass
+    # Doing this only to get rid of an IDE glitch that does not
+    # let me access the dataframe of the RSUEnv()
+    if not isinstance(rsu_env, RSUEnv):
+        raise Exception("Wrong environment")
+
+    # Apply action array to instantiated RSUEnv
+    rsu_env._take_action(action)
+
+    for index, row in rsu_env.df.iterrows():
+        # Case where RSU tells the vehicle to speed up
+        if action[index] > 0:
+            assert (rsu_env.df.at[index, 'Velocity'] - action[index]) == 2
+        # Case where the RSU tells the vehicle to slow down
+        elif action[index] < 0:
+            assert (rsu_env.df.at[index, 'Velocity'] + action[index]) == 2
+        # Do nothing case where RSU is satisfied with current speed of vehicle
+        else:
+            pass
 
 
 def test_step_func(rsu_env):  #, action):
