@@ -266,7 +266,7 @@ class RSUEnv(gym.Env):
             raise Exception(f"Size of action list does not match number of vehicles: {NUMBER_OF_VEHICLES}")
         else:
             for index, row in self.df.iterrows():
-                self.df.at[index, 'Velocity'] += action[index]
+                self.df.loc[index, 'Velocity'] += action[index]
 
             # Knowing the new set of velocities for the vehicles we now need to compute the
             # new set of headways since the previously recorded ones are useless. The following
