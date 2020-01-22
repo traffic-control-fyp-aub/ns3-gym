@@ -203,15 +203,7 @@ def test_take_action(rsu_env, action):
     rsu_env._take_action(action)
 
     for index, row in rsu_env.df.iterrows():
-        # Case where RSU tells the vehicle to speed up
-        if action[index] > 0:
-            assert rsu_env.df.at[index, 'Velocity'] == (2 + action[index])
-        # Case where the RSU tells the vehicle to slow down
-        elif action[index] < 0:
-            assert rsu_env.df.at[index, 'Velocity'] == (2 - action[index])
-        # Do nothing case where RSU is satisfied with current speed of vehicle
-        else:
-            pass
+        assert rsu_env.df.at[index, 'Velocity'] == (2 + action[index])
 
 
 def test_step_func(rsu_env):  #, action):
