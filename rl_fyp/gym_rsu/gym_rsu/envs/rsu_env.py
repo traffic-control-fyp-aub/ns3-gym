@@ -115,6 +115,7 @@ class RSUEnv(gym.Env):
         # Execute one time step within the environment
         if not isinstance(action, np.ndarray):
             raise Exception(f'Action must be of type Numpy Array instead is of type {type(action)}')
+
         self._take_action(action)
         self.current_step += 1
 
@@ -258,11 +259,15 @@ class RSUEnv(gym.Env):
                 to be performed on the vehicle(s). The length of this vector
                 is equal to the number of vehicles in the environment.
         """
-        if action.__len__() < NUMBER_OF_VEHICLES:
+        if not isinstance(action, np.ndarray):
+            raise Exception(f'Action must be of type Numpy Array instead is of type {type(action)}')
+
+        if len(action) < NUMBER_OF_VEHICLES:
             raise Exception(f"Size of action list does not match number of vehicles: {NUMBER_OF_VEHICLES}")
         else:
-            for index, elem in self.df['Velocity'].__len__():
-                self.df['Velocity'].loc[index] = elem + action[index] if action[index] >= 0 else elem - action[index]
+            for index, row in self.df.iterrows():
+                self.df.at[index, 'Velocity'] = self.df.at[index, 'Velocity'] + action[index] if action[index] >= 0 \
+                    else self.df.at[index, 'Velocity'] - action[index]
 
             # Knowing the new set of velocities for the vehicles we now need to compute the
             # new set of headways since the previously recorded ones are useless. The following
@@ -270,11 +275,11 @@ class RSUEnv(gym.Env):
             #     1) Derive the new system average velocity over all the vehicles after applying the action.
             #     2) Derive the average number of vehicles arriving per hour.
             #     3) If the value is < 2000 vehicles/hr then the headway time follows a poisson distribution
-            #     4) Else if the value is > 2000 vehicles/hr then the headway times follows the exponential distribution
+            #     4) Else if the value is > 2000 vehicles/hr then the headway times follows an exponential distribution
             #     5) Sample from the chosen headway distribution and update the headway times.
 
             # Average velocity of all vehicles in the traffic circuit environment
-            average_velocity = sum(self.df['Velocity']) / self.df['Velocity'].__len__()
+            average_velocity = sum(self.df['Velocity'].values) / len(self.df['Velocity'].values)
 
             # Total time it would take one vehicle on average to travel the entire traffic ciruict
             time_to_travel_circuit = CIRCUIT_LENGTH / average_velocity
