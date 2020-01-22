@@ -224,12 +224,9 @@ class RSUEnv(gym.Env):
                 All values are scaled between 0 and 1
         """
         obs = np.array([
-            self.df.loc[self.current_step:
-                        self.current_step + 5, 'Headway'].values
-            / MAX_HEADWAY_TIME,
-            self.df.loc[self.current_step:
-                        self.current_step + 5, 'Velocity'].values
-            / MAX_VELOCITY_VALUE])
+            self.df.loc[self.current_step + 1, 'Headway'].values / MAX_HEADWAY_TIME,
+            self.df.loc[self.current_step + 1, 'Velocity'].values / MAX_VELOCITY_VALUE
+        ])
 
         return obs
 

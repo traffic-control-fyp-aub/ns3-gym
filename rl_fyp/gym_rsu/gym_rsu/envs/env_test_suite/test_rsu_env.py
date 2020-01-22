@@ -125,6 +125,30 @@ def test_exponential_sampling(rsu_env, q_value, epsilon, headway):
         assert math.pow(abs(rsu_env.df.at[index, 'Headway'] - np.random.exponential(q_value)) % headway, 2) < epsilon
 
 
+@pytest.mark.parametrize("next_headway, next_velocity, max_headway, max_velocity",
+                         [(1, 2, 2, 3.5)])
+def test_next_observation(rsu_env, next_headway, next_velocity, max_headway, max_velocity):
+    """
+        Test the next observation
+        utility function in the RSUEnv
+
+        Parameter(s):
+        -------------
+        rsu_env: type(gym.Env)
+            Instantiated object of the custom RSUEnv class.
+    """
+    # Doing this only to get rid of an IDE glitch that does not
+    # let me access the dataframe of the RSUEnv()
+    if not isinstance(rsu_env, RSUEnv):
+        raise Exception("Wrong environment")
+
+    # Next time step headway value
+    assert rsu_env._next_observation()[0] == next_headway / max_headway
+
+    # Next time step velocity value
+    assert rsu_env._next_observation()[1] == next_velocity / max_velocity
+
+
 def test_take_action(rsu_env):  #, action):
     """
         Test the take action utility function
@@ -137,19 +161,6 @@ def test_take_action(rsu_env):  #, action):
         action: type(Numpy Array)
             Array of de/acceleration values for the vehicles
             present in the RSUEnv
-    """
-    pass
-
-
-def test_next_observation(rsu_env):
-    """
-        Test the next observation
-        utility function in the RSUEnv
-
-        Parameter(s):
-        -------------
-        rsu_env: type(gym.Env)
-            Instantiated object of the custom RSUEnv class.
     """
     pass
 
