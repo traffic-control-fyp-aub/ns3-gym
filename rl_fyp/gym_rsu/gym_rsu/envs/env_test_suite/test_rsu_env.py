@@ -166,11 +166,17 @@ def test_env_reset(rsu_env, next_headway, next_velocity, max_headway, max_veloci
     if not isinstance(rsu_env, RSUEnv):
         raise Exception("Wrong environment")
 
-    # Next time step headway value
-    assert rsu_env.reset()[0] == next_headway / max_headway
+    # Reset the RSUEnv gym environment
+    rsu_env.reset()
 
-    # Next time step velocity value
-    assert rsu_env.reset()[1] == next_velocity / max_velocity
+    # Get the newly set random time step
+    new_time_step = rsu_env.current_step
+
+    # Check that environment is resetting next headway properly
+    assert rsu_env.df.loc[new_time_step + 1, 'Headway'] / max_headway == next_headway / max_headway
+
+    # Check that environment is resetting next velocity properly
+    assert rsu_env.df.loc[new_time_step + 1, 'Velocity'] / max_velocity == next_velocity / max_velocity
 
 
 def test_take_action(rsu_env):  #, action):
