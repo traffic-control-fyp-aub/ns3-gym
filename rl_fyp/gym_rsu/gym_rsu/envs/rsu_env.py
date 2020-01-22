@@ -259,7 +259,7 @@ class RSUEnv(gym.Env):
                 to be performed on the vehicle(s). The length of this vector
                 is equal to the number of vehicles in the environment.
         """
-        if type(action.__module__) != np.__name__:
+        if action.__module__ != np.__name__:
             raise Exception(f'Action must be of type Numpy Array instead is of type {type(action)}')
 
         if len(action) < NUMBER_OF_VEHICLES:
