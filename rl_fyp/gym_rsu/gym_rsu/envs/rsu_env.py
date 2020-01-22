@@ -90,7 +90,7 @@ class RSUEnv(gym.Env):
 
         self.current_step = 0
 
-    def step(self, action):
+    def step(self, action=np.array([])):
         """
             Step function to be taken on the environment.
 
@@ -113,7 +113,7 @@ class RSUEnv(gym.Env):
                     Diagnostic information useful for debugging.
         """
         # Execute one time step within the environment
-        if not isinstance(action, np.ndarray):
+        if 'numpy' not in type(action).__module__:
             raise Exception(f'Action must be of type Numpy Array instead is of type {type(action)}')
 
         self._take_action(action)
@@ -232,7 +232,7 @@ class RSUEnv(gym.Env):
 
         return obs
 
-    def _take_action(self, action):
+    def _take_action(self, action=np.array([])):
         """
             Take the action provided by the agent/model
             and physically perform it on the environment.
@@ -259,7 +259,7 @@ class RSUEnv(gym.Env):
                 to be performed on the vehicle(s). The length of this vector
                 is equal to the number of vehicles in the environment.
         """
-        if action.__module__ != np.__name__:
+        if 'numpy' not in type(action).__module__:
             raise Exception(f'Action must be of type Numpy Array instead is of type {type(action)}')
 
         if len(action) < NUMBER_OF_VEHICLES:
