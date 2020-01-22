@@ -48,6 +48,11 @@ def test_env_init(rsu_env, obs_space, action_space, reward):
             Reward collected by the agent from the environment
             whenever an environment action is taken.
     """
+    # Doing this only to get rid of an IDE glitch that does not
+    # let me access the dataframe of the RSUEnv()
+    if not isinstance(rsu_env, RSUEnv):
+        raise Exception("Wrong environment")
+
     # check the observation space
     assert rsu_env.observation_space == obs_space
 
@@ -55,7 +60,7 @@ def test_env_init(rsu_env, obs_space, action_space, reward):
     assert rsu_env.action_space == action_space
 
     # check the empty reward
-    assert rsu_env.reward == reward
+    assert rsu_env.current_reward == reward
 
 
 @pytest.mark.parametrize("q_value, epsilon",
@@ -120,7 +125,7 @@ def test_exponential_sampling(rsu_env, q_value, epsilon):
         assert math.pow(abs(elem - np.random.exponential(q_value)), 2) < epsilon
 
 
-def test_take_action(rsu_env, action):
+def test_take_action(rsu_env):  #, action):
     """
         Test the take action utility function
         in the RSUEnv.
@@ -162,7 +167,7 @@ def test_env_reset(rsu_env):
     pass
 
 
-def test_step_func(rsu_env, action):
+def test_step_func(rsu_env):  #, action):
     """
         Test the step function in the RSUEnv.
 
