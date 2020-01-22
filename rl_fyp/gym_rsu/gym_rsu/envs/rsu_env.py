@@ -9,7 +9,7 @@ import math
     Custom OpenAI Gym environment from the perspective
     of the road side unit (RSU).
 """
-PATH_TO_DATA_FRAME = "/home/rayyan/Desktop/FYP/repos/ns3-gym/rl_fyp/training_data/training_data_frame.csv"
+PATH_TO_DATA_FRAME = "rl_fyp/training_data/training_data_frame.csv"
 MAX_HEADWAY_TIME = 2  # maximum allowed headway time for vehicles in seconds
 MAX_VELOCITY_VALUE = 3.5  # maximum allowed velocity for vehicles in meters per second
 MAX_STEPS = 5  # maximum time steps for training horizon
