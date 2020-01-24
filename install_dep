@@ -27,6 +27,10 @@ echo "Installing PyTest"
 pip3 install pytest
 echo "** Done **"
 
+echo "Installing BeautifulTable"
+pip3 install beautifultable
+echo "** Done **"
+
 echo "Installing TensorFlow"
 pip3 install tensorflow
 echo "** Done **"

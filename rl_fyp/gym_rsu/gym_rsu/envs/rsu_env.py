@@ -3,6 +3,7 @@ import numpy as np
 import random
 import pandas as pd
 import math
+from beautifultable import BeautifulTable
 
 
 """
@@ -20,7 +21,7 @@ TOTAL_SECONDS_OF_INTEREST = 60*15  # 60 seconds/minute * 15 minutes
 EPSILON_THRESHOLD = math.pow(10, -5)  # threshold used to check if reward is advancing or not
 CIRCUIT_LENGTH = 1500  # length of the traffic circuit environment
 FLOW_WINDOW_CONSTANT = 15  # flow volume within the window frame of 15 minutes
-TRAFFIC_FLOW_THRESHOLD = 2000  # Flow Q-value threshold (reported commonly in traffic literature)
+TRAFFIC_FLOW_THRESHOLD = 1.4  # Flow Q-value threshold (reported commonly in traffic literature)
 
 
 class RSUEnv(gym.Env):
@@ -117,10 +118,7 @@ class RSUEnv(gym.Env):
             raise Exception(f'Action must be of type Numpy Array instead is of type {type(action)}')
 
         self._take_action(action)
-        self.current_step += 1
-
-        if self.current_step > len(self.df.loc[:, 'Headway'].values) - 6:
-            self.current_step = 0
+        self.current_step = (self.current_step + 1) % len(self.df['Headway'].values)
 
         delay_modifier = (self.current_step / MAX_STEPS)
 
@@ -132,12 +130,12 @@ class RSUEnv(gym.Env):
         desired_headway = {'Head_Desired': [MAX_HEADWAY_TIME]}
         desired_headway_dataframe = pd.DataFrame(desired_headway, columns=['Head_Desired'])
 
-        for ii in self.df['Velocity'].__len__() - 1:
+        for ii in range(len(self.df['Velocity'].values)):
             desired_velocity_dataframe.append(DESIRED_VELOCITY)
             desired_headway_dataframe.append(MAX_HEADWAY_TIME)
 
         temp = []
-        for jj in self.df['Headway'].__len__():
+        for jj in range(len(self.df['Headway'].values)):
             temp.append(max(desired_headway_dataframe.loc[jj] - self.df['Headway'].loc[jj], 0))
 
         list_of_maximums = np.asarray(temp)
@@ -157,7 +155,7 @@ class RSUEnv(gym.Env):
 
         self.current_reward = abs(DESIRED_VELOCITY)\
             - abs((np.sum(np.subtract(desired_velocity_dataframe.values,
-                                      self.df['Velocity'].values))))/(self.df['Velocity'].__len__())\
+                                      self.df['Velocity'].values))))/(len(self.df['Velocity'].values))\
             - ALPHA*(sum(list_of_maximums))
 
         #   Multiply by a delay modifier in order to encourage exploration in the long
@@ -202,11 +200,14 @@ class RSUEnv(gym.Env):
             graphics to the screen.
 
             Here we chose to print the velocities of all the vehicles
-            at each time step.
+            at each time step using the BeautifulTable package.
         """
-        print(f'Step: {self.current_step}')
-        print(f'Velocity of all vehicles: {self.df["Velocity"]}')
-        print(f'********************')
+        print(f' - Step: {self.current_step}')
+        table = BeautifulTable()
+        table.column_headers = ["Headway", "Velocity"]
+        for index, row in self.df.iterrows():
+            table.append_row([self.df.at[index, 'Headway'], self.df.at[index, 'Velocity']])
+        print(table)
 
     def _next_observation(self):
         """
@@ -308,7 +309,7 @@ class RSUEnv(gym.Env):
                 Flow value
         """
         for index, row in self.df.iterrows():
-            self.df.at[index, 'Headway'] = np.random.poisson(q) % MAX_HEADWAY_TIME
+            self.df.loc[index, 'Headway'] = np.random.poisson(q) % MAX_HEADWAY_TIME
 
     def _sample_exponential_value(self, q):
         """
@@ -322,4 +323,4 @@ class RSUEnv(gym.Env):
                 Flow value
         """
         for index, row in self.df.iterrows():
-            self.df.at[index, 'Headway'] = np.random.exponential(q) % MAX_HEADWAY_TIME
+            self.df.loc[index, 'Headway'] = np.random.exponential(q) % MAX_HEADWAY_TIME
