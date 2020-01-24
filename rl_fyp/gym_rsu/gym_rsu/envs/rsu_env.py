@@ -122,21 +122,19 @@ class RSUEnv(gym.Env):
 
         delay_modifier = (self.current_step / MAX_STEPS)
 
-        # create a dataframe of values all set to desired velocity but same size as Velocity column
-        desired_velocity = {'V_Desired': [DESIRED_VELOCITY]}
-        desired_velocity_dataframe = pd.DataFrame(desired_velocity, columns=['V_Desired'])
+        desired_velocity = np.asarray([])
+        for _ in range(len(self.df['Velocity'].values)):
+            desired_velocity = np.append(desired_velocity, DESIRED_VELOCITY)
 
-        # create a dataframe of values all set to desired headway but same size as Headway column
-        desired_headway = {'Head_Desired': [MAX_HEADWAY_TIME]}
-        desired_headway_dataframe = pd.DataFrame(desired_headway, columns=['Head_Desired'])
+        desired_headway = np.asarray([])
+        for _ in range(len(self.df['Headway'].values)):
+            desired_headway = np.append(desired_headway, MAX_HEADWAY_TIME)
 
-        for ii in range(len(self.df['Velocity'].values)):
-            desired_velocity_dataframe.append(DESIRED_VELOCITY)
-            desired_headway_dataframe.append(MAX_HEADWAY_TIME)
+        desired_dataframe = pd.DataFrame({'H_desired': desired_headway, 'V_desired': desired_velocity})
 
         temp = []
         for jj in range(len(self.df['Headway'].values)):
-            temp.append(max(desired_headway_dataframe.loc[jj] - self.df['Headway'].loc[jj], 0))
+            temp.append(max(desired_dataframe.loc[jj, 'H_desired'] - self.df['Headway'].loc[jj], 0))
 
         list_of_maximums = np.asarray(temp)
 
@@ -154,7 +152,7 @@ class RSUEnv(gym.Env):
         #       - N is the total number of vehicles in the environment
 
         self.current_reward = abs(DESIRED_VELOCITY)\
-            - abs((np.sum(np.subtract(desired_velocity_dataframe.values,
+            - abs((np.sum(np.subtract(desired_dataframe['V_desired'].values,
                                       self.df['Velocity'].values))))/(len(self.df['Velocity'].values))\
             - ALPHA*(sum(list_of_maximums))
 
