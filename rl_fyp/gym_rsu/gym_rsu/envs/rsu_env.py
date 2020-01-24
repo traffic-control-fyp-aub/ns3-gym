@@ -231,10 +231,10 @@ class RSUEnv(gym.Env):
         """
         obs = np.asarray([])
         for index, _ in self.df.iterrows():
-            obs = np.append(self.df.loc[index, 'Headway'] / MAX_HEADWAY_TIME)
+            obs = np.append(obs, self.df.loc[index, 'Headway'] / MAX_HEADWAY_TIME)
 
         for index, _ in self.df.iterrows():
-            obs = np.append(self.df.loc[index, 'Velocity'] / MAX_VELOCITY_VALUE)
+            obs = np.append(obs, self.df.loc[index, 'Velocity'] / MAX_VELOCITY_VALUE)
 
         return obs
 
