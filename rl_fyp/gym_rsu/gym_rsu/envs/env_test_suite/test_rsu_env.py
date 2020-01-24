@@ -142,11 +142,15 @@ def test_next_observation(rsu_env, next_headway, next_velocity, max_headway, max
     if not isinstance(rsu_env, RSUEnv):
         raise Exception("Wrong environment")
 
+    obs_array = rsu_env._next_observation()
+
     # Next time step headway value
-    assert rsu_env._next_observation()[0] == next_headway / max_headway
+    for index in range(int(len(obs_array)/2)):
+        assert obs_array[index] == next_headway / max_headway
 
     # Next time step velocity value
-    assert rsu_env._next_observation()[1] == next_velocity / max_velocity
+    for index in range(int(len(obs_array) / 2), int(len(obs_array))):
+        assert obs_array[index] == next_velocity / max_velocity
 
 
 @pytest.mark.parametrize("next_headway, next_velocity, max_headway, max_velocity",
@@ -206,7 +210,15 @@ def test_take_action(rsu_env, action):
         assert rsu_env.df.at[index, 'Velocity'] == (2 + action[index])
 
 
-def test_step_func(rsu_env):  #, action):
+# FIXME - change the reward value to correct calculated one
+# FIXME - add the observed headways
+@pytest.mark.parametrize("action, obs_h, obs_vel, reward, done",
+                         [(np.array([np.array([-1, 0.5, -0.75, 0.3])]),
+                           np.array([0, 0, 0, 0]),
+                           np.array([1, 2.5, 1.25, 2.3]),
+                           0,
+                           False)])
+def test_step_func(rsu_env, action, obs_h, obs_vel, reward, done):
     """
         Test the step function in the RSUEnv.
 
