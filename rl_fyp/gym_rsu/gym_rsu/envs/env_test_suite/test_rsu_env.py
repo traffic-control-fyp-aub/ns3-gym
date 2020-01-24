@@ -210,15 +210,14 @@ def test_take_action(rsu_env, action):
         assert rsu_env.df.at[index, 'Velocity'] == (2 + action[index])
 
 
-# FIXME - change the reward value to correct calculated one
-# FIXME - add the observed headways
-@pytest.mark.parametrize("action, obs_h, obs_vel, reward, done",
-                         [(np.array([np.array([-1, 0.5, -0.75, 0.3])]),
-                           np.array([0, 0, 0, 0]),
-                           np.array([1, 2.5, 1.25, 2.3]),
-                           0,
-                           False)])
-def test_step_func(rsu_env, action, obs_h, obs_vel, reward, done):
+@pytest.mark.parametrize("action, obs_vel, reward, done, epsilon, max_velocity",
+                         [(np.array([-1, 0.5, -0.75, 0.3]),
+                          np.array([1, 2.5, 1.25, 2.3]),
+                          1.41,
+                          False,
+                           5,
+                           3.5)])
+def test_step_func(rsu_env, action, obs_vel, reward, done, epsilon, max_velocity):
     """
         Test the step function in the RSUEnv.
 
@@ -229,5 +228,55 @@ def test_step_func(rsu_env, action, obs_h, obs_vel, reward, done):
         action: type(Numpy Array)
             Array of de/acceleration values for the vehicles
             present in the RSUEnv
+        obs_h: type(Numpy Array)
+            Array of headway times for the next time
+            step of length N where:
+                - N = number of vehicles on circuit
+        obs_vel: type(Numpy Array)
+            Array of velocities for the next time
+            step of length N where:
+                - N = number of vehicles on circuit
+        reward: type(Float)
+            Reward collected from the environment
+            based on the current step taken.
+        done: type(Bool)
+            Boolean value that tells the agent
+            whether the environment specific
+            end condition has been reached.
     """
-    pass
+    # Doing this only to get rid of an IDE glitch that does not
+    # let me access the dataframe of the RSUEnv()
+    if not isinstance(rsu_env, RSUEnv):
+        raise Exception("Wrong environment")
+
+    obs, rew, d, _ = rsu_env.step(action)
+
+    # Assert that the done condition is correct
+    assert d == done
+
+    # Assert that the reward is close to what is expected
+    # because we are re-sampling for the headway times
+    # so there is some uncertainty and we only specify
+    # and upper limit on the expected reward.
+    assert math.pow(abs(reward - rew), 2) == epsilon
+
+    # Returned observation is of length 2N where N is
+    # the number of vehicles on the circuit. The first
+    # half of the returned observations is the observed
+    # headway times and the second half is the observed
+    # velocities.
+    velocities = np.asarray([])
+
+    # Splitting the returned observations into the
+    # headways and velocities
+    for index in range(int(len(obs)/2), len(obs)):
+        velocities = np.append(velocities, obs[index])
+
+    # Normalizing the obs_vel vector to be between
+    # the values of 0 and 1
+    for index in range(len(obs_vel)):
+        obs_vel[index] = obs_vel[index] / max_velocity
+
+    # Assert the velocities
+    for index in range(len(velocities)):
+        assert velocities[index] == obs_vel[index]
