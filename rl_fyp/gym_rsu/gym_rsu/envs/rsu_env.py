@@ -97,7 +97,7 @@ class RSUEnv(gym.Env):
 
             Parameter(s):
             -------------
-            action: type(gym.space.Box)
+            action: type(Numpy Array)
                     The action to be taken by the agent that
                     will affect the state of the environment.
 
@@ -221,14 +221,17 @@ class RSUEnv(gym.Env):
                 Of the form: (h_t+1, v_t+1) where:
                     - h_t+1 = next time step headway
                     - v_t+1 = next time step velocity
+                Total length of the observation vector
+                is 2N where:
+                    - N = number of vehicles on the circuit
 
                 * Note:
                 -------
                 All values are scaled between 0 and 1
         """
         obs = np.array([
-            self.df.loc[self.current_step + 1, 'Headway'] / MAX_HEADWAY_TIME,
-            self.df.loc[self.current_step + 1, 'Velocity'] / MAX_VELOCITY_VALUE
+            self.df.loc[:, 'Headway'] / MAX_HEADWAY_TIME,
+            self.df.loc[:, 'Velocity'] / MAX_VELOCITY_VALUE
         ])
 
         return obs
