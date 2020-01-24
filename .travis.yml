@@ -1,0 +1,28 @@
+# This file is required to enable continuous integration testing in our repository. For more information on TravisCI please visit the following link:
+# -------------------------
+# https://www.travis-ci.org
+# -------------------------
+
+language: python
+
+os: linux
+
+sudo: required
+
+before_install:
+        - sudo apt-get update
+          # install pip3
+        - sudo apt-get -y install python3-pip
+          # install pip
+        - sudo apt-get -y install python-pip
+
+install:
+        - pip3 install pytest
+        - pip install gym
+        - pip3 install numpy
+        - pip3 install pandas
+        - pip3 install beautifultable
+        - pip install .
+
+script:
+        - pytest -q rl_fyp/gym_rsu/gym_rsu/envs/env_test_suite/test_rsu_env.py

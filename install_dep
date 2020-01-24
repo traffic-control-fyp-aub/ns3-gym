@@ -1,0 +1,100 @@
+#!/bin/bash
+
+# This script will take care of SOME of the dependencies.
+# These dependencies range from cloning SUMO, ns3-gym requirements
+# as well as some third-party tools like PyTest and TensorFlow.
+#
+# The full list of requirements is listed in the README file
+# this is because some dependencies are additional or OS dependent.
+#
+#
+# To run this script just enter the following command in the terminal
+# >> ./install_dep
+
+echo "Installing pip3"
+sudo apt-get update
+sudo apt-get -y install python3-pip
+pip3 --version
+echo "** Done **"
+
+echo "Installing pip"
+sudo apt-get update
+sudo apt-get -y install python-pip
+pip --version
+echo "** Done **"
+
+echo "Installing PyTest"
+pip3 install pytest
+echo "** Done **"
+
+echo "Installing BeautifulTable"
+pip3 install beautifultable
+echo "** Done **"
+
+echo "Installing TensorFlow"
+pip3 install tensorflow
+echo "** Done **"
+
+echo "Installing stablebaselines dependencies"
+echo "Enter your OS:"
+echo "1: Ubuntu"
+echo "2: macOS"
+echo "3: Windows"
+read os_type
+
+if [ $os_type == 1 ]
+then
+	sudo apt-get update && sudo apt-get install cmake libopenmpi-dev python3-dev zlib1g-dev
+fi
+if [ $os_type == 2 ]
+then
+	echo "Installing HomeBrew"
+	/usr/bin/ruby -e "$(curl -fsSl https://raw.githubusercontent.com/Homebrew/install/master/install)"
+	echo "Done with Homebrew"
+	brew install cmake openmpi
+fi
+if [ $os_type == 3 ]
+then
+	echo "Check the README file. There is a link for Windows."
+fi
+
+echo "Installing StableBaselines"
+echo "Which type of StableBaselines would you like?"
+echo "1: Regular"
+echo "2: With OpenMPI support"
+echo "* Note: OpenMPI has been known to cause issues with Tensorflow in the past."
+
+read sb_option
+if [ $sb_option == 1  ]
+then
+        pip3 install stable-baselines
+fi
+if [ $sb_option == 2 ]
+then
+        pip3 install stable-baselines[mpi]
+fi
+echo "** Done **"
+
+echo "Installing ns3-gym dependencies"
+apt-get install gcc g++ python
+sudo add-apt-repository ppa:maarten-fonville/protobuf
+sudo apt-get update
+
+apt-get install libzmq5 libzmq5-dev
+apt-get install libprotobuf-dev
+apt-get install protobuf-compiler
+
+echo "Configuring and building ns3-gym"
+
+# If you don't want examples then omit the option
+./waf configure --enable-examples
+./waf build
+
+echo "** Done **"
+echo "Installing gym add on"
+
+pip3 install install ./src/opengym/model/ns3gym
+
+echo "Cloning SUMO into ../sumo (one level outside ns3-gym)"
+cd ../
+git clone https://github.com/eclipse/sumo

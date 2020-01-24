@@ -1,3 +1,103 @@
+# NGS (ns3 + OpenAI Gym + SUMO)
+
+Welcome to NGS, an augmented version of the repository originally developed by [tkn-tub](https://github.com/tkn-tub/ns3-gym). 
+
+In this augmented version we have managed to additionally integrate the SUMO traffic simulator. Hence all SUMO traffic scenarios are also supported.
+
+Additionally, we performed all of our reinforcement learning using the agents present in the [stable-baselines](https://github.com/hill-a/stable-baselines) repository. Which is a repository with high-quality implementations of well known Deep RL algorithms.
+
+Continuing to scroll down, you will find the three different subsections that will explains the required dependencies for:
+* SUMO
+* Stable Baselines
+* ns3-gym
+
+**Note**: You can go through the steps below for a more hands on installation process or you can run the installation helper script by entering the following command in the terminal:
+```bash
+./install_dep
+```
+
+The above command must be run the working directory of ns3-gym.
+
+**The above script does not take care of the entire set up of SUMO. You still have to set the SUMO paths in your terminal.**
+
+* We recommend you run the following **pip** command in the main directory to get rid of any weird module import errors:
+```bash
+pip install .
+# -- or -- #
+pip install NGS
+```
+
+# SUMO
+
+## What is SUMO
+
+["Simulation of Urban MObility" (SUMO)](https://sumo.dlr.de/) is an open source,
+highly portable, microscopic traffic simulation package designed to handle
+large road networks and different modes of transport.
+
+It is mainly developed by employees of the [Institute of Transportation Systems
+at the German Aerospace Center](https://www.dlr.de/ts).
+
+
+## Where to get it
+
+You can download SUMO via our [downloads site](https://sumo.dlr.de/docs/Downloads.html).
+
+As the program is still under development and is extended continuously, we advice you to
+use the latest sources from our GitHub repository. Using a command line client
+the following command should work:
+
+        git clone --recursive https://github.com/eclipse/sumo
+
+# Stable Baselines
+
+Stable Baselines is a set of improved implementations of reinforcement learning algorithms based on OpenAI [Baselines](https://github.com/openai/baselines/).
+
+## Documentation
+
+Documentation is available online: [https://stable-baselines.readthedocs.io/](https://stable-baselines.readthedocs.io/)
+
+## RL Baselines Zoo: A Collection of 100+ Trained RL Agents
+
+[RL Baselines Zoo](https://github.com/araffin/rl-baselines-zoo). is a collection of pre-trained Reinforcement Learning agents using Stable-Baselines.
+
+## Installation
+
+**Note:** Stabe-Baselines supports Tensorflow versions from 1.8.0 to 1.14.0. Support for Tensorflow 2 API is planned.
+
+### Prerequisites
+Baselines requires python3 (>=3.5) with the development headers. You'll also need system packages CMake, OpenMPI and zlib. Those can be installed as follows
+
+#### Ubuntu
+
+```bash
+sudo apt-get update && sudo apt-get install cmake libopenmpi-dev python3-dev zlib1g-dev
+```
+
+#### Mac OS X
+Installation of system packages on Mac requires [Homebrew](https://brew.sh). With Homebrew installed, run the following:
+```bash
+brew install cmake openmpi
+```
+
+#### Windows 10
+
+To install stable-baselines on Windows, please look at the [documentation](https://stable-baselines.readthedocs.io/en/master/guide/install.html#prerequisites).
+
+### Install using pip
+Install the Stable Baselines package:
+```
+pip install stable-baselines[mpi]
+```
+
+This includes an optional dependency on MPI, enabling algorithms DDPG, GAIL, PPO1 and TRPO. If you do not need these algorithms, you can install without MPI:
+```
+pip install stable-baselines
+```
+
+Please read the [documentation](https://stable-baselines.readthedocs.io/) for more details and alternatives (from source, using docker).
+
+
 ns3-gym
 ============
 
@@ -53,107 +153,14 @@ cd ./scratch/opengym
 ./test.py --start=0
 ```
 
-Examples
-========
-
-All examples can be found [here](./scratch/).
-
-## Basic Interface
-
-1. Example Python script. Note, that `gym.make('ns3-v0')` starts ns-3 simulation script located in current working directory.
-```
-import gym
-import ns3gym
-import MyAgent
-
-env = gym.make('ns3-v0')
-obs = env.reset()
-agent = MyAgent.Agent()
-
-while True:
-  action = agent.get_action(obs)
-  obs, reward, done, info = env.step(action)
-
-  if done:
-    break
-env.close()
-```
-2. Any ns-3 simulation script can be used as a Gym environment. This requires only to instantiate OpenGymInterface and implement the ns3-gym C++ interface consisting of the following functions:
-```
-Ptr<OpenGymSpace> GetObservationSpace();
-Ptr<OpenGymSpace> GetActionSpace();
-Ptr<OpenGymDataContainer> GetObservation();
-float GetReward();
-bool GetGameOver();
-std::string GetExtraInfo();
-bool ExecuteActions(Ptr<OpenGymDataContainer> action);
-```
-Note, that the generic ns3-gym interface allows to observe any variable or parameter in a simulation.
-
-A more detailed description can be found in our [Paper](http://www.tkn.tu-berlin.de/fileadmin/fg112/Papers/2019/gawlowicz19_mswim.pdf).
-
-## Cognitive Radio
-We consider the problem of radio channel selection in a wireless multi-channel environment, e.g. 802.11 networks with external interference. The objective of the agent is to select for the next time slot a channel free of interference. We consider a simple illustrative example where the external interference follows a periodic pattern, i.e. sweeping over all channels one to four in the same order as shown in the table.
-
-<p align="center">
-<img src="src/opengym/doc/figures/interferer-pattern.png" alt="drawing" width="500"/>
-</p>
-
-We created such a scenario in ns-3 using existing functionality from ns-3, i.e. interference created using `WaveformGenerator` class and sensing performed using `SpectrumAnalyzer` class.
-
-Such a periodic interferer can be easily learned by an RL-agent so that based on the current observation of the occupation on each channel in a given time slot the correct channel can be determined for the next time slot avoiding any collision with the interferer.
-
-Our proposed RL mapping is:
-- observation - occupation on each channel in the current time slot, i.e. wideband-sensing,
-- actions - set the channel to be used for the next time slot,
-- reward - +1 in case of no collision with interferer; otherwise -1,
-- gameover - if more than three collisions happened during the last ten time-slots
-
-The figure below shows the learning performance when using a simple neural network with fully connected input and an output layer.
-We see that after around 80 episodes the agent is able to perfectly predict the next channel state from the current observation hence avoiding any collision with the interference.
-
-The full source code of the example can be found [here](./scratch/interference-pattern/).
-
-<p align="center">
-<img src="src/opengym/doc/figures/cognitive-radio-learning.png" alt="drawing" width="600"/>
-</p>
-
-Note, that in a more realistic scenario the simple waveform generator in this example can be replaced by a real wireless technology like LTE unlicensed (LTE-U).
-
-
-## RL-TCP
-The proper RL-TCP agent example is still under development. However, we have already implemented and released two versions (i.e. time and event-based) of an interface allowing to monitor parameters of a TCP instance and control its `Congestion Window` and `Slow Start Threshold` -- see details [here](./scratch/rl-tcp/tcp_base.py). Note, that both versions inherits from `TcpCongestionOps` and hence can be used as an argument for `ns3::TcpL4Protocol::SocketType`.
-
-Moreover, using the event-based interface, we already have an example Python Gym agent that implements TCP NewReno and communicates with the ns-3 simulation process using ns3gym -- see [here](./scratch/rl-tcp/tcp_newreno.py). The example can be used as a starting point to implement an RL-based TCP congestion control algorithms.
-
-In order to run it, please execute:
-```
-cd ./scratch/rl-tcp
-./test_tcp.py 
-```
-
-Or in two terminals:
-```
-# Terminal 1:
-./waf --run "rl-tcp --transport_prot=TcpRl"
-
-# Terminal 2:
-cd ./scratch/rl-tcp/
-./test_tcp.py --start=0
-```
-
-Note, that our Python TCP NewReno implementation achieves the same number of transmitted packets like the one implemented in ns3 (see the output of ns-3 simulation, i.e. `RxPkts: 5367` in both cases). Please execute the following command to cross-check:
-```
-./waf --run "rl-tcp --transport_prot=TcpNewReno"
-```
-
 Contact
 ============
-* Piotr Gawlowicz, TU-Berlin, gawlowicz@tkn
-* Anatolij Zubow, TU-Berlin, zubow@tkn
-* tkn = tkn.tu-berlin.de
+* American University of Beirut:
+    * **Rayyan Nasr**: rrn13@mail.aub.edu
+    * **Jihad Eddine Al Khurfan**: jia07@mail.aub.edu
+    * **Ahmad Abou Adla**: aka38@mail.aub.edu
 
-How to reference ns3-gym?
+How to reference the original ns3-gym?
 ============
 
 Please use the following bibtex :
