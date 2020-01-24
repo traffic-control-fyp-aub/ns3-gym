@@ -18,7 +18,7 @@ After installing and registering the custom environment you can use it with the 
 import gym
 import gym_rsu
 
-env = gym.make('rsu_v0')
+env = gym.make('rsu-v0')
 ```
 
 ## Running script file
