@@ -34,7 +34,15 @@ main (int argc, char *argv[])
   /*** 1. Create node pool and counter; large enough to cover all sumo vehicles ***/
   ns3::Time simulationTime (ns3::Seconds(500));
   NodeContainer nodePool;
-  nodePool.Create (30);
+/** scenario1 **/
+  //nodePool.Create (32);
+
+/** scenario2 **/
+  //nodePool.Create (5);
+
+/** scenario3 **/
+  nodePool.Create (5);
+
   uint32_t nodeCounter (0);
 
   /*** 2. Create and setup channel ***/
@@ -75,9 +83,16 @@ main (int argc, char *argv[])
 
   /*** 7. Setup Traci and start SUMO ***/
   Ptr<TraciClient> sumoClient = CreateObject<TraciClient> ();
-//  sumoClient->SetAttribute ("SumoConfigPath", StringValue ("src/traci/examples/circle-simple/circle.sumo.cfg"));
 
-  sumoClient->SetAttribute ("SumoConfigPath", StringValue ("src/traci/examples/sumo-highway-merge/merge-baseline_20191204-1224431575455083.45716.sumo.cfg"));
+/** scenario1 **/
+ // sumoClient->SetAttribute ("SumoConfigPath", StringValue ("rl-fyp/sumo_files/circle-simple/circle.sumo.cfg"));
+
+/** scenario2 **/
+  //sumoClient->SetAttribute ("SumoConfigPath", StringValue ("rl-fyp/sumo_files/sumo-highway-merge/merge-baseline_20191204-1224431575455083.45716.sumo.cfg"));
+
+/** scenario3 -training environment  **/
+  sumoClient->SetAttribute ("SumoConfigPath", StringValue ("rl-fyp/sumo_files/training-loop/training-loop.sumo.cfg"));
+
   sumoClient->SetAttribute ("SumoBinaryPath", StringValue (""));    // use system installation of sumo
   sumoClient->SetAttribute ("SynchInterval", TimeValue (Seconds (0.1)));
   sumoClient->SetAttribute ("StartTime", TimeValue (Seconds (0.0)));
@@ -97,7 +112,7 @@ main (int argc, char *argv[])
   rsuSpeedControlHelper1.SetAttribute ("Client", (PointerValue) (sumoClient));    // pass TraciClient object for accessing sumo in application
 
   RsuSpeedControlHelper rsuSpeedControlHelper2 (9); // Port #9
-  rsuSpeedControlHelper2.SetAttribute ("Velocity", UintegerValue (15));           // initial velocity value which is sent to vehicles
+  rsuSpeedControlHelper2.SetAttribute ("Velocity", UintegerValue (30));           // initial velocity value which is sent to vehicles
   rsuSpeedControlHelper2.SetAttribute ("Interval", TimeValue (Seconds (0.5)));    // packet interval
   rsuSpeedControlHelper2.SetAttribute ("Client", (PointerValue) (sumoClient));    // pass TraciClient object for accessing sumo in application
 
@@ -111,10 +126,10 @@ main (int argc, char *argv[])
   rsuSpeedControlApps2.Stop (simulationTime);
 
   Ptr<MobilityModel> mobilityRsuNode1 = nodePool.Get (0)->GetObject<MobilityModel> ();
-  mobilityRsuNode1->SetPosition (Vector (100.0, 100.0, 3.0)); // set RSU to fixed position
+  mobilityRsuNode1->SetPosition (Vector (100.0, 125.0, 3.0)); // set RSU to fixed position
   nodeCounter++;    // one node (RSU) consumed from "node pool"
   Ptr<MobilityModel> mobilityRsuNode2 = nodePool.Get (1)->GetObject<MobilityModel> ();
-  mobilityRsuNode2->SetPosition (Vector (500.0, 100.0, 3.0)); // set RSU to fixed position
+  mobilityRsuNode2->SetPosition (Vector (470.0, 125.0, 3.0)); // set RSU to fixed position
   nodeCounter++;  // two nodes (RSU) consumed from "node pool"
 
 
@@ -159,7 +174,7 @@ main (int argc, char *argv[])
   sumoClient->SumoSetup (setupNewWifiNode, shutdownWifiNode);
 
   /*** 10. Setup and Start Simulation + Animation ***/
-  AnimationInterface anim ("src/traci-applications/examples/ns3-sumo-coupling.xml"); // Mandatory
+  AnimationInterface anim ("rl-fyp/netanim/ns3-sumo-coupling.xml"); // Mandatory
 
   Simulator::Stop (simulationTime);
 
