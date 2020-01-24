@@ -215,7 +215,7 @@ def test_take_action(rsu_env, action):
                           np.array([1, 2.5, 1.25, 2.3]),
                           1.41,
                           False,
-                           5,
+                           2,
                            3.5)])
 def test_step_func(rsu_env, action, obs_vel, reward, done, epsilon, max_velocity):
     """
@@ -258,7 +258,7 @@ def test_step_func(rsu_env, action, obs_vel, reward, done, epsilon, max_velocity
     # because we are re-sampling for the headway times
     # so there is some uncertainty and we only specify
     # and upper limit on the expected reward.
-    assert math.pow(abs(reward - rew), 2) == epsilon
+    assert math.pow(abs(reward - rew), 2) <= epsilon
 
     # Returned observation is of length 2N where N is
     # the number of vehicles on the circuit. The first
