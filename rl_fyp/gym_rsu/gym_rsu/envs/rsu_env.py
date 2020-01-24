@@ -229,10 +229,12 @@ class RSUEnv(gym.Env):
                 -------
                 All values are scaled between 0 and 1
         """
-        obs = np.array([
-            self.df.loc[:, 'Headway'] / MAX_HEADWAY_TIME,
-            self.df.loc[:, 'Velocity'] / MAX_VELOCITY_VALUE
-        ])
+        obs = np.asarray([])
+        for index, _ in self.df.iterrows():
+            obs = np.append(self.df.loc[index, 'Headway'] / MAX_HEADWAY_TIME)
+
+        for index, _ in self.df.iterrows():
+            obs = np.append(self.df.loc[index, 'Velocity'] / MAX_VELOCITY_VALUE)
 
         return obs
 
