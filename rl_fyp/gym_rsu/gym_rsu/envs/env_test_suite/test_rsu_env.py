@@ -186,7 +186,7 @@ def test_env_reset(rsu_env, next_headway, next_velocity, max_headway, max_veloci
 
 
 @pytest.mark.parametrize("action",
-                         [(np.array([-1, 0.5, -0.75, 0.3]))])
+                         [(np.array([-1, 0.5, -0.75]))])
 def test_take_action(rsu_env, action):
     """
         Test the take action utility function
@@ -213,7 +213,7 @@ def test_take_action(rsu_env, action):
 
 
 @pytest.mark.parametrize("action, obs_vel, reward, done, epsilon, max_velocity",
-                         [(np.array([-1, 0.5, -0.75, 0.3]),
+                         [(np.array([-1, 0.5, -0.75]),
                           np.array([1, 2.5, 1.25, 2.3]),
                           1.41,
                           False,
