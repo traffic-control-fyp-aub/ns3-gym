@@ -10,6 +10,7 @@ from beautifultable import BeautifulTable
     Custom OpenAI Gym environment from the perspective
     of the road side unit (RSU).
 """
+DIRECT_PATH_TO_DATA_FRAME = "/home/rayyan/Desktop/FYP/repos/ns3-gym/rl_fyp/training_data/training_data_frame.csv"
 PATH_TO_DATA_FRAME = "rl_fyp/training_data/training_data_frame.csv"
 MAX_HEADWAY_TIME = 2  # maximum allowed headway time for vehicles in seconds
 MAX_VELOCITY_VALUE = 3.5  # maximum allowed velocity for vehicles in meters per second
@@ -87,6 +88,9 @@ class RSUEnv(gym.Env):
         try:
             self.df = pd.read_csv(PATH_TO_DATA_FRAME)
         except FileNotFoundError:
+            # Re-try importing the CSV file because sometimes the
+            # relative import does not find the CSV file.
+            self.df = pd.read_csv(DIRECT_PATH_TO_DATA_FRAME)
             print(f'The provided path to training data frame does not exist: {PATH_TO_DATA_FRAME}')
 
         self.current_step = 0
@@ -267,7 +271,8 @@ class RSUEnv(gym.Env):
             raise Exception(f'Action must be of type Numpy Array instead is of type {type(action)}')
 
         if len(action) != NUMBER_OF_VEHICLES:
-            raise Exception(f"Size of action list does not match number of vehicles: {NUMBER_OF_VEHICLES}")
+            raise Exception(f"Size of action list does not match number of vehicles: {len(action)}."
+                            f" Here is that action: {action}")
         else:
             for index, row in self.df.iterrows():
                 self.df.loc[index, 'Velocity'] += action[index]
