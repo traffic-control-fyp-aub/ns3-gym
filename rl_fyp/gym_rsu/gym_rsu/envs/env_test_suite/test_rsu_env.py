@@ -185,9 +185,9 @@ def test_env_reset(rsu_env, next_headway, next_velocity, max_headway, max_veloci
                         - (next_velocity / max_velocity)), 2)
 
 
-@pytest.mark.parametrize("action",
-                         [(np.array([-1, 0.5, -0.75, 0.3]))])
-def test_take_action(rsu_env, action):
+@pytest.mark.parametrize("action, epsilon",
+                         [(np.array([-1, 0.5, -0.75, 0.3]), 2)])
+def test_take_action(rsu_env, action, epsilon):
     """
         Test the take action utility function
         in the RSUEnv.
@@ -209,7 +209,7 @@ def test_take_action(rsu_env, action):
     rsu_env._take_action(action)
 
     for index, row in rsu_env.df.iterrows():
-        assert rsu_env.df.at[index, 'Velocity'] == (2 + action[index])
+        assert math.pow(abs(rsu_env.df.at[index, 'Velocity'] - (2 + action[index])), 2) <= epsilon
 
 
 @pytest.mark.parametrize("action, obs_vel, reward, done, epsilon, max_velocity",
@@ -281,4 +281,4 @@ def test_step_func(rsu_env, action, obs_vel, reward, done, epsilon, max_velocity
 
     # Assert the velocities
     for index in range(len(velocities)):
-        assert velocities[index] == obs_vel[index]
+        assert math.pow(abs(velocities[index] - obs_vel[index]), 2) <= epsilon
