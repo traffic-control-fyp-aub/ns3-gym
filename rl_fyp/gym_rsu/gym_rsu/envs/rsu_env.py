@@ -266,7 +266,7 @@ class RSUEnv(gym.Env):
         if 'numpy' not in type(action).__module__:
             raise Exception(f'Action must be of type Numpy Array instead is of type {type(action)}')
 
-        if len(action) < NUMBER_OF_VEHICLES:
+        if len(action) != NUMBER_OF_VEHICLES:
             raise Exception(f"Size of action list does not match number of vehicles: {NUMBER_OF_VEHICLES}")
         else:
             for index, row in self.df.iterrows():

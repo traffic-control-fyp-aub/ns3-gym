@@ -125,9 +125,9 @@ def test_exponential_sampling(rsu_env, q_value, epsilon, headway):
         assert math.pow(abs(rsu_env.df.at[index, 'Headway'] - np.random.exponential(q_value)) % headway, 2) < epsilon
 
 
-@pytest.mark.parametrize("next_headway, next_velocity, max_headway, max_velocity",
-                         [(1, 2, 2, 3.5)])
-def test_next_observation(rsu_env, next_headway, next_velocity, max_headway, max_velocity):
+@pytest.mark.parametrize("next_headway, next_velocity, max_headway, max_velocity, epsilon",
+                         [(1, 2, 2, 3.5, 2)])
+def test_next_observation(rsu_env, next_headway, next_velocity, max_headway, max_velocity, epsilon):
     """
         Test the next observation
         utility function in the RSUEnv
@@ -146,16 +146,16 @@ def test_next_observation(rsu_env, next_headway, next_velocity, max_headway, max
 
     # Next time step headway value
     for index in range(int(len(obs_array)/2)):
-        assert obs_array[index] == next_headway / max_headway
+        assert math.pow(abs(obs_array[index] - (next_headway / max_headway)), 2) <= epsilon
 
     # Next time step velocity value
     for index in range(int(len(obs_array) / 2), int(len(obs_array))):
-        assert obs_array[index] == next_velocity / max_velocity
+        assert math.pow(abs(obs_array[index] - (next_velocity / max_velocity)), 2) <= epsilon
 
 
-@pytest.mark.parametrize("next_headway, next_velocity, max_headway, max_velocity",
-                         [(1, 2, 2, 3.5)])
-def test_env_reset(rsu_env, next_headway, next_velocity, max_headway, max_velocity):
+@pytest.mark.parametrize("next_headway, next_velocity, max_headway, max_velocity, epsilon",
+                         [(1, 2, 2, 3.5, 2)])
+def test_env_reset(rsu_env, next_headway, next_velocity, max_headway, max_velocity, epsilon):
     """
         Test the environmental reset function
         of the RSUEnv.
@@ -177,10 +177,12 @@ def test_env_reset(rsu_env, next_headway, next_velocity, max_headway, max_veloci
     new_time_step = rsu_env.current_step
 
     # Check that environment is resetting next headway properly
-    assert rsu_env.df.loc[new_time_step + 1, 'Headway'] / max_headway == next_headway / max_headway
+    assert math.pow(abs((rsu_env.df.loc[new_time_step + 1, 'Headway'] / max_headway)
+                        - (next_headway / max_headway)), 2)
 
     # Check that environment is resetting next velocity properly
-    assert rsu_env.df.loc[new_time_step + 1, 'Velocity'] / max_velocity == next_velocity / max_velocity
+    assert math.pow(abs((rsu_env.df.loc[new_time_step + 1, 'Velocity'] / max_velocity)
+                        - (next_velocity / max_velocity)), 2)
 
 
 @pytest.mark.parametrize("action",
