@@ -76,18 +76,19 @@ class RSUEnv(gym.Env):
         """
         super(RSUEnv, self).__init__()
 
-        # Initializing my observation space to be of two dimensions:
-        #     - First dimension: a continuous interval between 0 and MAX_HEADWAY_TIME
-        #     - Second dimension: a continuous interval between 0 and MAX_VELOCITY_VALUE
-        self.observation_space = gym.spaces.Box(low=np.array([0, 0]),
-                                                high=np.array([MAX_HEADWAY_TIME, MAX_VELOCITY_VALUE]),
+        # Initializing my observation space to be a vector of length 2*NUMBER_OF_VEHICLES
+        # where the first "NUMBER_OF_VEHICLES" observations correspond to the headway times
+        # and the remaining "NUMBER_OF_VEHICLES" observations correspond to the vehicle velocities.
+        self.observation_space = gym.spaces.Box(low=0,
+                                                high=MAX_VELOCITY_VALUE,
+                                                shape=(2*NUMBER_OF_VEHICLES,),
                                                 dtype=np.float16)
 
         # Initializing my action space to be a vector of length NUMBER_OF_VEHICLES
         # which consists of a continuous interval from -1 to +1
         self.action_space = gym.spaces.Box(low=-1,
                                            high=1,
-                                           shape=(NUMBER_OF_VEHICLES, 1),
+                                           shape=(NUMBER_OF_VEHICLES,),
                                            dtype=np.float16)
 
         self.current_reward, self.old_reward = 0, 0
