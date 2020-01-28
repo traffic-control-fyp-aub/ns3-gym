@@ -86,8 +86,8 @@ class RSUEnv(gym.Env):
         # Initializing my action space to be a vector of length NUMBER_OF_VEHICLES
         # which consists of a continuous interval from -1 to +1
         self.action_space = gym.spaces.Box(low=-1,
-                                           high=+1,
-                                           shape=(NUMBER_OF_VEHICLES,),
+                                           high=1,
+                                           shape=(NUMBER_OF_VEHICLES, 1),
                                            dtype=np.float16)
 
         self.current_reward, self.old_reward = 0, 0
