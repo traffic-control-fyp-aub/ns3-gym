@@ -11,12 +11,15 @@ env = gym.make("rsu-v0")
 model = PPO2('MlpPolicy', env)
 
 # Train the agent
+print("Beginning model training")
 model.learn(total_timesteps=int(2e5))
+print("** Done training the model **")
 
 # Save the agent
 model.save("ppo_rsu")
 
-del model  # deleting it just to make sure we can load successfully again
+# deleting it just to make sure we can load successfully again
+del model
 
 # Load the trained agent
 model = PPO2.load("ppo_rsu")
