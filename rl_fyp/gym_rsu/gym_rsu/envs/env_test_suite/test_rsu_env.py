@@ -25,12 +25,13 @@ def rsu_env():
     return RSUEnv()
 
 
-@pytest.mark.parametrize("obs_space, action_space, reward", [(gym.spaces.Box(np.array([0, 0]),
-                                                                             np.array([2, 3.5]),
+@pytest.mark.parametrize("obs_space, action_space, reward", [(gym.spaces.Box(0,
+                                                                             3.5,
+                                                                             shape=(8,),
                                                                              dtype=np.float16),
                                                               gym.spaces.Box(-1,
                                                                              1,
-                                                                             shape=(4, 1),
+                                                                             shape=(4,),
                                                                              dtype=np.float16),
                                                               0)])
 def test_env_init(rsu_env, obs_space, action_space, reward):
