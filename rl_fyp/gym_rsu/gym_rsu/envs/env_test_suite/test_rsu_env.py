@@ -30,6 +30,7 @@ def rsu_env():
                                                                              dtype=np.float16),
                                                               gym.spaces.Box(np.array([-1]),
                                                                              np.array([1]),
+                                                                             shape=(4,),
                                                                              dtype=np.float16),
                                                               0)])
 def test_env_init(rsu_env, obs_space, action_space, reward):
