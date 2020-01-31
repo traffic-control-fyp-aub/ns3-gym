@@ -98,8 +98,9 @@ class RSUEnv(gym.Env):
         except FileNotFoundError:
             # Re-try importing the CSV file because sometimes the
             # relative import does not find the CSV file.
-            self.df = pd.read_csv(DIRECT_PATH_TO_DATA_FRAME)
             print(f'The provided path to training data frame does not exist: {PATH_TO_DATA_FRAME}')
+            print(f'Switching to absolute path instead: {DIRECT_PATH_TO_DATA_FRAME}')
+            self.df = pd.read_csv(DIRECT_PATH_TO_DATA_FRAME)
 
         self.current_step = 0
 
@@ -325,7 +326,7 @@ class RSUEnv(gym.Env):
                 Flow value
         """
         for index, row in self.df.iterrows():
-            self.df.loc[index, 'Headway'] = np.random.poisson(q) % MAX_HEADWAY_TIME
+            self.df.loc[index, 'Headway'] = abs(np.random.poisson(q) % MAX_HEADWAY_TIME)
 
     def _sample_exponential_value(self, q):
         """
@@ -339,4 +340,4 @@ class RSUEnv(gym.Env):
                 Flow value
         """
         for index, row in self.df.iterrows():
-            self.df.loc[index, 'Headway'] = np.random.exponential(q) % MAX_HEADWAY_TIME
+            self.df.loc[index, 'Headway'] = abs(np.random.exponential(q) % MAX_HEADWAY_TIME)
