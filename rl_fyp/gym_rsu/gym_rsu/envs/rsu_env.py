@@ -148,10 +148,7 @@ class RSUEnv(gym.Env):
             # If the current time step is still zero then
             # think about just running a randomly sampled
             # list of actions
-            a = []
-            for _ in range(NUMBER_OF_VEHICLES):
-                a.append(self.action_space.sample())
-                self._take_action(self._action_to_list(a))
+            self._take_action(self._action_to_list(self.action_space.sample()))
         else:
             # Convert the action to type list
             action = self._action_to_list(action)
