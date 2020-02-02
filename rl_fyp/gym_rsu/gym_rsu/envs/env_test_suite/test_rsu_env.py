@@ -148,11 +148,11 @@ def test_next_observation(rsu_env, next_headway, next_velocity, max_headway, max
 
     # Next time step headway value
     for index in range(int(len(obs_array)/2)):
-        assert math.pow(abs(obs_array[index] - (next_headway / max_headway)), 2) <= epsilon
+        assert math.pow(abs(obs_array[index] - next_headway), 2) <= epsilon
 
     # Next time step velocity value
     for index in range(int(len(obs_array) / 2), int(len(obs_array))):
-        assert math.pow(abs(obs_array[index] - (next_velocity / max_velocity)), 2) <= epsilon
+        assert math.pow(abs(obs_array[index] - next_velocity), 2) <= epsilon
 
 
 @pytest.mark.parametrize("next_headway, next_velocity, max_headway, max_velocity, epsilon",
@@ -179,12 +179,12 @@ def test_env_reset(rsu_env, next_headway, next_velocity, max_headway, max_veloci
     new_time_step = rsu_env.current_step
 
     # Check that environment is resetting next headway properly
-    assert math.pow(abs((rsu_env.df.loc[new_time_step + 1, 'Headway'] / max_headway)
-                        - (next_headway / max_headway)), 2)
+    assert math.pow(abs(rsu_env.df.loc[new_time_step, 'Headway']
+                        - next_headway), 2)
 
     # Check that environment is resetting next velocity properly
-    assert math.pow(abs((rsu_env.df.loc[new_time_step + 1, 'Velocity'] / max_velocity)
-                        - (next_velocity / max_velocity)), 2)
+    assert math.pow(abs(rsu_env.df.loc[new_time_step, 'Velocity']
+                        - next_velocity), 2)
 
 
 @pytest.mark.parametrize("action, epsilon",
@@ -214,14 +214,12 @@ def test_take_action(rsu_env, action, epsilon):
         assert math.pow(abs(rsu_env.df.at[index, 'Velocity'] - (2 + action[index])), 2) <= epsilon
 
 
-@pytest.mark.parametrize("action, obs_vel, reward, done, epsilon, max_velocity",
-                         [(np.array([-1, 0.5, -0.75, 0.3]),
-                          np.array([1, 2.5, 1.25, 2.3]),
+@pytest.mark.parametrize("obs_vel, reward, done, epsilon",
+                         [(np.array([1, 2.5, 1.25, 2.3]),
                           1.41,
                           False,
-                           2,
-                           3.5)])
-def test_step_func(rsu_env, action, obs_vel, reward, done, epsilon, max_velocity):
+                           2)])
+def test_step_func(rsu_env, obs_vel, reward, done, epsilon):
     """
         Test the step function in the RSUEnv.
 
@@ -253,7 +251,7 @@ def test_step_func(rsu_env, action, obs_vel, reward, done, epsilon, max_velocity
     if not isinstance(rsu_env, RSUEnv):
         raise Exception("Wrong environment")
 
-    obs, rew, d, _ = rsu_env.step(action)
+    obs, rew, d, _ = rsu_env.step()
 
     # Assert that the done condition is correct
     assert d == done
@@ -275,11 +273,6 @@ def test_step_func(rsu_env, action, obs_vel, reward, done, epsilon, max_velocity
     # headways and velocities
     for index in range(int(len(obs)/2), len(obs)):
         velocities = np.append(velocities, obs[index])
-
-    # Normalizing the obs_vel vector to be between
-    # the values of 0 and 1
-    for index in range(len(obs_vel)):
-        obs_vel[index] = obs_vel[index] / max_velocity
 
     # Assert the velocities
     for index in range(len(velocities)):
