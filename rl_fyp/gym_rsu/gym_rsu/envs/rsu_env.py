@@ -24,6 +24,8 @@ EPSILON_THRESHOLD = math.pow(10, -5)  # threshold used to check if reward is adv
 CIRCUIT_LENGTH = 1500  # length of the traffic circuit environment
 FLOW_WINDOW_CONSTANT = 15  # flow volume within the window frame of 15 minutes
 TRAFFIC_FLOW_THRESHOLD = 1.4  # Flow Q-value threshold (reported commonly in traffic literature)
+MEAN_VELOCITY = 1.00  # value to center normal distribution velocity sampling
+SIGMA = 0.1  # standard deviation for normal distribution velocity sampling
 
 
 class RSUEnv(gym.Env):
@@ -74,11 +76,6 @@ class RSUEnv(gym.Env):
                 method we give it a random value to point to within
                 the data frame because this gives our agent a more
                 unique experience from the dame data set.
-
-            self.state: type(bool)
-                This indicates whether the training episode is still
-                valid or not. Equivalent to the 'done' variable returned
-                by the step function.
         """
         super(RSUEnv, self).__init__()
 
@@ -105,10 +102,6 @@ class RSUEnv(gym.Env):
 
         # Initializing random seed of RSU environment
         self._seed()
-
-        # Setting the state of the environment to False
-        # which means that we can still train.
-        self.state = False
 
         # Opening data frame that contains environment related data
         try:
@@ -142,8 +135,7 @@ class RSUEnv(gym.Env):
             info:   Dictionary
                     Diagnostic information useful for debugging.
         """
-        assert self.state is not True, 'Cant call step() once episode is finished (call reset() instead'
-
+        # Take a single step in time and enforce its effects on the RSU environment
         if self.current_step is 0:
             # If the current time step is still zero then
             # think about just running a randomly sampled
@@ -209,7 +201,6 @@ class RSUEnv(gym.Env):
         #   that was observed 10 time steps ago did not change beyond a certain
         #   threshold then the training is done.
         done = True if math.pow(abs(self.old_reward - self.current_reward), 2) < EPSILON_THRESHOLD else False
-        self.state = done
 
         obs = self._next_observation()
 
@@ -333,6 +324,8 @@ class RSUEnv(gym.Env):
         else:
             for index, row in self.df.iterrows():
                 self.df.loc[index, 'Velocity'] += action[index]
+                if self.df.loc[index, 'Velocity'] <= 0:
+                    self.df.loc[index, 'Velocity'] = round(abs(np.random.normal(MEAN_VELOCITY, SIGMA)), 2)
 
             # Knowing the new set of velocities for the vehicles we now need to compute the
             # new set of headways since the previously recorded ones are useless. The following

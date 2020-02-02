@@ -22,8 +22,6 @@ elif 'ppo' == sys.argv[1]:
                  env,
                  verbose=1,
                  ent_coef=0.0,
-                 n_steps=2048,
-                 nminibatches=32,
                  lam=0.95,
                  gamma=0.99,
                  noptepochs=10,
@@ -31,7 +29,7 @@ elif 'ppo' == sys.argv[1]:
                  cliprange=0.2)
     # Use this name to save the model
     # parameters after training is done
-    save_name = 'ppo_rsu'
+    save_name = 'rsu_agents/ppo_rsu'
 elif 'td3' == sys.argv[1]:
     # Use the stable-baseline TD3 policy to train
     model = TD3('MlpPolicy', env, verbose=1, random_exploration=0)
@@ -68,7 +66,7 @@ elif 'hiro' == sys.argv[1]:
     pass
 
 # Evaluate the agent
-mean_reward, n_steps = evaluate_policy(model, model.get_env(), n_eval_episodes=10)
+mean_reward, n_steps = evaluate_policy(model, env, n_eval_episodes=10)
 
 # Enjoy the trained agent
 obs = env.reset()
