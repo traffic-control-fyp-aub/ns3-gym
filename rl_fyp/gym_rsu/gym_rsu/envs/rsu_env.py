@@ -1,10 +1,12 @@
 import gym
+from gym.utils import seeding
+
 import numpy as np
-import random
 import pandas as pd
-import math
 from beautifultable import BeautifulTable
 
+import math
+import random
 
 """
     Custom OpenAI Gym environment from the perspective
@@ -14,7 +16,6 @@ DIRECT_PATH_TO_DATA_FRAME = "/home/rayyan/Desktop/FYP/repos/ns3-gym/rl_fyp/train
 PATH_TO_DATA_FRAME = "rl_fyp/training_data/training_data_frame.csv"
 MAX_HEADWAY_TIME = 2  # maximum allowed headway time for vehicles in seconds
 MAX_VELOCITY_VALUE = 3.5  # maximum allowed velocity for vehicles in meters per second
-MAX_STEPS = 5  # maximum time steps for training horizon
 ALPHA = 0.1  # gain used to diminish the magnitude of the penalty
 DESIRED_VELOCITY = 3  # desired system wide target (average) velocity
 NUMBER_OF_VEHICLES = 4  # number of vehicles present in the environment
@@ -64,8 +65,8 @@ class RSUEnv(gym.Env):
                 tell if there is any advancement in the training and
                 to determine whether or not to end the training episode.
 
-            self.df: type(String)
-                Path to the dataframe that contains the information
+            self.df: type(dataframe)
+                Dataframe that contains the information
                 to use while training on this environment.
 
             self.current_step: type(Int)
@@ -73,6 +74,11 @@ class RSUEnv(gym.Env):
                 method we give it a random value to point to within
                 the data frame because this gives our agent a more
                 unique experience from the dame data set.
+
+            self.state: type(bool)
+                This indicates whether the training episode is still
+                valid or not. Equivalent to the 'done' variable returned
+                by the step function.
         """
         super(RSUEnv, self).__init__()
 
@@ -82,17 +88,29 @@ class RSUEnv(gym.Env):
         self.observation_space = gym.spaces.Box(low=0,
                                                 high=MAX_VELOCITY_VALUE,
                                                 shape=(2*NUMBER_OF_VEHICLES,),
-                                                dtype=np.float16)
+                                                dtype=np.float32)
 
         # Initializing my action space to be a vector of length NUMBER_OF_VEHICLES
         # which consists of a continuous interval from -1 to +1
         self.action_space = gym.spaces.Box(low=-1,
                                            high=1,
                                            shape=(NUMBER_OF_VEHICLES,),
-                                           dtype=np.float16)
+                                           dtype=np.float32)
 
+        # Zero-ing out the reward values
         self.current_reward, self.old_reward = 0, 0
 
+        # Setting current time step to zero
+        self.current_step = 0
+
+        # Initializing random seed of RSU environment
+        self._seed()
+
+        # Setting the state of the environment to False
+        # which means that we can still train.
+        self.state = False
+
+        # Opening data frame that contains environment related data
         try:
             self.df = pd.read_csv(PATH_TO_DATA_FRAME)
         except FileNotFoundError:
@@ -102,15 +120,13 @@ class RSUEnv(gym.Env):
             print(f'Switching to absolute path instead: {DIRECT_PATH_TO_DATA_FRAME}')
             self.df = pd.read_csv(DIRECT_PATH_TO_DATA_FRAME)
 
-        self.current_step = 0
-
-    def step(self, action=np.array([])):
+    def step(self, action=None):
         """
             Step function to be taken on the environment.
 
             Parameter(s):
             -------------
-            action: type(Numpy Array)
+            action: type(ndarray || list || object)
                     The action to be taken by the agent that
                     will affect the state of the environment.
 
@@ -126,14 +142,28 @@ class RSUEnv(gym.Env):
             info:   Dictionary
                     Diagnostic information useful for debugging.
         """
-        # Execute one time step within the environment
-        if 'numpy' not in type(action).__module__:
-            raise Exception(f'Action must be of type Numpy Array instead is of type {type(action)}')
+        assert self.state is not True, 'Cant call step() once episode is finished (call reset() instead'
 
-        self._take_action(action)
+        if self.current_step is 0:
+            # If the current time step is still zero then
+            # think about just running a randomly sampled
+            # list of actions
+            a = []
+            for _ in range(NUMBER_OF_VEHICLES):
+                a.append(self.action_space.sample())
+                self._take_action(self._action_to_list(a))
+        else:
+            # Convert the action to type list
+            action = self._action_to_list(action)
+
+            # Take environment effect of action list
+            self._take_action(action)
+
+        # Advance the current step of the environment by 1 (modulo the length of the dataframe)
         self.current_step = (self.current_step + 1) % len(self.df['Headway'].values)
 
-        delay_modifier = (self.current_step / MAX_STEPS)
+        # Calculate a delay modifier to use later to encourage exploration by the agent
+        delay_modifier = (self.current_step / len(self.df['Headway'].values))
 
         desired_velocity = np.asarray([])
         for _ in range(len(self.df['Velocity'].values)):
@@ -172,9 +202,9 @@ class RSUEnv(gym.Env):
         #   Multiply by a delay modifier in order to encourage exploration in the long
         #   term and not just settle with a local maximum (i.e.: prefer long term to
         #   short term planning)
-        self.current_reward *= delay_modifier
+        reward = self.current_reward * delay_modifier
 
-        if self.current_step % 10 == 0:
+        if self.current_step % len(self.df['Headway'].values) == 0:
             self.old_reward = self.current_reward
 
         #   Condition that would trigger the end of an episode.
@@ -182,10 +212,11 @@ class RSUEnv(gym.Env):
         #   that was observed 10 time steps ago did not change beyond a certain
         #   threshold then the training is done.
         done = True if math.pow(abs(self.old_reward - self.current_reward), 2) < EPSILON_THRESHOLD else False
+        self.state = done
 
         obs = self._next_observation()
 
-        return obs, self.current_reward, done, {}
+        return obs, reward, done, {}
 
     def reset(self):
         """
@@ -194,11 +225,13 @@ class RSUEnv(gym.Env):
         """
         # Set the current step to a random point within frame
         self.current_step = random.randint(0, len(self.df.loc[:, 'Headway'].values))\
-            % (len(self.df.loc[:, 'Headway'].values) - 2)
+            % (len(self.df.loc[:, 'Headway'].values))
 
-        self._next_observation()
+        obs = self._next_observation()
 
-    def render(self, mode='human', close=False):
+        return obs
+
+    def render(self, mode='human'):
         """
             Function that renders the environment to the
             user.
@@ -220,6 +253,26 @@ class RSUEnv(gym.Env):
             table.append_row([self.df.at[index, 'Headway'], self.df.at[index, 'Velocity']])
         print(table)
 
+    def close(self):
+        """
+            This function ensures that the environment
+            is closed properly.
+        """
+        self.close()
+
+    def _seed(self, seed=None):
+        """
+            Utility function that helps with setting
+            the seed for random sampling.
+
+            Parameter(s):
+            -------------
+            seed: type(Float)
+                User set seed value for seeding function.
+        """
+        self.np_random, seed = seeding.np_random(seed)
+        return [seed]
+
     def _next_observation(self):
         """
             Helper function that returns the next
@@ -227,7 +280,7 @@ class RSUEnv(gym.Env):
 
             Return(s):
             ----------
-            obs: type(Numpy Array)
+            obs: type(list)
                 Next observation in the environment.
                 Of the form: (h_t+1, v_t+1) where:
                     - h_t+1 = next time step headway
@@ -235,21 +288,22 @@ class RSUEnv(gym.Env):
                 Total length of the observation vector
                 is 2N where:
                     - N = number of vehicles on the circuit
-
-                * Note:
-                -------
-                All values are scaled between 0 and 1
         """
-        obs = np.asarray([])
+        o = np.asarray([])
         for index, _ in self.df.iterrows():
-            obs = np.append(obs, self.df.loc[index, 'Headway'] / MAX_HEADWAY_TIME)
+            # Appending all the headway times for the next time step
+            o = np.append(o, self.df.loc[index, 'Headway'])  # / MAX_HEADWAY_TIME)
 
         for index, _ in self.df.iterrows():
-            obs = np.append(obs, self.df.loc[index, 'Velocity'] / MAX_VELOCITY_VALUE)
+            # Appending all the velocity values of the next time step
+            o = np.append(o, self.df.loc[index, 'Velocity'])  # / MAX_VELOCITY_VALUE)
+
+        # Converting the numpy array to type list
+        obs = o.tolist()
 
         return obs
 
-    def _take_action(self, action=np.array([])):
+    def _take_action(self, action):
         """
             Take the action provided by the agent/model
             and physically perform it on the environment.
@@ -276,9 +330,6 @@ class RSUEnv(gym.Env):
                 to be performed on the vehicle(s). The length of this vector
                 is equal to the number of vehicles in the environment.
         """
-        if 'numpy' not in type(action).__module__:
-            raise Exception(f'Action must be of type Numpy Array instead is of type {type(action)}')
-
         if len(action) != NUMBER_OF_VEHICLES:
             raise Exception(f"Size of action list does not match number of vehicles: {len(action)}."
                             f" Here is that action: {action}")
@@ -325,7 +376,7 @@ class RSUEnv(gym.Env):
             q: type(Float)
                 Flow value
         """
-        for index, row in self.df.iterrows():
+        for index, _ in self.df.iterrows():
             self.df.loc[index, 'Headway'] = abs(np.random.poisson(q) % MAX_HEADWAY_TIME)
 
     def _sample_exponential_value(self, q):
@@ -339,5 +390,22 @@ class RSUEnv(gym.Env):
             q: type(Float)
                 Flow value
         """
-        for index, row in self.df.iterrows():
+        for index, _ in self.df.iterrows():
             self.df.loc[index, 'Headway'] = abs(np.random.exponential(q) % MAX_HEADWAY_TIME)
+
+    def _action_to_list(self, action):
+        """
+            This function is a utility function that
+            converts the action vector into a list.
+
+            Parameter(s):
+            -------------
+            action: type(ndarray || list || Object)
+                Action vector of length NUMBER_OF_VEHICLES
+                to be applied on the RSUEnv.
+        """
+        if isinstance(action, np.ndarray):
+            return action.tolist()
+        if not isinstance(action, list):
+            return [action]
+        return action
