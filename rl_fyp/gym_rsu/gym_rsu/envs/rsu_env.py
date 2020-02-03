@@ -395,11 +395,11 @@ class RSUEnv(gym.Env):
         if v_delta > 0:
             # RSU is telling the vehicle of focus to speed up
             # therefore the headway time must decrease
-            self.df.loc[index, 'Headway'] = (self.df.loc[index, 'Headway'] - (v_delta*(BETA / 2.0))) % MAX_HEADWAY_TIME
+            self.df.loc[index, 'Headway'] = (self.df.loc[index, 'Headway'] - (v_delta*SIGMA)) % MAX_HEADWAY_TIME
         elif v_delta < 0:
             # RSU is telling the vehicle of focus to slow down
             # therefore the headway time must increase
-            self.df.loc[index, 'Headway'] = (self.df.loc[index, 'Headway'] + (v_delta*(BETA / 2.0))) % MAX_HEADWAY_TIME
+            self.df.loc[index, 'Headway'] = (self.df.loc[index, 'Headway'] + (v_delta*SIGMA)) % MAX_HEADWAY_TIME
         else:
             # RSU is telling the vehicle of focus to maintain speed
             # therefore the headway time must stay the same
