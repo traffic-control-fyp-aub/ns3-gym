@@ -165,6 +165,14 @@ class RSUEnv(gym.Env):
         # Advance the current step of the environment by 1
         self.current_step += 1
 
+        # Before taking a new step in time check if there are any low headway
+        # values. This indicates that the current vehicle is traveling too close
+        # to the leading vehicle and this is too dangerous. Automatically penalize
+        # the agent with a reward value of -10
+        for index, _ in self.df.iterrows():
+            if self.df.loc[index, 'Headway'] < 1:
+                return self._next_observation(), -10, False, {}
+
         # Calculate a delay modifier to use later to encourage exploration by the agent
         delay_modifier = math.pow(BETA, self.current_step)
 
@@ -196,11 +204,6 @@ class RSUEnv(gym.Env):
         #       - v_i(t) is the velocity of vehicle "i" at time "t"
         #       - h_i(t) is the headway time observed by vehicle "i" at time "t"
         #       - N is the total number of vehicles in the environment
-
-        for index, _ in self.df.iterrows():
-            if self.df.loc[index, 'Headway'] < 1:
-                return self._next_observation(), -10, False, {}
-
         self.current_reward = abs(DESIRED_VELOCITY)\
             - abs((np.sum(np.subtract(desired_dataframe['V_desired'].values,
                                       self.df['Velocity'].values))))/(len(self.df['Velocity'].values))\
@@ -234,13 +237,13 @@ class RSUEnv(gym.Env):
 
         velocities = np.asarray([])
         for _ in range(4):
-            # Generate 10,000 samples of velocities from a normal distribution
+            # Generate new samples of velocities from a normal distribution
             # centered around the mean velocity with standard deviation sigma.
             velocities = np.append(velocities, round(abs(np.random.normal(MEAN_VELOCITY, SIGMA)), 2))
 
         headways = np.asarray([])
         for _ in range(4):
-            # Generate 10,000 samples of headways from a normal distribution
+            # Generate new samples of headways from a normal distribution
             # centered around the mean headway with standard deviation sigma.
             headways = np.append(headways, round(abs(np.random.normal(MEAN_HEADWAY, SIGMA)), 2))
 
@@ -250,9 +253,9 @@ class RSUEnv(gym.Env):
         # Export the dataframe containing all the training data
         # as a CSV file located at PATH_TO_CSV
         try:
-            export_csv = training_dataframe.to_csv(PATH_TO_DATA_FRAME)
+            _ = training_dataframe.to_csv(PATH_TO_DATA_FRAME)
         except FileNotFoundError:
-            export_csv = training_dataframe.to_csv(DIRECT_PATH_TO_DATA_FRAME)
+            _ = training_dataframe.to_csv(DIRECT_PATH_TO_DATA_FRAME)
 
         # Return a new observation from the RSU environment
         obs = self._next_observation()
