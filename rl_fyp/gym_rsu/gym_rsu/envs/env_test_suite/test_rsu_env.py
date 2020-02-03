@@ -65,68 +65,6 @@ def test_env_init(rsu_env, obs_space, action_space, reward):
     assert rsu_env.current_reward == reward
 
 
-@pytest.mark.parametrize("q_value, epsilon, headway",
-                         [(5, 5, 2)])
-def test_poisson_sampling(rsu_env, q_value, epsilon, headway):
-    """
-        Test the Poisson sampling utility function
-        in the RSU gym environment.
-
-        Parameter(s):
-        ------------
-        rsu_env: type(gym.Env)
-            Instantiated object of the custom RSUEnv class.
-        q_value: type(Float)
-            Flow value
-    """
-    # Doing this only to get rid of an IDE glitch that does not
-    # let me access the dataframe of the RSUEnv()
-    if not isinstance(rsu_env, RSUEnv):
-        raise Exception("Wrong environment")
-
-    rsu_env._sample_poisson_value(q_value)
-
-    # Go through each element in the newly populated headway times
-    # and make sure that they are correct. But since we are sampling
-    # from a probability distribution we can not get the exact value
-    # instead we can only check that the mean squared error between
-    # what we got and what we would get if we sampled again is less
-    # than a certain epsilon threshold.
-    for index, row in rsu_env.df.iterrows():
-        assert math.pow(abs(rsu_env.df.at[index, 'Headway'] - np.random.poisson(q_value)) % headway, 2) < epsilon
-
-
-@pytest.mark.parametrize("q_value, epsilon, headway",
-                         [(5, 5, 2)])
-def test_exponential_sampling(rsu_env, q_value, epsilon, headway):
-    """
-        Test the Exponential sampling utility function
-        in the RSU gym environment.
-
-        Parameter(s):
-        ------------
-        rsu_env: type(gym.Env)
-            Instantiated object of the custom RSUEnv class.
-        q_value: type(Float)
-            Flow value
-    """
-    # Doing this only to get rid of an IDE glitch that does not
-    # let me access the dataframe of the RSUEnv()
-    if not isinstance(rsu_env, RSUEnv):
-        raise Exception("Wrong environment")
-
-    rsu_env._sample_exponential_value(q_value)
-
-    # Go through each element in the newly populated headway times
-    # and make sure that they are correct. But since we are sampling
-    # from a probability distribution we can not get the exact value
-    # instead we can only check that the mean squared error between
-    # what we got and what we would get if we sampled again is less
-    # than a certain epsilon threshold.
-    for index, row in rsu_env.df.iterrows():
-        assert math.pow(abs(rsu_env.df.at[index, 'Headway'] - np.random.exponential(q_value)) % headway, 2) < epsilon
-
-
 @pytest.mark.parametrize("next_headway, next_velocity, max_headway, max_velocity, epsilon",
                          [(1, 2, 2, 3.5, 2)])
 def test_next_observation(rsu_env, next_headway, next_velocity, max_headway, max_velocity, epsilon):
@@ -173,18 +111,15 @@ def test_env_reset(rsu_env, next_headway, next_velocity, max_headway, max_veloci
         raise Exception("Wrong environment")
 
     # Reset the RSUEnv gym environment
-    rsu_env.reset()
-
-    # Get the newly set random time step
-    new_time_step = rsu_env.current_step
+    obs = rsu_env.reset()
 
     # Check that environment is resetting next headway properly
-    assert math.pow(abs(rsu_env.df.loc[new_time_step, 'Headway']
-                        - next_headway), 2)
+    for index in range(4):
+        assert math.pow(abs(obs[index] - round(abs(np.random.normal(1.5, 0.1)), 2)), 2) <= epsilon
 
     # Check that environment is resetting next velocity properly
-    assert math.pow(abs(rsu_env.df.loc[new_time_step, 'Velocity']
-                        - next_velocity), 2)
+    for index in range(4,8):
+        assert math.pow(abs(obs[index] - round(abs(np.random.normal(1.75, 0.1)), 2)), 2) <= epsilon
 
 
 @pytest.mark.parametrize("action, epsilon",
@@ -210,8 +145,8 @@ def test_take_action(rsu_env, action, epsilon):
     # Apply action array to instantiated RSUEnv
     rsu_env._take_action(action)
 
-    for index, row in rsu_env.df.iterrows():
-        assert math.pow(abs(rsu_env.df.at[index, 'Velocity'] - (2 + action[index])), 2) <= epsilon
+    for index, _ in rsu_env.df.iterrows():
+        assert math.pow(abs(rsu_env.df.at[index, 'Velocity'] - (3.5 + action[index])), 2) <= epsilon
 
 
 @pytest.mark.parametrize("obs_vel, reward, done, epsilon",

@@ -24,8 +24,10 @@ EPSILON_THRESHOLD = math.pow(10, -5)  # threshold used to check if reward is adv
 CIRCUIT_LENGTH = 1500  # length of the traffic circuit environment
 FLOW_WINDOW_CONSTANT = 15  # flow volume within the window frame of 15 minutes
 TRAFFIC_FLOW_THRESHOLD = 1.4  # Flow Q-value threshold (reported commonly in traffic literature)
-MEAN_VELOCITY = 1.00  # value to center normal distribution velocity sampling
+MEAN_VELOCITY = 1.75  # value to center normal distribution velocity sampling
+MEAN_HEADWAY = 1.5  # value to center normal distribution headway sampling
 SIGMA = 0.1  # standard deviation for normal distribution velocity sampling
+BETA = 0.99  # constant to be used in the delay modifier calculation
 
 
 class RSUEnv(gym.Env):
@@ -76,6 +78,11 @@ class RSUEnv(gym.Env):
                 method we give it a random value to point to within
                 the data frame because this gives our agent a more
                 unique experience from the dame data set.
+
+            self.first_run: type(bool)
+                Use this parameter to see if we are running the environment
+                for the first time or not in order to decide whether the agent
+                samples randomly or submit a list of actions.
         """
         super(RSUEnv, self).__init__()
 
@@ -99,6 +106,9 @@ class RSUEnv(gym.Env):
 
         # Setting current time step to zero
         self.current_step = 0
+
+        # Specify that this is the first time we run the environment
+        self.first_run = True
 
         # Initializing random seed of RSU environment
         self._seed()
@@ -136,7 +146,11 @@ class RSUEnv(gym.Env):
                     Diagnostic information useful for debugging.
         """
         # Take a single step in time and enforce its effects on the RSU environment
-        if self.current_step is 0:
+        if self.first_run:
+            # It is no longer the first time we run a step
+            # in the RSU environment
+            self.first_run = False
+
             # If the current time step is still zero then
             # think about just running a randomly sampled
             # list of actions
@@ -148,11 +162,11 @@ class RSUEnv(gym.Env):
             # Take environment effect of action list
             self._take_action(action)
 
-        # Advance the current step of the environment by 1 (modulo the length of the dataframe)
-        self.current_step = (self.current_step + 1) % len(self.df['Headway'].values)
+        # Advance the current step of the environment by 1
+        self.current_step += 1
 
         # Calculate a delay modifier to use later to encourage exploration by the agent
-        delay_modifier = (self.current_step / len(self.df['Headway'].values))
+        delay_modifier = math.pow(BETA, self.current_step)
 
         desired_velocity = np.asarray([])
         for _ in range(len(self.df['Velocity'].values)):
@@ -183,6 +197,10 @@ class RSUEnv(gym.Env):
         #       - h_i(t) is the headway time observed by vehicle "i" at time "t"
         #       - N is the total number of vehicles in the environment
 
+        for index, _ in self.df.iterrows():
+            if self.df.loc[index, 'Headway'] < 1:
+                return self._next_observation(), -10, False, {}
+
         self.current_reward = abs(DESIRED_VELOCITY)\
             - abs((np.sum(np.subtract(desired_dataframe['V_desired'].values,
                                       self.df['Velocity'].values))))/(len(self.df['Velocity'].values))\
@@ -211,10 +229,32 @@ class RSUEnv(gym.Env):
             Reset function that sets the environment back
             to it's initial settings.
         """
-        # Set the current step to a random point within frame
-        self.current_step = random.randint(0, len(self.df.loc[:, 'Headway'].values))\
-            % (len(self.df.loc[:, 'Headway'].values))
+        # Set the current step to 0
+        self.current_step = 0
 
+        velocities = np.asarray([])
+        for _ in range(4):
+            # Generate 10,000 samples of velocities from a normal distribution
+            # centered around the mean velocity with standard deviation sigma.
+            velocities = np.append(velocities, round(abs(np.random.normal(MEAN_VELOCITY, SIGMA)), 2))
+
+        headways = np.asarray([])
+        for _ in range(4):
+            # Generate 10,000 samples of headways from a normal distribution
+            # centered around the mean headway with standard deviation sigma.
+            headways = np.append(headways, round(abs(np.random.normal(MEAN_HEADWAY, SIGMA)), 2))
+
+        # Two dimentional dataframe consisting of the sampled headways and velocities
+        training_dataframe = pd.DataFrame({'Headway': headways, 'Velocity': velocities})
+
+        # Export the dataframe containing all the training data
+        # as a CSV file located at PATH_TO_CSV
+        try:
+            export_csv = training_dataframe.to_csv(PATH_TO_DATA_FRAME)
+        except FileNotFoundError:
+            export_csv = training_dataframe.to_csv(DIRECT_PATH_TO_DATA_FRAME)
+
+        # Return a new observation from the RSU environment
         obs = self._next_observation()
 
         return obs
@@ -280,11 +320,11 @@ class RSUEnv(gym.Env):
         o = np.asarray([])
         for index, _ in self.df.iterrows():
             # Appending all the headway times for the next time step
-            o = np.append(o, self.df.loc[index, 'Headway'])  # / MAX_HEADWAY_TIME)
+            o = np.append(o, self.df.loc[index, 'Headway'])
 
         for index, _ in self.df.iterrows():
             # Appending all the velocity values of the next time step
-            o = np.append(o, self.df.loc[index, 'Velocity'])  # / MAX_VELOCITY_VALUE)
+            o = np.append(o, self.df.loc[index, 'Velocity'])
 
         # Converting the numpy array to type list
         obs = o.tolist()
@@ -323,65 +363,44 @@ class RSUEnv(gym.Env):
                             f" Here is that action: {action}")
         else:
             for index, row in self.df.iterrows():
-                self.df.loc[index, 'Velocity'] += action[index]
-                if self.df.loc[index, 'Velocity'] <= 0:
-                    self.df.loc[index, 'Velocity'] = round(abs(np.random.normal(MEAN_VELOCITY, SIGMA)), 2)
+                self.df.loc[index, 'Velocity'] = (self.df.loc[index, 'Velocity'] + action[index])\
+                                                 % MAX_VELOCITY_VALUE
 
-            # Knowing the new set of velocities for the vehicles we now need to compute the
-            # new set of headways since the previously recorded ones are useless. The following
-            # proposed solution methodology is what we follow through with:
-            #     1) Derive the new system average velocity over all the vehicles after applying the action.
-            #     2) Derive the average number of vehicles arriving per hour.
-            #     3) If the value is < 2000 vehicles/hr then the headway time follows a poisson distribution
-            #     4) Else if the value is > 2000 vehicles/hr then the headway times follows an exponential distribution
-            #     5) Sample from the chosen headway distribution and update the headway times.
+                # Adjust the headway time of the current vehicle of focus
+                self._adjust_relative_headway(index, action[index])
 
-            # Average velocity of all vehicles in the traffic circuit environment
-            average_velocity = sum(self.df['Velocity'].values) / len(self.df['Velocity'].values)
-
-            # Total time it would take one vehicle on average to travel the entire traffic ciruict
-            time_to_travel_circuit = CIRCUIT_LENGTH / average_velocity
-
-            # Total amount of traffic volume in the circuit in a 15 minute time frame
-            traffic_volume = TOTAL_SECONDS_OF_INTEREST / time_to_travel_circuit
-
-            # Traffic Q-value flow rate
-            q_flow_value = traffic_volume * FLOW_WINDOW_CONSTANT
-
-            if q_flow_value < TRAFFIC_FLOW_THRESHOLD:
-                # poisson distribution
-                self._sample_poisson_value(q_flow_value)
-            elif q_flow_value >= TRAFFIC_FLOW_THRESHOLD:
-                # exponential distribution
-                self._sample_exponential_value(q_flow_value)
-
-    def _sample_poisson_value(self, q):
+    def _adjust_relative_headway(self, index, v_delta):
         """
-            Draws samples from a Poisson Distribution
-            and updates the previously recorded headway times
-            accordingly.
+            Utility function that proportionally decreases
+            the headway value of a vehicle of focus.
+
+            If the submitted action requires that a vehicle speeds up
+            then it would be logical that the headway time decreases
+            assuming the vehicle in front of it does not change speed.
+            However, if the submitted action requires that a vehicle
+            slows down then it would be logical that the headway time
+            increases assuming the vehicle in front of it does not
+            change speed.
 
             Parameter(s):
             -------------
-            q: type(Float)
-                Flow value
+            index: type(int)
+                Index of the vehicle of focus in the dataframe.
+            v_delta: type(float)
+                Speed change instructed by the RSU.
         """
-        for index, _ in self.df.iterrows():
-            self.df.loc[index, 'Headway'] = abs(np.random.poisson(q) % MAX_HEADWAY_TIME)
-
-    def _sample_exponential_value(self, q):
-        """
-            Draws samples from an Exponential Distribution
-            centered around "q" and updates the previously
-            recorded headway times accordingly.
-
-            Parameter(s):
-            -------------
-            q: type(Float)
-                Flow value
-        """
-        for index, _ in self.df.iterrows():
-            self.df.loc[index, 'Headway'] = abs(np.random.exponential(q) % MAX_HEADWAY_TIME)
+        if v_delta > 0:
+            # RSU is telling the vehicle of focus to speed up
+            # therefore the headway time must decrease
+            self.df.loc[index, 'Headway'] = (self.df.loc[index, 'Headway'] - (v_delta*(BETA / 2.0))) % MAX_HEADWAY_TIME
+        elif v_delta < 0:
+            # RSU is telling the vehicle of focus to slow down
+            # therefore the headway time must increase
+            self.df.loc[index, 'Headway'] = (self.df.loc[index, 'Headway'] + (v_delta*(BETA / 2.0))) % MAX_HEADWAY_TIME
+        else:
+            # RSU is telling the vehicle of focus to maintain speed
+            # therefore the headway time must stay the same
+            pass
 
     def _action_to_list(self, action):
         """
