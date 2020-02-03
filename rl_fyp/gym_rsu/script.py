@@ -1,4 +1,5 @@
 import sys
+from datetime import datetime
 
 import gym
 import gym_rsu
@@ -22,14 +23,13 @@ elif 'ppo' == sys.argv[1]:
                  env,
                  verbose=1,
                  ent_coef=0.0,
-                 lam=0.95,
-                 gamma=0.99,
-                 noptepochs=10,
-                 learning_rate=0.0003,
-                 cliprange=0.2)
+                 lam=0.94,
+                 gamma=0.99)
     # Use this name to save the model
     # parameters after training is done
-    save_name = 'rsu_agents/ppo_rsu'
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    save_name = f'rsu_agents/ppo_rsu_{current_time}'
 elif 'td3' == sys.argv[1]:
     # Use the stable-baseline TD3 policy to train
     model = TD3('MlpPolicy', env, verbose=1, random_exploration=0)
@@ -42,7 +42,7 @@ elif 'hiro' == sys.argv[1]:
 
 # Train the agent
 print("Beginning model training")
-model.learn(total_timesteps=int(2e5))
+model.learn(total_timesteps=int(2e6))
 print("** Done training the model **")
 
 # Save the agent
@@ -67,10 +67,11 @@ elif 'hiro' == sys.argv[1]:
 
 # Evaluate the agent
 mean_reward, n_steps = evaluate_policy(model, env, n_eval_episodes=10)
+print(f'Mean Reward = {mean_reward}')
 
 # Enjoy the trained agent
 obs = env.reset()
-for _ in range(1000):
+for _ in range(10):
     action, _states = model.predict(obs)
     obs, reward, dones, info = env.step(action)
     env.render()

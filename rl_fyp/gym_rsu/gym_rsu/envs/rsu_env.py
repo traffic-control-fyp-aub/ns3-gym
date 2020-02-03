@@ -168,13 +168,16 @@ class RSUEnv(gym.Env):
         # Before taking a new step in time check if there are any low headway
         # values. This indicates that the current vehicle is traveling too close
         # to the leading vehicle and this is too dangerous. Automatically penalize
-        # the agent with a reward value of -10
+        # the agent with a reward value of -10.
+        #
+        # However we do not want the vehicles to go too slow either. Therefore,
+        # we also check the velocity values and see if they are below a threshold
+        # and penalize the agent with a reward value of -10 as well.
         for index, _ in self.df.iterrows():
             if self.df.loc[index, 'Headway'] < 1:
                 return self._next_observation(), -10, False, {}
-
-        # Calculate a delay modifier to use later to encourage exploration by the agent
-        delay_modifier = math.pow(BETA, self.current_step)
+            elif self.df.loc[index, 'Velocity'] <= 0.5:
+                return self._next_observation(), -10, False, {}
 
         desired_velocity = np.asarray([])
         for _ in range(len(self.df['Velocity'].values)):
@@ -212,7 +215,7 @@ class RSUEnv(gym.Env):
         #   Multiply by a delay modifier in order to encourage exploration in the long
         #   term and not just settle with a local maximum (i.e.: prefer long term to
         #   short term planning)
-        reward = self.current_reward * delay_modifier
+        reward = self.current_reward * BETA
 
         if self.current_step % len(self.df['Headway'].values) == 0:
             self.old_reward = self.current_reward
@@ -365,7 +368,7 @@ class RSUEnv(gym.Env):
             raise Exception(f"Size of action list does not match number of vehicles: {len(action)}."
                             f" Here is that action: {action}")
         else:
-            for index, row in self.df.iterrows():
+            for index, _ in self.df.iterrows():
                 self.df.loc[index, 'Velocity'] = (self.df.loc[index, 'Velocity'] + action[index])\
                                                  % MAX_VELOCITY_VALUE
 
@@ -399,7 +402,7 @@ class RSUEnv(gym.Env):
         elif v_delta < 0:
             # RSU is telling the vehicle of focus to slow down
             # therefore the headway time must increase
-            self.df.loc[index, 'Headway'] = (self.df.loc[index, 'Headway'] + (v_delta*SIGMA)) % MAX_HEADWAY_TIME
+            self.df.loc[index, 'Headway'] = (self.df.loc[index, 'Headway'] + abs(v_delta*SIGMA)) % MAX_HEADWAY_TIME
         else:
             # RSU is telling the vehicle of focus to maintain speed
             # therefore the headway time must stay the same
@@ -416,6 +419,13 @@ class RSUEnv(gym.Env):
                 Action vector of length NUMBER_OF_VEHICLES
                 to be applied on the RSUEnv.
         """
+        # Converting the values to be between -1 and 1
+        for index in range(len(action)):
+            temp = abs(action[index]) % 1
+            if action[index] < 0:
+                action[index] = -temp
+            else:
+                action[index] = temp
         if isinstance(action, np.ndarray):
             return action.tolist()
         if not isinstance(action, list):
