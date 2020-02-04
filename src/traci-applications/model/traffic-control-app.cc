@@ -97,6 +97,7 @@ namespace ns3
   {
     NS_LOG_FUNCTION(this);
     tx_socket = 0;
+    rx_socket = 0;
   }
 
   void
@@ -123,7 +124,7 @@ namespace ns3
         tx_socket->Connect (remote);
 
         ScheduleTransmit (Seconds (0.0));
-        //Simulator::Schedule (Seconds (5.0), &RsuSpeedControl::ChangeSpeed, this);
+        Simulator::Schedule (Seconds (5.0), &RsuSpeedControl::ChangeSpeed, this);
       }
             TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
     rx_socket = Socket::CreateSocket (GetNode (), tid);
@@ -149,6 +150,13 @@ namespace ns3
       {
         tx_socket->Close ();
         tx_socket->SetRecvCallback (MakeNullCallback<void, Ptr<Socket> > ());
+      }
+	
+	if (rx_socket != 0)
+      {
+        rx_socket->Close ();
+        rx_socket->SetRecvCallback (MakeNullCallback<void, Ptr<Socket> > ());
+        rx_socket = 0;
       }
 
     Simulator::Cancel (m_sendEvent);
@@ -234,6 +242,7 @@ void
   {
     NS_LOG_FUNCTION(this);
     m_sendEvent = EventId ();
+	tx_socket = 0;
     rx_socket = 0;
     m_port = 0;
     m_client = nullptr;
@@ -243,6 +252,7 @@ void
   VehicleSpeedControl::~VehicleSpeedControl ()
   {
     NS_LOG_FUNCTION(this);
+    tx_socket = 0;
     rx_socket = 0;
   }
 
@@ -284,7 +294,13 @@ void
   VehicleSpeedControl::StopApplication ()
   {
     NS_LOG_FUNCTION(this);
-
+	
+	if (tx_socket != 0)
+      {
+        tx_socket->Close ();
+        tx_socket->SetRecvCallback (MakeNullCallback<void, Ptr<Socket> > ());
+      }
+	
     if (rx_socket != 0)
       {
         rx_socket->Close ();
