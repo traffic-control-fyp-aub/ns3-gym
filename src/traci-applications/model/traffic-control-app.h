@@ -112,6 +112,7 @@ private:
   Ptr<Socket> tx_socket; //!< Socket
   Ptr<TraciClient> m_client;
   double last_velocity;
+  double last_headway;
 };
 
 } // namespace ns3

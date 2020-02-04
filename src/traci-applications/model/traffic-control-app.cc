@@ -340,7 +340,6 @@ void
 
     if (velocity != last_velocity)
       {
-        //NS_LOG_INFO("Set speed of: " << m_client->GetVehicleId(this->GetNode()) << " [" << ipAddr << "] to " << velocity << "m/s");
         m_client->TraCIAPI::vehicle.setSpeed (m_client->GetVehicleId (this->GetNode ()), velocity);
         last_velocity = velocity;
       }
@@ -351,6 +350,9 @@ void
   {
     NS_LOG_FUNCTION(this << tx_socket);
 
+	//Get Headway Just before sending
+	last_headway = m_client->TraCIAPI::vehicle.getLeader (m_client->GetVehicleId(this->GetNode()),0).second;
+	
     std::ostringstream msg;
     msg << std::to_string (last_velocity) << '\0';
     Ptr<Packet> packet = Create<Packet> ((uint8_t*) msg.str ().c_str (), msg.str ().length ());
@@ -360,9 +362,14 @@ void
     Ipv4Address ipAddr = iaddr.GetLocal ();
 
    tx_socket->Send (packet);
-    NS_LOG_INFO("***** Packet sent from Vehicle at time" << Simulator::Now().GetSeconds()
+    NS_LOG_INFO("***** Packet sent from Vehicle at time " << Simulator::Now().GetSeconds()
                 << "s - [ip:" << ipAddr << "]"
-                << "[tx vel:" << last_velocity << "m/s]");
+                << "[tx vel:" << last_velocity << "m/s]"
+//				<< "[tx pos:" << m_client->TraCIAPI::vehicle.getPosition(m_client->GetVehicleId(this->GetNode())).x
+//				<< ", "		  << m_client->TraCIAPI::vehicle.getPosition(m_client->GetVehicleId(this->GetNode())).y
+				<< "]"
+				<< "[tx headway:" << last_headway
+				<< "]");
 
     ScheduleTransmit (m_interval);
   }

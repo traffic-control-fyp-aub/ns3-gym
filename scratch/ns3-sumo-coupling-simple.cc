@@ -32,7 +32,7 @@ main (int argc, char *argv[])
     }
 
   /*** 1. Create node pool and counter; large enough to cover all sumo vehicles ***/
-  ns3::Time simulationTime (ns3::Seconds(500));
+  ns3::Time simulationTime (ns3::Seconds(50));
   NodeContainer nodePool;
 /** scenario1 **/
   //nodePool.Create (32);
