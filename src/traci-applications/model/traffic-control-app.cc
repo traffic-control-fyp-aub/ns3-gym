@@ -58,7 +58,7 @@ namespace ns3
                    MakeUintegerChecker<uint16_t> ())
     .AddAttribute ("Interval",
                    "The time to wait between packets",
-                   TimeValue (Seconds (1.0)),
+                   TimeValue (Seconds (5.0)),
                    MakeTimeAccessor (&RsuSpeedControl::m_interval),
                    MakeTimeChecker ())
    .AddAttribute ("MaxPackets",
@@ -123,7 +123,7 @@ namespace ns3
         tx_socket->Connect (remote);
 
         ScheduleTransmit (Seconds (0.0));
-        Simulator::Schedule (Seconds (0.5), &RsuSpeedControl::ChangeSpeed, this);
+        //Simulator::Schedule (Seconds (5.0), &RsuSpeedControl::ChangeSpeed, this);
       }
             TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
     rx_socket = Socket::CreateSocket (GetNode (), tid);
@@ -179,7 +179,7 @@ namespace ns3
   RsuSpeedControl::ChangeSpeed ()
   {
     m_velocity = rand () % 60; // between 0 and 60 m/s
-    Simulator::Schedule (Seconds (0.5), &RsuSpeedControl::ChangeSpeed, this);
+    Simulator::Schedule (Seconds (5.0), &RsuSpeedControl::ChangeSpeed, this);
   }
 
 void
@@ -219,7 +219,7 @@ void
             MakeUintegerChecker<uint16_t> ())
         .AddAttribute ("Interval",
                    "The time to wait between packets",
-                   TimeValue (Seconds (2.0)),
+                   TimeValue (Seconds (5.0)),
                    MakeTimeAccessor (&VehicleSpeedControl::m_interval),
                    MakeTimeChecker ())
         .AddAttribute (
@@ -276,7 +276,7 @@ void
         tx_socket->Connect (remote);
 
         ScheduleTransmit (Seconds (0.0));
-        Simulator::Schedule (Seconds (0.5), &VehicleSpeedControl::Send, this);
+        Simulator::Schedule (Seconds (5.0), &VehicleSpeedControl::Send, this);
       }
   }
 
