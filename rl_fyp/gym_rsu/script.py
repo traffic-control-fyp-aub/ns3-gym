@@ -1,5 +1,4 @@
 import sys
-from datetime import datetime
 
 import gym
 import gym_rsu
@@ -25,12 +24,10 @@ elif 'ppo' == sys.argv[1]:
                  ent_coef=0.0,
                  lam=0.94,
                  gamma=0.99,
-                 tensorboard_log='rsu_agents/ppo_2e5_rsu_tensorboard/')
+                 tensorboard_log='rsu_agents/ppo_2e6_rsu_tensorboard/')
     # Use this name to save the model
     # parameters after training is done
-    now = datetime.now()
-    current_time = now.strftime("%H:%M:%S")
-    save_name = f'rsu_agents/ppo_rsu_{current_time}'
+    save_name = 'rsu_agents/ppo_rsu_2e6'
 elif 'td3' == sys.argv[1]:
     # Use the stable-baseline TD3 policy to train
     model = TD3('MlpPolicy', env, verbose=1, random_exploration=0)
@@ -43,7 +40,7 @@ elif 'hiro' == sys.argv[1]:
 
 # Train the agent
 print("Beginning model training")
-model.learn(total_timesteps=int(2e5))
+model.learn(total_timesteps=int(2e6))
 print("** Done training the model **")
 
 # Save the agent
