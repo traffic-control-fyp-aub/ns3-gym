@@ -165,20 +165,6 @@ class RSUEnv(gym.Env):
         # Advance the current step of the environment by 1
         self.current_step += 1
 
-        # Before taking a new step in time check if there are any low headway
-        # values. This indicates that the current vehicle is traveling too close
-        # to the leading vehicle and this is too dangerous. Automatically penalize
-        # the agent with a reward value of -10.
-        #
-        # However we do not want the vehicles to go too slow either. Therefore,
-        # we also check the velocity values and see if they are below a threshold
-        # and penalize the agent with a reward value of -10 as well.
-        for index, _ in self.df.iterrows():
-            if self.df.loc[index, 'Headway'] < 1:
-                return self._next_observation(), -10, False, {}
-            elif self.df.loc[index, 'Velocity'] <= 0.5:
-                return self._next_observation(), -10, False, {}
-
         desired_velocity = np.asarray([])
         for _ in range(len(self.df['Velocity'].values)):
             desired_velocity = np.append(desired_velocity, DESIRED_VELOCITY)
@@ -190,8 +176,8 @@ class RSUEnv(gym.Env):
         desired_dataframe = pd.DataFrame({'H_desired': desired_headway, 'V_desired': desired_velocity})
 
         temp = []
-        for jj in range(len(self.df['Headway'].values)):
-            temp.append(max(desired_dataframe.loc[jj, 'H_desired'] - self.df['Headway'].loc[jj], 0))
+        for index, _ in self.df.iterrows():
+            temp.append(max(desired_dataframe.loc[index, 'H_desired'] - self.df.loc[index, 'Headway'], 0))
 
         list_of_maximums = np.asarray(temp)
 
@@ -207,7 +193,7 @@ class RSUEnv(gym.Env):
         #       - v_i(t) is the velocity of vehicle "i" at time "t"
         #       - h_i(t) is the headway time observed by vehicle "i" at time "t"
         #       - N is the total number of vehicles in the environment
-        self.current_reward = abs(DESIRED_VELOCITY)\
+        self.current_reward = abs(MAX_VELOCITY_VALUE)\
             - abs((np.sum(np.subtract(desired_dataframe['V_desired'].values,
                                       self.df['Velocity'].values))))/(len(self.df['Velocity'].values))\
             - ALPHA*(sum(list_of_maximums))
@@ -398,6 +384,7 @@ class RSUEnv(gym.Env):
         if v_delta > 0:
             # RSU is telling the vehicle of focus to speed up
             # therefore the headway time must decrease
+            # TODO - maybe make these values absolute?
             self.df.loc[index, 'Headway'] = (self.df.loc[index, 'Headway'] - (v_delta*SIGMA)) % MAX_HEADWAY_TIME
         elif v_delta < 0:
             # RSU is telling the vehicle of focus to slow down
@@ -423,9 +410,9 @@ class RSUEnv(gym.Env):
         for index in range(len(action)):
             temp = abs(action[index]) % 1
             if action[index] < 0:
-                action[index] = -temp
+                action[index] = round(-temp, 2)
             else:
-                action[index] = temp
+                action[index] = round(temp, 2)
         if isinstance(action, np.ndarray):
             return action.tolist()
         if not isinstance(action, list):

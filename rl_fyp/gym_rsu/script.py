@@ -24,7 +24,8 @@ elif 'ppo' == sys.argv[1]:
                  verbose=1,
                  ent_coef=0.0,
                  lam=0.94,
-                 gamma=0.99)
+                 gamma=0.99,
+                 tensorboard_log='rsu_agents/ppo_2e5_rsu_tensorboard/')
     # Use this name to save the model
     # parameters after training is done
     now = datetime.now()
@@ -42,7 +43,7 @@ elif 'hiro' == sys.argv[1]:
 
 # Train the agent
 print("Beginning model training")
-model.learn(total_timesteps=int(2e6))
+model.learn(total_timesteps=int(2e5))
 print("** Done training the model **")
 
 # Save the agent
@@ -67,11 +68,11 @@ elif 'hiro' == sys.argv[1]:
 
 # Evaluate the agent
 mean_reward, n_steps = evaluate_policy(model, env, n_eval_episodes=10)
-print(f'Mean Reward = {mean_reward}')
+print(f'Mean Reward = {round(mean_reward, 4)}')
 
 # Enjoy the trained agent
 obs = env.reset()
-for _ in range(10):
+for _ in range(3):
     action, _states = model.predict(obs)
     obs, reward, dones, info = env.step(action)
     env.render()
