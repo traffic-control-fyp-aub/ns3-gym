@@ -31,6 +31,8 @@
 #include "ns3/uinteger.h"
 #include <string>
 #include <stdlib.h>
+#include <boost/algorithm/string/classification.hpp> // Include boost::for is_any_of
+#include <boost/algorithm/string/split.hpp> // Include for boost::split
 
 #include "ns3/pointer.h"
 #include "ns3/trace-source-accessor.h"
@@ -39,6 +41,12 @@
 
 namespace ns3
 {
+	std::vector<std::string> getPacketData(const std::string& s, const std::string& token) {
+		
+		std::vector<std::string> words;
+		boost::split(words, s, boost::is_any_of(token), boost::token_compress_on);
+		return words;
+	}
 
   NS_LOG_COMPONENT_DEFINE("TrafficControlApplication");
 
@@ -168,7 +176,7 @@ namespace ns3
     NS_LOG_FUNCTION(this << tx_socket);
 
     std::ostringstream msg;
-    msg << std::to_string (m_velocity) << '\0';
+    msg << "0*" << std::to_string (m_velocity) << '\0';
     Ptr<Packet> packet = Create<Packet> ((uint8_t*) msg.str ().c_str (), msg.str ().length ());
 
     Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
@@ -200,16 +208,22 @@ void
     uint8_t *buffer = new uint8_t[packet->GetSize ()];
     packet->CopyData (buffer, packet->GetSize ());
     std::string s = std::string ((char*) buffer);
-    double velocity = (double) std::stoi (s);
+	std::vector<std::string> data = getPacketData (s, "*");
+	
+	if (data[0]!="1"){return;}
+	
+    double velocity = (double) std::stoi (data[1]);
+	double headway = (double) std::stoi (data[2]);
 
     Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
     Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
     Ipv4Address ipAddr = iaddr.GetLocal ();
 
-    NS_LOG_INFO("##### Packet received from Vehicle - "
-        << "[id:" << m_client->GetVehicleId(this->GetNode()) << "]"
-        << "[ip:" << ipAddr << "]"
-        << "[rx vel:" << velocity << "m/s]");
+    NS_LOG_INFO("##### Packet received from Vehicle at time " << Simulator::Now().GetSeconds()
+//        << "[id:" << m_client->GetVehicleId(this->GetNode()) << "]"
+        << "s -[ip:" << ipAddr << "]"
+        << "[rx vel:" << velocity << "m/s]"
+		<< "[rx headway:" << headway << "m]");
   }
 
   TypeId
@@ -326,14 +340,20 @@ void
     uint8_t *buffer = new uint8_t[packet->GetSize ()];
     packet->CopyData (buffer, packet->GetSize ());
     std::string s = std::string ((char*) buffer);
-    double velocity = (double) std::stoi (s);
+	std::vector<std::string> data = getPacketData (s, "*");
+
+	if (data[0]!="0"){
+		NS_LOG_INFO("Dumping data from vehicle");
+	}
+	
+    double velocity = (double) std::stoi (data[1]);
 
     Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
     Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
     Ipv4Address ipAddr = iaddr.GetLocal ();
 
-    NS_LOG_INFO("***** Packet received from RSU- "
-        << "[id:" << m_client->GetVehicleId(this->GetNode()) << "]"
+    NS_LOG_INFO("***** Packet received from RSU at time " << Simulator::Now().GetSeconds()
+        << "s - [id:" << m_client->GetVehicleId(this->GetNode()) << "]"
         << "[ip:" << ipAddr << "]"
         << "[vel:" << m_client->TraCIAPI::vehicle.getSpeed(m_client->GetVehicleId(this->GetNode())) << "m/s]"
         << "[rx vel:" << velocity << "m/s]");
@@ -354,7 +374,7 @@ void
 	last_headway = m_client->TraCIAPI::vehicle.getLeader (m_client->GetVehicleId(this->GetNode()),0).second;
 	
     std::ostringstream msg;
-    msg << std::to_string (last_velocity) << '\0';
+    msg << "1*" <<std::to_string (last_velocity) << "*" << std::to_string (last_headway) <<'\0';
     Ptr<Packet> packet = Create<Packet> ((uint8_t*) msg.str ().c_str (), msg.str ().length ());
 
     Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
@@ -380,6 +400,5 @@ void
     NS_LOG_FUNCTION(this << dt);
     m_sendEvent = Simulator::Schedule (dt, &VehicleSpeedControl::Send, this);
   }
-
 
 } // Namespace ns3
