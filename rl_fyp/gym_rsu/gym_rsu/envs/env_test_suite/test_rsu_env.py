@@ -17,7 +17,6 @@ def rsu_env():
     """
         Test fixture that creates a default RSUEnv
         object every time it is called.
-
         Return(s):
         ----------
             Returns a blank slate RSU Environment
@@ -37,7 +36,6 @@ def rsu_env():
 def test_env_init(rsu_env, obs_space, action_space, reward):
     """
         Test that the RSUEnv is initialized properly.
-
         Parameter(s):
         -------------
         rsu_env: type(gym.Env)
@@ -71,7 +69,6 @@ def test_next_observation(rsu_env, next_headway, next_velocity, max_headway, max
     """
         Test the next observation
         utility function in the RSUEnv
-
         Parameter(s):
         -------------
         rsu_env: type(gym.Env)
@@ -99,7 +96,6 @@ def test_env_reset(rsu_env, next_headway, next_velocity, max_headway, max_veloci
     """
         Test the environmental reset function
         of the RSUEnv.
-
         Parameter(s):
         -------------
         rsu_env: type(gym.Env)
@@ -128,7 +124,6 @@ def test_take_action(rsu_env, action, epsilon):
     """
         Test the take action utility function
         in the RSUEnv.
-
         Parameter(s):
         -------------
         rsu_env: type(gym.Env)
@@ -157,7 +152,6 @@ def test_take_action(rsu_env, action, epsilon):
 def test_step_func(rsu_env, obs_vel, reward, done, epsilon):
     """
         Test the step function in the RSUEnv.
-
         Parameter(s):
         -------------
         rsu_env: type(gym.Env)

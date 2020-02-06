@@ -41,7 +41,6 @@ class RSUEnv(gym.Env):
         """
             Initialization constructor for the
             custom environment.
-
             Attributes:
             -----------
             self.action_space: type(gym.space.Box)
@@ -49,7 +48,6 @@ class RSUEnv(gym.Env):
                 environment. Specifically, it is the normalized
                 set of continuous numbers between -1 and +1 where
                 {-1 = complete deceleration, +1 = complete acceleration}
-
             self.observation_space: type(gym.space.Box)
                 This is the observation space allowable in our
                 environment. Specifically, it is the set of
@@ -57,28 +55,23 @@ class RSUEnv(gym.Env):
                 by the vehicles. The following values are observed:
                     - Headway Time in seconds: [0, 2]
                     - Vehicle Velocity in m/s: [0, 3.5]
-
             self.current_reward: type(Float)
                 This is the cumulative reward range allowed during
                 an episode of interaction between the agent
                 and the gym environment.
-
             self.old_reward: type(Float)
                 This is the reward that was observed 10 time steps ago
                 in the environment. It is used in the step function to
                 tell if there is any advancement in the training and
                 to determine whether or not to end the training episode.
-
             self.df: type(dataframe)
                 Dataframe that contains the information
                 to use while training on this environment.
-
             self.current_step: type(Int)
                 Only used in the reset method. Within the reset
                 method we give it a random value to point to within
                 the data frame because this gives our agent a more
                 unique experience from the dame data set.
-
             self.first_run: type(bool)
                 Use this parameter to see if we are running the environment
                 for the first time or not in order to decide whether the agent
@@ -126,13 +119,11 @@ class RSUEnv(gym.Env):
     def step(self, action=None):
         """
             Step function to be taken on the environment.
-
             Parameter(s):
             -------------
             action: type(ndarray || list || object)
                     The action to be taken by the agent that
                     will affect the state of the environment.
-
             Return(s):
             ----------
             obs: Object
@@ -255,14 +246,12 @@ class RSUEnv(gym.Env):
         """
             Function that renders the environment to the
             user.
-
             *Note:
             ------
             It is up to the developer to choose their own
             definition of the render function. It is not
             necessary that the function output some visual
             graphics to the screen.
-
             Here we chose to print the velocities of all the vehicles
             at each time step using the BeautifulTable package.
         """
@@ -284,7 +273,6 @@ class RSUEnv(gym.Env):
         """
             Utility function that helps with setting
             the seed for random sampling.
-
             Parameter(s):
             -------------
             seed: type(Float)
@@ -297,7 +285,6 @@ class RSUEnv(gym.Env):
         """
             Helper function that returns the next
             observation in the environment.
-
             Return(s):
             ----------
             obs: type(list)
@@ -327,7 +314,6 @@ class RSUEnv(gym.Env):
         """
             Take the action provided by the agent/model
             and physically perform it on the environment.
-
             Specifically what happens is that based on the
             received action the RSU then modifies the following
             time step's velocities. These future time step velocity
@@ -335,13 +321,11 @@ class RSUEnv(gym.Env):
             data frame specified within the RSU environment.
             This can be viewed as the equivalent of training from
             scratch without any previously recorded data.
-
             * Note:
             -------
             This is not to be confused with the action function within the
             agent that is responsible for actually taking the decision of speeding
             up or slowing down and by a certain amount.
-
             Parameter(s):
             -------------
             action: type(Numpy Array(dtype=Float))
@@ -365,7 +349,6 @@ class RSUEnv(gym.Env):
         """
             Utility function that proportionally decreases
             the headway value of a vehicle of focus.
-
             If the submitted action requires that a vehicle speeds up
             then it would be logical that the headway time decreases
             assuming the vehicle in front of it does not change speed.
@@ -373,7 +356,6 @@ class RSUEnv(gym.Env):
             slows down then it would be logical that the headway time
             increases assuming the vehicle in front of it does not
             change speed.
-
             Parameter(s):
             -------------
             index: type(int)
@@ -399,7 +381,6 @@ class RSUEnv(gym.Env):
         """
             This function is a utility function that
             converts the action vector into a list.
-
             Parameter(s):
             -------------
             action: type(ndarray || list || Object)
