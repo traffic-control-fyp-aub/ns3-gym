@@ -93,11 +93,6 @@ main (int argc, char *argv[])
 /** scenario3 -training environment  **/
   sumoClient->SetAttribute ("SumoConfigPath", StringValue ("rl_fyp/sumo_files/training_loop/training-loop.sumo.cfg"));
 
- // sumoClient->SetAttribute ("SumoConfigPath", StringValue ("rl_fyp/sumo_files/circle-simple/circle.sumo.cfg"));
-
-/** scenario2 **/
-  //sumoClient->SetAttribute ("SumoConfigPath", StringValue ("rl_fyp/sumo_files/sumo-highway-merge/merge-baseline_20191204-1224431575455083.45716.sumo.cfg"));
-
   sumoClient->SetAttribute ("SumoBinaryPath", StringValue (""));    // use system installation of sumo
   sumoClient->SetAttribute ("SynchInterval", TimeValue (Seconds (0.1)));
   sumoClient->SetAttribute ("StartTime", TimeValue (Seconds (0.0)));
