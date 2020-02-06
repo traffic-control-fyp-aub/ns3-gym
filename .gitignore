@@ -3,11 +3,20 @@
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and WebStorm
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
+<<<<<<< HEAD
+# ignore the custom environment registration files
+ns3-gym/rl_fyp/gym_rsu/rl_fyp.gym_rsu
+
+# ignore big tensorboard file
+rl_fyp/gym_rsu/rsu_agents/ppo_2e6_rsu_tensorboard
+rl_fyp/gym_rsu/rsu_agents/ppo_2e5_rsu_tensorboard/
+=======
 rl-fyp/rl-baselines/other-agents/HIRO/envs
 
 # ignore the custom environment registration files
 ns3-gym/rl_fyp/gym_rsu/rl_fyp.gym_rsu
 ns3-gym/rl_fyp/gym_car/rl_fyp.gym_car
+>>>>>>> master
 
 # User-specific stuff
 .idea
@@ -140,3 +149,48 @@ build/
 *.pb.cc
 *_pb2.py
 *_pb3.py
+
+### C++ ###
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+### NetBeans ###
+**/nbproject/private/
+**/nbproject/Makefile-*.mk
+**/nbproject/Package-*.bash
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+rl_fyp/netanim

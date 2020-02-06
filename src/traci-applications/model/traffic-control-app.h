@@ -12,6 +12,8 @@
 
 namespace ns3 {
 
+std::vector<std::string> getPacketData(const std::string& input, const std::string& regex);
+
 class Socket;
 class Packet;
 
@@ -112,7 +114,9 @@ private:
   Ptr<Socket> tx_socket; //!< Socket
   Ptr<TraciClient> m_client;
   double last_velocity;
+  double last_headway;
 };
+
 
 } // namespace ns3
 
