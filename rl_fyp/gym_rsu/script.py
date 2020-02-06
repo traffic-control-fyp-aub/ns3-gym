@@ -71,5 +71,5 @@ print(f'Mean Reward = {round(mean_reward, 4)}')
 obs = env.reset()
 for _ in range(3):
     action, _states = model.predict(obs)
-    obs, reward, dones, info = env.step(action)
+    obs, reward, done, info = env.step(action)
     env.render()
