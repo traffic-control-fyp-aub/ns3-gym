@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Tempe Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include "ns3/log.h"
 #include "ns3/ipv4.h"
@@ -351,7 +351,7 @@ void
     Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
     Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
     Ipv4Address ipAddr = iaddr.GetLocal ();
-
+	
     NS_LOG_INFO("***** Packet received from RSU at time " << Simulator::Now().GetSeconds()
         << "s - [id:" << m_client->GetVehicleId(this->GetNode()) << "]"
         << "[ip:" << ipAddr << "]"
@@ -385,9 +385,6 @@ void
     NS_LOG_INFO("***** Packet sent from Vehicle at time " << Simulator::Now().GetSeconds()
                 << "s - [ip:" << ipAddr << "]"
                 << "[tx vel:" << last_velocity << "m/s]"
-//				<< "[tx pos:" << m_client->TraCIAPI::vehicle.getPosition(m_client->GetVehicleId(this->GetNode())).x
-//				<< ", "		  << m_client->TraCIAPI::vehicle.getPosition(m_client->GetVehicleId(this->GetNode())).y
-				<< "]"
 				<< "[tx headway:" << last_headway
 				<< "]");
 
