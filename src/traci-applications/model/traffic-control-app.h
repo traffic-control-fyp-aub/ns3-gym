@@ -68,6 +68,7 @@ private:
   uint16_t m_velocity; //!< transmitted velocity
   EventId m_sendEvent; //!< Event to send the next packet
   Ptr<TraciClient> m_client;
+  std::map<std::string,double> m_vehicles_data;
 
   /// Callbacks for tracing the packet Tx events
   TracedCallback<Ptr<const Packet> > m_txTrace;

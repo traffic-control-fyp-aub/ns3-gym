@@ -32,7 +32,8 @@
 #include <string>
 #include <stdlib.h>
 #include <boost/algorithm/string/classification.hpp> // Include boost::for is_any_of
-#include <boost/algorithm/string/split.hpp> // Include for boost::split
+#include <boost/algorithm/string/split.hpp>
+#include <bits/stl_map.h> // Include for boost::split
 
 #include "ns3/pointer.h"
 #include "ns3/trace-source-accessor.h"
@@ -195,6 +196,17 @@ namespace ns3
   RsuSpeedControl::ChangeSpeed ()
   {
     m_velocity = rand () % 60; // between 0 and 60 m/s
+	
+	NS_LOG_INFO("####################################################################################");
+	std::map<std::string, double>::iterator it = m_vehicles_data.begin();
+    while(it != m_vehicles_data.end())
+    {
+        NS_LOG_INFO(it->first<<" :: "<<it->second);
+        it++;
+    }
+	
+	NS_LOG_INFO("####################################################################################");
+			
     Simulator::Schedule (Seconds (5.0), &RsuSpeedControl::ChangeSpeed, this);
   }
 
@@ -215,6 +227,14 @@ void
 	std::string receivedID = data[1];
     double velocity = (double) std::stoi (data[2]);
 	double headway = (double) std::stoi (data[3]);
+	
+	// Inserting vehicle data to RSU databse
+	std::map<std::string, double>::iterator it = m_vehicles_data.find(receivedID); 
+	if (it != m_vehicles_data.end()){
+		it->second = velocity;
+	}else {
+			m_vehicles_data.insert(std::make_pair(receivedID, velocity));
+	}
 
     Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
     Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
@@ -224,7 +244,7 @@ void
         << "s - [sender ip:" << ipAddr << "]"
 		<< "[from vehicle:" << receivedID << "]"
         << "[rx vel:" << velocity << "m/s]"
-		<< "[rx headway:" << headway << "m]");
+		<< "[rx headway:" << headway << "]");
   }
 
   TypeId
@@ -372,9 +392,14 @@ void
   VehicleSpeedControl::Send ()
   {
     NS_LOG_FUNCTION(this << tx_socket);
-
-	//Get Headway Just before sending
-	last_headway = m_client->TraCIAPI::vehicle.getLeader (m_client->GetVehicleId(this->GetNode()),0).second;
+	
+	// Get Headway Just before sending 
+	// Headway in seconds  = Headway in meters / velocity
+	if (last_velocity <= 0){
+		last_headway = 0.0;
+	}else{
+		last_headway = m_client->TraCIAPI::vehicle.getLeader (m_client->GetVehicleId(this->GetNode()),0).second / last_velocity;
+	}
 	
     std::ostringstream msg;
     msg << "1*" << m_client->GetVehicleId(this->GetNode()) << "*" << std::to_string (last_velocity) << "*" << std::to_string (last_headway) <<'\0';
@@ -390,8 +415,7 @@ void
 			    << "[sender ip:" << ipAddr << "]"
 				<< "[vehicle id:" << m_client->GetVehicleId(this->GetNode()) << "]"
                 << "[tx vel:" << last_velocity << "m/s]"
-				<< "[tx headway:" << last_headway
-				<< "]");
+				<< "[tx headway:" << last_headway << "s]");
 
     ScheduleTransmit (m_interval);
   }
