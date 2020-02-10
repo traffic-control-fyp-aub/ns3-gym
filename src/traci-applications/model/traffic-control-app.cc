@@ -196,7 +196,7 @@ namespace ns3
 
     tx_socket->Send (packet);
     NS_LOG_INFO("TX ##### RSU->vehicle at time " << Simulator::Now().GetSeconds()
-                << "s - [RSU ip:" << ipAddr << "]");
+                << "s - [RSU ip:" << ipAddr << "]\n");
 
     ScheduleTransmit (m_interval);
   }
@@ -205,7 +205,8 @@ namespace ns3
   RsuSpeedControl::ChangeSpeed ()
   {
 	
-	NS_LOG_INFO("\n####################################################################################");
+	NS_LOG_INFO("\nVehicles Data at RSU with ip: " << this->GetNode ()->GetObject<Ipv4> ()->GetAddress (1, 0).GetLocal () << " \n");
+
 	
 	std::map<std::string, std::pair<double,double>>::iterator it = m_vehicles_data.begin();
     while(it != m_vehicles_data.end())
@@ -216,6 +217,8 @@ namespace ns3
 		(it->second).first = rand () % 60;
         it++;
     }
+	
+	NS_LOG_INFO("\n");
 				
     Simulator::Schedule (Seconds (5.0), &RsuSpeedControl::ChangeSpeed, this);
   }
@@ -255,7 +258,7 @@ void
         << "s - [RSU ip:" << ipAddr << "]"
 		<< "[from vehicle:" << receivedID << "]"
         << "[rx vel:" << velocity << "m/s]"
-		<< "[rx headway:" << headway << "]");
+		<< "[rx headway:" << headway << "]\n");
   }
 
   TypeId
@@ -400,10 +403,10 @@ void
 	
     NS_LOG_INFO("RX ***** RSU->vehicle at time " << Simulator::Now().GetSeconds()
         << "s - "
-        << "[RSU ip:" << ipAddr << "]"
+        << "[vehicle ip:" << ipAddr << "]"
 		<< "[vehicle id:" << m_client->GetVehicleId(this->GetNode()) << "]"
         << "[vel:" << m_client->TraCIAPI::vehicle.getSpeed(m_client->GetVehicleId(this->GetNode())) << "m/s]"
-        << "[rx vel:" << velocity << "m/s]");
+        << "[rx vel:" << velocity << "m/s]\n");
 
     if (velocity != last_velocity)
       {
@@ -439,7 +442,7 @@ void
 			    << "[vehicle ip:" << ipAddr << "]"
 				<< "[vehicle id:" << m_client->GetVehicleId(this->GetNode()) << "]"
                 << "[tx vel:" << last_velocity << "m/s]"
-				<< "[tx headway:" << last_headway << "s]");
+				<< "[tx headway:" << last_headway << "s]\n");
 
     ScheduleTransmit (m_interval);
   }
