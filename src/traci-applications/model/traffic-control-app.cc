@@ -212,16 +212,17 @@ void
 	
 	if (data[0]!="1"){return;}
 	
-    double velocity = (double) std::stoi (data[1]);
-	double headway = (double) std::stoi (data[2]);
+	std::string receivedID = data[1];
+    double velocity = (double) std::stoi (data[2]);
+	double headway = (double) std::stoi (data[3]);
 
     Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
     Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
     Ipv4Address ipAddr = iaddr.GetLocal ();
 
     NS_LOG_INFO("##### Packet received from Vehicle at time " << Simulator::Now().GetSeconds()
-//        << "[id:" << m_client->GetVehicleId(this->GetNode()) << "]"
-        << "s -[ip:" << ipAddr << "]"
+        << "s - [sender ip:" << ipAddr << "]"
+		<< "[from vehicle:" << receivedID << "]"
         << "[rx vel:" << velocity << "m/s]"
 		<< "[rx headway:" << headway << "m]");
   }
@@ -344,6 +345,7 @@ void
 
 	if (data[0]!="0"){
 		NS_LOG_INFO("Dumping data from vehicle");
+		return;
 	}
 	
     double velocity = (double) std::stoi (data[1]);
@@ -353,8 +355,9 @@ void
     Ipv4Address ipAddr = iaddr.GetLocal ();
 	
     NS_LOG_INFO("***** Packet received from RSU at time " << Simulator::Now().GetSeconds()
-        << "s - [id:" << m_client->GetVehicleId(this->GetNode()) << "]"
-        << "[ip:" << ipAddr << "]"
+        << "s - "
+        << "[sender ip:" << ipAddr << "]"
+		<< "[vehicle id:" << m_client->GetVehicleId(this->GetNode()) << "]"
         << "[vel:" << m_client->TraCIAPI::vehicle.getSpeed(m_client->GetVehicleId(this->GetNode())) << "m/s]"
         << "[rx vel:" << velocity << "m/s]");
 
@@ -374,7 +377,7 @@ void
 	last_headway = m_client->TraCIAPI::vehicle.getLeader (m_client->GetVehicleId(this->GetNode()),0).second;
 	
     std::ostringstream msg;
-    msg << "1*" <<std::to_string (last_velocity) << "*" << std::to_string (last_headway) <<'\0';
+    msg << "1*" << m_client->GetVehicleId(this->GetNode()) << "*" << std::to_string (last_velocity) << "*" << std::to_string (last_headway) <<'\0';
     Ptr<Packet> packet = Create<Packet> ((uint8_t*) msg.str ().c_str (), msg.str ().length ());
 
     Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
@@ -383,7 +386,9 @@ void
 
    tx_socket->Send (packet);
     NS_LOG_INFO("***** Packet sent from Vehicle at time " << Simulator::Now().GetSeconds()
-                << "s - [ip:" << ipAddr << "]"
+                << "s - "
+			    << "[sender ip:" << ipAddr << "]"
+				<< "[vehicle id:" << m_client->GetVehicleId(this->GetNode()) << "]"
                 << "[tx vel:" << last_velocity << "m/s]"
 				<< "[tx headway:" << last_headway
 				<< "]");
