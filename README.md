@@ -18,7 +18,16 @@ Continuing to scroll down, you will find the three different subsections that wi
 
 The above command must be run the working directory of ns3-gym.
 
-**The above script does not take care of the entire set up of SUMO. You still have to set the SUMO paths in your terminal.**
+## Run our traffic example
+```bash
+# the following two commands are needed only
+# if this is the first time running
+# ------------------------------------------ 
+./waf configure --enable-examples
+./waf build
+# ------------------------------------------
+./waf --run scratch/ns3-sumo-coupling-simple
+```
 
 
 # SUMO

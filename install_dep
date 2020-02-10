@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script will take care of SOME of the dependencies.
+# This script will take care of the dependencies.
 # These dependencies range from cloning SUMO, ns3-gym requirements
 # as well as some third-party tools like PyTest and TensorFlow.
 #
@@ -36,27 +36,8 @@ pip3 install tensorflow
 echo "** Done **"
 
 echo "Installing stablebaselines dependencies"
-echo "Enter your OS:"
-echo "1: Ubuntu"
-echo "2: macOS"
-echo "3: Windows"
-read os_type
-
-if [ $os_type == 1 ]
-then
-	sudo apt-get update && sudo apt-get install cmake libopenmpi-dev python3-dev zlib1g-dev
-fi
-if [ $os_type == 2 ]
-then
-	echo "Installing HomeBrew"
-	/usr/bin/ruby -e "$(curl -fsSl https://raw.githubusercontent.com/Homebrew/install/master/install)"
-	echo "Done with Homebrew"
-	brew install cmake openmpi
-fi
-if [ $os_type == 3 ]
-then
-	echo "Check the README file. There is a link for Windows."
-fi
+sudo apt-get update && sudo apt-get install cmake libopenmpi-dev python3-dev zlib1g-dev
+echo "** Done **"
 
 echo "Installing StableBaselines"
 echo "Which type of StableBaselines would you like?"
@@ -98,3 +79,30 @@ pip3 install install ./src/opengym/model/ns3gym
 echo "Cloning SUMO into ../sumo (one level outside ns3-gym)"
 cd ../
 git clone https://github.com/eclipse/sumo
+
+echo "Installing system dependencies for SUMO"
+sudo apt-get update
+sudo apt-get install -y cmake swig libgtest-dev python-pygame python-scipy
+sudo apt-get install -y autoconf libtool pkg-config libgdal-dev libxerces-c-dev
+sudo apt-get install -y libproj-dev libfox-1.6-dev libxml2-dev libxslt1-dev
+sudo apt-get install -y build-essential curl unzip flex bison python python-dev
+sudo apt-get install -y python3-dev
+sudo pip3 install cmake cython
+echo "** Done **"
+
+echo "Installing SUMO binaries"
+mkdir -p $HOME/sumo_binaries/bin/
+pushd $HOME/sumo_binaries/bin
+wget https://akreidieh.s3.amazonaws.com/sumo/flow-0.4.0/binaries-ubuntu1804.tar.xz
+tar -xf binaries-ubuntu1804.tar.xz
+rm binaries-ubuntu1804.tar.xz
+chmod +x *
+popd
+echo 'export PATH="$HOME/sumo_binaries/bin:$PATH"' >> ~/.bashrc
+echo 'export SUMO_HOME="$HOME/sumo_binaries/bin"' >> ~/.bashrc
+echo "** Done **"
+
+echo "To complete set up we need to close this terminal window"
+echo "Click on the ENTER key to close thios window"
+read key
+if [[ -z $key ]]; then exit; fi
