@@ -198,10 +198,10 @@ namespace ns3
     m_velocity = rand () % 60; // between 0 and 60 m/s
 	
 	NS_LOG_INFO("####################################################################################");
-	std::map<std::string, double>::iterator it = m_vehicles_data.begin();
+	std::map<std::string, std::pair<double,double>>::iterator it = m_vehicles_data.begin();
     while(it != m_vehicles_data.end())
     {
-        NS_LOG_INFO(it->first<<" :: "<<it->second);
+        NS_LOG_INFO(it->first<<" :: "<<(it->second).first<<" :: "<<(it->second).second);
         it++;
     }
 	
@@ -225,15 +225,16 @@ void
 	if (data[0]!="1"){return;}
 	
 	std::string receivedID = data[1];
-    double velocity = (double) std::stoi (data[2]);
-	double headway = (double) std::stoi (data[3]);
+    double velocity = (double) std::stod (data[2]);
+	double headway = (double) std::stod (data[3]);
 	
 	// Inserting vehicle data to RSU databse
-	std::map<std::string, double>::iterator it = m_vehicles_data.find(receivedID); 
+	std::map<std::string, std::pair<double,double>>::iterator it = m_vehicles_data.find(receivedID); 
 	if (it != m_vehicles_data.end()){
-		it->second = velocity;
+		(it->second).first = velocity;
+		(it->second).second = headway;
 	}else {
-			m_vehicles_data.insert(std::make_pair(receivedID, velocity));
+			m_vehicles_data.insert(std::make_pair(receivedID, std::make_pair(velocity,headway)));
 	}
 
     Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
@@ -368,7 +369,7 @@ void
 		return;
 	}
 	
-    double velocity = (double) std::stoi (data[1]);
+    double velocity = (double) std::stod (data[1]);
 
     Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
     Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
