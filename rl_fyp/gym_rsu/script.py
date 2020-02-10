@@ -6,17 +6,13 @@ import gym_rsu
 from stable_baselines import PPO2, TD3
 from stable_baselines.common.evaluation import evaluate_policy
 
-# Create environment
-env = gym.make("rsu-v0")
-
-# Doing the below step to get rid of instantiation
-# bug that complains about no definition of model variable
-model = None
-save_name = ''
 if len(sys.argv) == 1:
     print("Please specify one of the following agents to train with: PPO - DDPG - HIRO")
     exit(0)
-elif 'ppo' == sys.argv[1]:
+elif 'train' == sys.argv[1]:
+    # Create environment
+    env = gym.make("rsu-v0")
+
     # Use the stable-baseline PPO policy to train
     model = PPO2('MlpPolicy',
                  env,
@@ -28,48 +24,38 @@ elif 'ppo' == sys.argv[1]:
     # Use this name to save the model
     # parameters after training is done
     save_name = 'rsu_agents/ppo_rsu_2e6'
-elif 'td3' == sys.argv[1]:
-    # Use the stable-baseline TD3 policy to train
-    model = TD3('MlpPolicy', env, verbose=1, random_exploration=0)
-    # Use this name to save the model
-    # parameters after training is done
-    save_name = 'td3_rsu'
-elif 'hiro' == sys.argv[1]:
-    # Use the custom HIRO policy to train
-    pass
 
-# Train the agent
-print("Beginning model training")
-model.learn(total_timesteps=int(2e6))
-print("** Done training the model **")
+    # Train the agent
+    print("Beginning model training")
+    model.learn(total_timesteps=int(2e6))
+    print("** Done training the model **")
 
-# Save the agent
-model.save(save_name)
+    # Save the agent
+    model.save(save_name)
 
-# deleting it just to make sure we can load successfully again
-del model
+    # deleting it just to make sure we can load successfully again
+    del model
 
-model = None
-if 'ppo' == sys.argv[1]:
     # Re-load the trained PPO algorithm with
     # parameters saved as 'ppo_rsu'
     model = PPO2.load(save_name)
-elif 'td3' == sys.argv[1]:
-    # Re-load the trained TD3 algorithm with
-    # parameters saved as 'td3_rsu'
-    model = TD3.load(save_name)
-elif 'hiro' == sys.argv[1]:
-    # Re-load the trained HIRO algorithm with
-    # parameters saved as 'hiro_rsu'
+
+    # Evaluate the agent
+    mean_reward, n_steps = evaluate_policy(model, env, n_eval_episodes=10)
+    print(f'Mean Reward = {round(mean_reward, 4)}')
+
+    # Enjoy the trained agent
+    # ------------------------------------------------
+    # This has nothing to do with testing the agent in
+    # a live simulation. This is just a visualization
+    # in the terminal window.
+    # ------------------------------------------------
+    obs = env.reset()
+    for _ in range(3):
+        action, _states = model.predict(obs)
+        obs, reward, dones, info = env.step(action)
+        env.render()
+elif 'test' == sys.argv[1]:
+    # Run the trained agent in the ns3-gym environment
+    # to see it in action during simulation
     pass
-
-# Evaluate the agent
-mean_reward, n_steps = evaluate_policy(model, env, n_eval_episodes=10)
-print(f'Mean Reward = {round(mean_reward, 4)}')
-
-# Enjoy the trained agent
-obs = env.reset()
-for _ in range(3):
-    action, _states = model.predict(obs)
-    obs, reward, dones, info = env.step(action)
-    env.render()

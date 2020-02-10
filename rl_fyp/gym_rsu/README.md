@@ -24,9 +24,7 @@ env = gym.make('rsu-v0')
 ## Running script file
 To run the **script.py** file in the custom environment directory type the following command:
 ```bash
-# Need to specify one of the three policies to train with:
-#   -PPO: Proximal Policy Optimization
-#   -DDPG: Deep Deterministic Policy Gradient
-#   -HIRO: Data-Efficient Hierarchical Reinforcement Learning
-python3 script.py [ppo | ddpg | hiro]
+# Need to specify whether training your agent
+# or testing it on the RSU environment
+python3 script.py [train | test]
 ```

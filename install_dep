@@ -103,6 +103,6 @@ echo 'export SUMO_HOME="$HOME/sumo_binaries/bin"' >> ~/.bashrc
 echo "** Done **"
 
 echo "To complete set up we need to close this terminal window"
-echo "Click on the ENTER key to close thios window"
+echo "Click on the ENTER key to close this window"
 read key
 if [[ -z $key ]]; then exit; fi
