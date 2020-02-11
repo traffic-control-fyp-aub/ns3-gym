@@ -32,7 +32,8 @@
 #include <string>
 #include <stdlib.h>
 #include <boost/algorithm/string/classification.hpp> // Include boost::for is_any_of
-#include <boost/algorithm/string/split.hpp> // Include for boost::split
+#include <boost/algorithm/string/split.hpp>
+#include <bits/stl_map.h> // Include for boost::split
 
 #include "ns3/pointer.h"
 #include "ns3/trace-source-accessor.h"
@@ -41,7 +42,7 @@
 
 namespace ns3
 {
-	std::vector<std::string> getPacketData(const std::string& s, const std::string& token) {
+	std::vector<std::string> split(const std::string& s, const std::string& token) {
 		
 		std::vector<std::string> words;
 		boost::split(words, s, boost::is_any_of(token), boost::token_compress_on);
@@ -74,10 +75,6 @@ namespace ns3
                       UintegerValue (100),
                       MakeUintegerAccessor (&RsuSpeedControl::m_count),
                       MakeUintegerChecker<uint32_t> ())
-    .AddAttribute ("Velocity", "Velocity value which is sent to vehicles.",
-                    UintegerValue (10),
-                    MakeUintegerAccessor (&RsuSpeedControl::m_velocity),
-                    MakeUintegerChecker<uint16_t> ())
     .AddAttribute ("Client",
                    "TraCI client for SUMO",
                    PointerValue (0),
@@ -97,7 +94,6 @@ namespace ns3
     m_port = 0;
     rx_socket = 0;
     tx_socket = 0;
-    m_velocity = 0;
     m_count = 1e9;
   }
 
@@ -175,8 +171,23 @@ namespace ns3
   {
     NS_LOG_FUNCTION(this << tx_socket);
 
+	// ********************* Constructing message ********************* 
     std::ostringstream msg;
-    msg << "0*" << std::to_string (m_velocity) << '\0';
+    msg << "0*";
+	
+	// The message will be of form: "0|id1:velocity1|id2:velocity2|...."
+	
+	std::map<std::string, std::pair<double,double>>::iterator it = m_vehicles_data.begin();
+    while(it != m_vehicles_data.end())
+    {
+		msg << "|" << it->first<<":"<<std::to_string((it->second).first);
+        it++;
+    }
+	
+	msg << '\0';
+	
+	// *****************************************************************
+	
     Ptr<Packet> packet = Create<Packet> ((uint8_t*) msg.str ().c_str (), msg.str ().length ());
 
     Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
@@ -184,9 +195,8 @@ namespace ns3
     Ipv4Address ipAddr = iaddr.GetLocal ();
 
     tx_socket->Send (packet);
-    NS_LOG_INFO("##### Packet sent from RSU at time " << Simulator::Now().GetSeconds()
-                << "s - [ip:" << ipAddr << "]"
-                << "[tx vel:" << m_velocity << "m/s]");
+    NS_LOG_INFO("TX ##### RSU->vehicle at time " << Simulator::Now().GetSeconds()
+                << "s - [RSU ip:" << ipAddr << "]\n");
 
     ScheduleTransmit (m_interval);
   }
@@ -194,7 +204,22 @@ namespace ns3
   void
   RsuSpeedControl::ChangeSpeed ()
   {
-    m_velocity = rand () % 60; // between 0 and 60 m/s
+	
+	NS_LOG_INFO("\nVehicles Data at RSU with ip: " << this->GetNode ()->GetObject<Ipv4> ()->GetAddress (1, 0).GetLocal () << " \n");
+
+	
+	std::map<std::string, std::pair<double,double>>::iterator it = m_vehicles_data.begin();
+    while(it != m_vehicles_data.end())
+    {
+        NS_LOG_INFO(it->first<<" :: "<<(it->second).first<<" :: "<<(it->second).second);
+		
+		//TODO CHANGE THIS  
+		(it->second).first = rand () % 60;
+        it++;
+    }
+	
+	NS_LOG_INFO("\n");
+				
     Simulator::Schedule (Seconds (5.0), &RsuSpeedControl::ChangeSpeed, this);
   }
 
@@ -208,22 +233,32 @@ void
     uint8_t *buffer = new uint8_t[packet->GetSize ()];
     packet->CopyData (buffer, packet->GetSize ());
     std::string s = std::string ((char*) buffer);
-	std::vector<std::string> data = getPacketData (s, "*");
+	std::vector<std::string> data = split (s, "*");
 	
 	if (data[0]!="1"){return;}
 	
-    double velocity = (double) std::stoi (data[1]);
-	double headway = (double) std::stoi (data[2]);
+	std::string receivedID = data[1];
+    double velocity = (double) std::stod (data[2]);
+	double headway = (double) std::stod (data[3]);
+	
+	// Inserting vehicle data to RSU databse
+	std::map<std::string, std::pair<double,double>>::iterator it = m_vehicles_data.find(receivedID); 
+	if (it != m_vehicles_data.end()){
+		(it->second).first = velocity;
+		(it->second).second = headway;
+	}else {
+			m_vehicles_data.insert(std::make_pair(receivedID, std::make_pair(velocity,headway)));
+	}
 
     Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
     Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
     Ipv4Address ipAddr = iaddr.GetLocal ();
 
-    NS_LOG_INFO("##### Packet received from Vehicle at time " << Simulator::Now().GetSeconds()
-//        << "[id:" << m_client->GetVehicleId(this->GetNode()) << "]"
-        << "s -[ip:" << ipAddr << "]"
+    NS_LOG_INFO("RX ##### vehicle->RSU at time " << Simulator::Now().GetSeconds()
+        << "s - [RSU ip:" << ipAddr << "]"
+		<< "[from vehicle:" << receivedID << "]"
         << "[rx vel:" << velocity << "m/s]"
-		<< "[rx headway:" << headway << "m]");
+		<< "[rx headway:" << headway << "]\n");
   }
 
   TypeId
@@ -340,23 +375,38 @@ void
     uint8_t *buffer = new uint8_t[packet->GetSize ()];
     packet->CopyData (buffer, packet->GetSize ());
     std::string s = std::string ((char*) buffer);
-	std::vector<std::string> data = getPacketData (s, "*");
+	std::vector<std::string> data = split (s, "*");
 
 	if (data[0]!="0"){
 		NS_LOG_INFO("Dumping data from vehicle");
+		return;
 	}
 	
-    double velocity = (double) std::stoi (data[1]);
+	double velocity = -999;
+	std::vector<std::string> map_data = split (data[1], "|");
+	for (uint8_t i=0;i< map_data.size(); i++ ){
+		std::vector<std::string> parameters = split(map_data[i],":");
+		if (parameters[0] == m_client->GetVehicleId(this->GetNode())){
+			velocity = std::stod(parameters[1]);
+		}
+	}
+	
+	if (velocity == -999){
+		NS_LOG_INFO("Dumping data from RSU");
+		return;
+	}
+
 
     Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
     Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
     Ipv4Address ipAddr = iaddr.GetLocal ();
 	
-    NS_LOG_INFO("***** Packet received from RSU at time " << Simulator::Now().GetSeconds()
-        << "s - [id:" << m_client->GetVehicleId(this->GetNode()) << "]"
-        << "[ip:" << ipAddr << "]"
+    NS_LOG_INFO("RX ***** RSU->vehicle at time " << Simulator::Now().GetSeconds()
+        << "s - "
+        << "[vehicle ip:" << ipAddr << "]"
+		<< "[vehicle id:" << m_client->GetVehicleId(this->GetNode()) << "]"
         << "[vel:" << m_client->TraCIAPI::vehicle.getSpeed(m_client->GetVehicleId(this->GetNode())) << "m/s]"
-        << "[rx vel:" << velocity << "m/s]");
+        << "[rx vel:" << velocity << "m/s]\n");
 
     if (velocity != last_velocity)
       {
@@ -369,12 +419,17 @@ void
   VehicleSpeedControl::Send ()
   {
     NS_LOG_FUNCTION(this << tx_socket);
-
-	//Get Headway Just before sending
-	last_headway = m_client->TraCIAPI::vehicle.getLeader (m_client->GetVehicleId(this->GetNode()),0).second;
+	
+	// Get Headway Just before sending 
+	// Headway in seconds  = Headway in meters / velocity
+	if (last_velocity <= 0){
+		last_headway = 0.0;
+	}else{
+		last_headway = m_client->TraCIAPI::vehicle.getLeader (m_client->GetVehicleId(this->GetNode()),0).second / last_velocity;
+	}
 	
     std::ostringstream msg;
-    msg << "1*" <<std::to_string (last_velocity) << "*" << std::to_string (last_headway) <<'\0';
+    msg << "1*" << m_client->GetVehicleId(this->GetNode()) << "*" << std::to_string (last_velocity) << "*" << std::to_string (last_headway) <<'\0';
     Ptr<Packet> packet = Create<Packet> ((uint8_t*) msg.str ().c_str (), msg.str ().length ());
 
     Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
@@ -382,11 +437,12 @@ void
     Ipv4Address ipAddr = iaddr.GetLocal ();
 
    tx_socket->Send (packet);
-    NS_LOG_INFO("***** Packet sent from Vehicle at time " << Simulator::Now().GetSeconds()
-                << "s - [ip:" << ipAddr << "]"
+    NS_LOG_INFO("TX ***** Vehicle->RSU at time " << Simulator::Now().GetSeconds()
+                << "s - "
+			    << "[vehicle ip:" << ipAddr << "]"
+				<< "[vehicle id:" << m_client->GetVehicleId(this->GetNode()) << "]"
                 << "[tx vel:" << last_velocity << "m/s]"
-				<< "[tx headway:" << last_headway
-				<< "]");
+				<< "[tx headway:" << last_headway << "s]\n");
 
     ScheduleTransmit (m_interval);
   }

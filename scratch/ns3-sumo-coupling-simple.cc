@@ -32,7 +32,7 @@ main (int argc, char *argv[])
     }
 
   /*** 1. Create node pool and counter; large enough to cover all sumo vehicles ***/
-  ns3::Time simulationTime (ns3::Seconds(50));
+  ns3::Time simulationTime (ns3::Seconds(500));
   NodeContainer nodePool;
 /** scenario1 **/
   //nodePool.Create (32);
@@ -107,12 +107,10 @@ main (int argc, char *argv[])
 
   /*** 8. Create and Setup Applications for the RSU node and set position ***/
   RsuSpeedControlHelper rsuSpeedControlHelper1 (9); // Port #9
-  rsuSpeedControlHelper1.SetAttribute ("Velocity", UintegerValue (30));           // initial velocity value which is sent to vehicles
   rsuSpeedControlHelper1.SetAttribute ("Interval", TimeValue (Seconds (5.0)));    // packet interval
   rsuSpeedControlHelper1.SetAttribute ("Client", (PointerValue) (sumoClient));    // pass TraciClient object for accessing sumo in application
 
   RsuSpeedControlHelper rsuSpeedControlHelper2 (9); // Port #9
-  rsuSpeedControlHelper2.SetAttribute ("Velocity", UintegerValue (30));           // initial velocity value which is sent to vehicles
   rsuSpeedControlHelper2.SetAttribute ("Interval", TimeValue (Seconds (5.0)));    // packet interval
   rsuSpeedControlHelper2.SetAttribute ("Client", (PointerValue) (sumoClient));    // pass TraciClient object for accessing sumo in application
 

@@ -12,7 +12,7 @@
 
 namespace ns3 {
 
-std::vector<std::string> getPacketData(const std::string& input, const std::string& regex);
+std::vector<std::string> split(const std::string& input, const std::string& regex);
 
 class Socket;
 class Packet;
@@ -65,9 +65,9 @@ private:
   uint32_t m_count; //!< Maximum number of packets the application will send
   Ptr<Socket> tx_socket; //!< IPv4 Socket
   Ptr<Socket> rx_socket; //!< IPv4 Socket
-  uint16_t m_velocity; //!< transmitted velocity
   EventId m_sendEvent; //!< Event to send the next packet
   Ptr<TraciClient> m_client;
+  std::map<std::string,std::pair<double,double>> m_vehicles_data;
 
   /// Callbacks for tracing the packet Tx events
   TracedCallback<Ptr<const Packet> > m_txTrace;
