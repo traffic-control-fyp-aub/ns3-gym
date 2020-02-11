@@ -110,7 +110,105 @@ namespace ns3
     NS_LOG_FUNCTION(this);
     Application::DoDispose ();
   }
+  
+  // ############################################# GYM SPECIFIC #############################################
+  
+  Ptr<OpenGymSpace>
+  RsuSpeedControl::GetObservationSpace()
+  {
+    NS_LOG_FUNCTION (this);
+    Ptr<OpenGymBoxSpace> space = CreateObject<OpenGymBoxSpace> ();
+    NS_LOG_UNCOND ("GetObservationSpace: " << space);
+    return space;
+  }
+  
+  Ptr<OpenGymSpace>
+  RsuSpeedControl::GetActionSpace()
+  {
+    NS_LOG_FUNCTION (this);
+    Ptr<OpenGymDiscreteSpace> space = CreateObject<OpenGymDiscreteSpace> ();
+    NS_LOG_UNCOND ("GetActionSpace: " << space);
+    return space;
+  }
+  
+  Ptr<OpenGymDataContainer>
+  RsuSpeedControl::GetObservation()
+  {
+    NS_LOG_FUNCTION (this);
+//    std::vector<uint32_t> shape = {m_channelNum,};
+    Ptr<OpenGymBoxContainer<uint32_t> > box = CreateObject<OpenGymBoxContainer<uint32_t> >(shape);
+//	
+//    for (uint32_t i = 0; i < m_channelOccupation.size(); ++i) {
+//    	uint32_t value = m_channelOccupation.at(i);
+//		box->AddValue(value);
+//	}
 
+	NS_LOG_UNCOND ("MyGetObservation: " << box);
+    return box;
+  }
+  
+  float
+  RsuSpeedControl::GetReward()
+  {
+    NS_LOG_FUNCTION (this);
+    float reward = 1.0;
+//    if (m_channelOccupation.size() == 0){
+//      return 0.0;
+//    }
+//    uint32_t occupied = m_channelOccupation.at(m_currentChannel);
+//    if (occupied == 1) {
+//      reward = -1.0;
+//      m_collisions.erase(m_collisions.begin());
+//      m_collisions.push_back(1);
+//    } else {
+//      m_collisions.erase(m_collisions.begin());
+//      m_collisions.push_back(0);
+//    }
+    NS_LOG_UNCOND ("MyGetReward: " << reward);
+    return reward;
+  }
+  
+  bool
+  RsuSpeedControl::GetGameOver()
+  {
+    NS_LOG_FUNCTION (this);
+    bool isGameOver = false;
+
+//    uint32_t collisionNum = 0;
+//    for (auto& v : m_collisions)
+//       collisionNum += v;
+//
+//    if (collisionNum >= m_collisionTh){
+//      isGameOver = true;
+//    }
+    NS_LOG_UNCOND ("MyGetGameOver: " << isGameOver);
+    return isGameOver;
+  }
+  
+  std::string
+  RsuSpeedControl::GetExtraInfo()
+  {
+    NS_LOG_FUNCTION (this);
+    std::string myInfo = "info";
+    NS_LOG_UNCOND("MyGetExtraInfo: " << myInfo);
+    return myInfo;
+  }
+  
+  bool
+  RsuSpeedControl::ExecuteActions(Ptr<OpenGymDataContainer> action)
+  {
+    NS_LOG_FUNCTION (this);
+//    Ptr<OpenGymDiscreteContainer> discrete = DynamicCast<OpenGymDiscreteContainer>(action);
+//    uint32_t nextChannel = discrete->GetValue();
+//    m_currentChannel = nextChannel;
+//
+//    NS_LOG_UNCOND ("Current Channel: " << m_currentChannel);
+    return true;
+  }
+
+  // ########################################################################################################
+
+  
   void
   RsuSpeedControl::StartApplication (void)
   {
@@ -395,7 +493,6 @@ void
     // Dumping data from RSU
 		return;
 	}
-
 
     Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
     Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);

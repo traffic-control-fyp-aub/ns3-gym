@@ -14,6 +14,7 @@
 #include <functional>
 #include <stdlib.h>
 
+
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE("ns3-sumo-coupling-simple");
 
@@ -104,18 +105,21 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoSeed", IntegerValue (10));
   sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--verbose true"));
   sumoClient->SetAttribute ("SumoWaitForSocket", TimeValue (Seconds (1.0)));
-
+  
   /*** 8. Create and Setup Applications for the RSU node and set position ***/
+  Ptr<OpenGymInterface> openGymInterface = CreateObject<OpenGymInterface> (5555);
   RsuSpeedControlHelper rsuSpeedControlHelper1 (9); // Port #9
   rsuSpeedControlHelper1.SetAttribute ("Interval", TimeValue (Seconds (5.0)));    // packet interval
   rsuSpeedControlHelper1.SetAttribute ("Client", (PointerValue) (sumoClient));    // pass TraciClient object for accessing sumo in application
-
+  
+  
   RsuSpeedControlHelper rsuSpeedControlHelper2 (9); // Port #9
   rsuSpeedControlHelper2.SetAttribute ("Interval", TimeValue (Seconds (5.0)));    // packet interval
   rsuSpeedControlHelper2.SetAttribute ("Client", (PointerValue) (sumoClient));    // pass TraciClient object for accessing sumo in application
 
 
   ApplicationContainer rsuSpeedControlApps = rsuSpeedControlHelper1.Install (nodePool.Get (0));
+  rsuSpeedControlApps->SetOpenGymInterface(openGymInterface);
   rsuSpeedControlApps.Start (Seconds (1.0));
   rsuSpeedControlApps.Stop (simulationTime);
 

@@ -1,6 +1,8 @@
 #ifndef TRAFFIC_INFO_SERVER_H
 #define TRAFFIC_INFO_SERVER_H
 
+#include "ns3/opengym-module.h"
+#include "ns3/stats-module.h"
 #include "ns3/traci-client.h"
 #include "ns3/constant-position-mobility-model.h"
 #include "ns3/application.h"
@@ -9,6 +11,8 @@
 #include "ns3/address.h"
 #include "ns3/ipv4-address.h"
 #include "ns3/traced-callback.h"
+
+
 
 namespace ns3 {
 
@@ -28,7 +32,7 @@ class Packet;
  *
  * Traffic information is broadcasted
  */
-class RsuSpeedControl : public Application 
+class RsuSpeedControl : public Application , public OpenGymEnv
 {
 public:
   /**
@@ -38,6 +42,15 @@ public:
   static TypeId GetTypeId (void);
   RsuSpeedControl ();
   virtual ~RsuSpeedControl ();
+  
+  // GYM specific methods
+  Ptr<OpenGymSpace> GetObservationSpace();
+  Ptr<OpenGymSpace> GetActionSpace();
+  Ptr<OpenGymDataContainer> GetObservation();
+  float GetReward();
+  bool GetGameOver();
+  std::string GetExtraInfo();
+  bool ExecuteActions(Ptr<OpenGymDataContainer> action);
 
 protected:
   virtual void DoDispose (void);
