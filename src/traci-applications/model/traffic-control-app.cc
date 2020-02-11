@@ -378,7 +378,7 @@ void
 	std::vector<std::string> data = split (s, "*");
 
 	if (data[0]!="0"){
-		NS_LOG_INFO("Dumping data from vehicle");
+		// Dumping data from vehicleDumping
 		return;
 	}
 	
@@ -392,7 +392,7 @@ void
 	}
 	
 	if (velocity == -999){
-		NS_LOG_INFO("Dumping data from RSU");
+    // Dumping data from RSU
 		return;
 	}
 
