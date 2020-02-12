@@ -120,7 +120,8 @@ main (int argc, char *argv[])
 
 
   ApplicationContainer rsuSpeedControlApps = rsuSpeedControlHelper1.Install (nodePool.Get (0));
-//  (dynamic_cast<Ptr<RsuSpeedControl>>(rsuSpeedControlApps.Get(0)))->SetOpenGymInterface(openGymInterface);
+//  Ptr<RsuSpeedControl> rsu1 = rsuSpeedControlApps.Get(0)->GetObject<RsuSpeedControl> ();
+//  rsu1->GetEnv()->SetOpenGymInterface(openGymInterface);
   rsuSpeedControlApps.Start (Seconds (1.0));
   rsuSpeedControlApps.Stop (simulationTime);
 

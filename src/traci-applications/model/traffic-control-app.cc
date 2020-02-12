@@ -40,515 +40,504 @@
 
 #include "traffic-control-app.h"
 
-namespace ns3
-{
-	std::vector<std::string> split(const std::string& s, const std::string& token) {
-		
-		std::vector<std::string> words;
-		boost::split(words, s, boost::is_any_of(token), boost::token_compress_on);
-		return words;
-	}
+namespace ns3 {
 
-  NS_LOG_COMPONENT_DEFINE("TrafficControlApplication");
+std::vector<std::string> split(const std::string& s, const std::string& token) {
 
-  NS_OBJECT_ENSURE_REGISTERED(RsuSpeedControl);
-  NS_OBJECT_ENSURE_REGISTERED(VehicleSpeedControl);
+	std::vector<std::string> words;
+	boost::split(words, s, boost::is_any_of(token), boost::token_compress_on);
+	return words;
+}
 
-  TypeId
-  RsuSpeedControl::GetTypeId (void)
-  {
-  static TypeId tid = TypeId ("ns3::TrafficInfoServer")
-    .SetParent<Application> ()
-    .SetGroupName("Applications")
-    .AddConstructor<RsuSpeedControl> ()
-    .AddAttribute ("Port", "Port on which we send packets.",
-                   UintegerValue (9),
-                   MakeUintegerAccessor (&RsuSpeedControl::m_port),
-                   MakeUintegerChecker<uint16_t> ())
-    .AddAttribute ("Interval",
-                   "The time to wait between packets",
-                   TimeValue (Seconds (5.0)),
-                   MakeTimeAccessor (&RsuSpeedControl::m_interval),
-                   MakeTimeChecker ())
-   .AddAttribute ("MaxPackets",
-                      "The maximum number of packets the application will send",
-                      UintegerValue (100),
-                      MakeUintegerAccessor (&RsuSpeedControl::m_count),
-                      MakeUintegerChecker<uint32_t> ())
-    .AddAttribute ("Client",
-                   "TraCI client for SUMO",
-                   PointerValue (0),
-                   MakePointerAccessor (&RsuSpeedControl::m_client),
-                   MakePointerChecker<TraciClient> ())
-    .AddTraceSource ("Tx", "A new packet is created and is sent",
-                     MakeTraceSourceAccessor (&RsuSpeedControl::m_txTrace),
-                     "ns3::Packet::TracedCallback")
-  ;
-    return tid;
-  }
+NS_LOG_COMPONENT_DEFINE("TrafficControlApplication");
 
-  RsuSpeedControl::RsuSpeedControl ()
-  {
-    NS_LOG_FUNCTION(this);
-    m_sendEvent = EventId ();
-    m_port = 0;
-    rx_socket = 0;
-    tx_socket = 0;
-    m_count = 1e9;
-  }
+NS_OBJECT_ENSURE_REGISTERED(RsuSpeedControl);
+NS_OBJECT_ENSURE_REGISTERED(VehicleSpeedControl);
+NS_OBJECT_ENSURE_REGISTERED(RsuEnv);
 
-  RsuSpeedControl::~RsuSpeedControl ()
-  {
-    NS_LOG_FUNCTION(this);
-    tx_socket = 0;
-    rx_socket = 0;
-  }
+RsuEnv::RsuEnv() {
+	NS_LOG_FUNCTION(this);
+	m_vehicles=0;
+}
 
-  void
-  RsuSpeedControl::DoDispose (void)
-  {
-    NS_LOG_FUNCTION(this);
-    Application::DoDispose ();
-  }
-  
-  // ############################################# GYM SPECIFIC #############################################
-  
-  Ptr<OpenGymSpace>
-  RsuSpeedControl::GetObservationSpace()
-  {
-    NS_LOG_FUNCTION (this);
-    Ptr<OpenGymBoxSpace> space = CreateObject<OpenGymBoxSpace> ();
-    NS_LOG_UNCOND ("GetObservationSpace: " << space);
-    return space;
-  }
-  
-  Ptr<OpenGymSpace>
-  RsuSpeedControl::GetActionSpace()
-  {
-    NS_LOG_FUNCTION (this);
-    Ptr<OpenGymDiscreteSpace> space = CreateObject<OpenGymDiscreteSpace> ();
-    NS_LOG_UNCOND ("GetActionSpace: " << space);
-    return space;
-  }
-  
-  Ptr<OpenGymDataContainer>
-  RsuSpeedControl::GetObservation()
-  {
-    NS_LOG_FUNCTION (this);
-    std::vector<uint32_t> values;
-    Ptr<OpenGymBoxContainer<uint32_t> > box = CreateObject<OpenGymBoxContainer<uint32_t> >(values);
-//	
-//    for (uint32_t i = 0; i < m_channelOccupation.size(); ++i) {
-//    	uint32_t value = m_channelOccupation.at(i);
-//		box->AddValue(value);
-//	}
+//RsuEnv::RsuEnv(uint32_t channelNum) {
+//	NS_LOG_FUNCTION(this);
+//}
 
-	NS_LOG_UNCOND ("MyGetObservation: " << box);
-    return box;
-  }
-  
-  float
-  RsuSpeedControl::GetReward()
-  {
-    NS_LOG_FUNCTION (this);
-    float reward = 1.0;
-//    if (m_channelOccupation.size() == 0){
-//      return 0.0;
-//    }
-//    uint32_t occupied = m_channelOccupation.at(m_currentChannel);
-//    if (occupied == 1) {
-//      reward = -1.0;
-//      m_collisions.erase(m_collisions.begin());
-//      m_collisions.push_back(1);
-//    } else {
-//      m_collisions.erase(m_collisions.begin());
-//      m_collisions.push_back(0);
-//    }
-    NS_LOG_UNCOND ("MyGetReward: " << reward);
-    return reward;
-  }
-  
-  bool
-  RsuSpeedControl::GetGameOver()
-  {
-    NS_LOG_FUNCTION (this);
-    bool isGameOver = false;
+RsuEnv::~RsuEnv() {
+	NS_LOG_FUNCTION(this);
+}
 
-//    uint32_t collisionNum = 0;
-//    for (auto& v : m_collisions)
-//       collisionNum += v;
-//
-//    if (collisionNum >= m_collisionTh){
-//      isGameOver = true;
-//    }
-    NS_LOG_UNCOND ("MyGetGameOver: " << isGameOver);
-    return isGameOver;
-  }
-  
-  std::string
-  RsuSpeedControl::GetExtraInfo()
-  {
-    NS_LOG_FUNCTION (this);
-    std::string myInfo = "info";
-    NS_LOG_UNCOND("MyGetExtraInfo: " << myInfo);
-    return myInfo;
-  }
-  
-  bool
-  RsuSpeedControl::ExecuteActions(Ptr<OpenGymDataContainer> action)
-  {
-    NS_LOG_FUNCTION (this);
-//    Ptr<OpenGymDiscreteContainer> discrete = DynamicCast<OpenGymDiscreteContainer>(action);
-//    uint32_t nextChannel = discrete->GetValue();
-//    m_currentChannel = nextChannel;
-//
-//    NS_LOG_UNCOND ("Current Channel: " << m_currentChannel);
-    return true;
-  }
-
-  // ########################################################################################################
-
-  
-  void
-  RsuSpeedControl::StartApplication (void)
-  {
-    NS_LOG_FUNCTION(this);
-
-    if (tx_socket == 0)
-      {
-        TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
-        tx_socket = Socket::CreateSocket (GetNode (), tid);
-        Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
-        Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
-        Ipv4Address ipAddr = iaddr.GetBroadcast ();
-        InetSocketAddress remote = InetSocketAddress (ipAddr, m_port);
-        tx_socket->SetAllowBroadcast (true);
-        tx_socket->Connect (remote);
-
-        ScheduleTransmit (Seconds (0.0));
-        Simulator::Schedule (Seconds (5.0), &RsuSpeedControl::ChangeSpeed, this);
-      }
-            TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
-    rx_socket = Socket::CreateSocket (GetNode (), tid);
-    InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), m_port);
-    rx_socket->Bind (local);
-    rx_socket->SetRecvCallback (MakeCallback (&RsuSpeedControl::HandleRead, this));
-
-  }
-
-  void
-  RsuSpeedControl::ScheduleTransmit (Time dt)
-  {
-    NS_LOG_FUNCTION(this << dt);
-    m_sendEvent = Simulator::Schedule (dt, &RsuSpeedControl::Send, this);
-  }
-
-  void
-  RsuSpeedControl::StopApplication ()
-  {
-    NS_LOG_FUNCTION(this);
-
-    if (tx_socket != 0)
-      {
-        tx_socket->Close ();
-        tx_socket->SetRecvCallback (MakeNullCallback<void, Ptr<Socket> > ());
-      }
-	
-	if (rx_socket != 0)
-      {
-        rx_socket->Close ();
-        rx_socket->SetRecvCallback (MakeNullCallback<void, Ptr<Socket> > ());
-        rx_socket = 0;
-      }
-
-    Simulator::Cancel (m_sendEvent);
-  }
-
-  void
-  RsuSpeedControl::Send ()
-  {
-    NS_LOG_FUNCTION(this << tx_socket);
-
-	// ********************* Constructing message ********************* 
-    std::ostringstream msg;
-    msg << "0*";
-	
-	// The message will be of form: "0|id1:velocity1|id2:velocity2|...."
-	
-	std::map<std::string, std::pair<double,double>>::iterator it = m_vehicles_data.begin();
-    while(it != m_vehicles_data.end())
-    {
-		msg << "|" << it->first<<":"<<std::to_string((it->second).first);
-        it++;
-    }
-	
-	msg << '\0';
-	
-	// *****************************************************************
-	
-    Ptr<Packet> packet = Create<Packet> ((uint8_t*) msg.str ().c_str (), msg.str ().length ());
-
-    Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
-    Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
-    Ipv4Address ipAddr = iaddr.GetLocal ();
-
-    tx_socket->Send (packet);
-    NS_LOG_INFO("TX ##### RSU->vehicle at time " << Simulator::Now().GetSeconds()
-                << "s - [RSU ip:" << ipAddr << "]\n");
-
-    ScheduleTransmit (m_interval);
-  }
-
-  void
-  RsuSpeedControl::ChangeSpeed ()
-  {
-	
-	NS_LOG_INFO("\nVehicles Data at RSU with ip: " << this->GetNode ()->GetObject<Ipv4> ()->GetAddress (1, 0).GetLocal () << " \n");
-
-	
-	std::map<std::string, std::pair<double,double>>::iterator it = m_vehicles_data.begin();
-    while(it != m_vehicles_data.end())
-    {
-        NS_LOG_INFO(it->first<<" :: "<<(it->second).first<<" :: "<<(it->second).second);
-		
-		//TODO CHANGE THIS  
-		(it->second).first = rand () % 60;
-        it++;
-    }
-	
-	NS_LOG_INFO("\n");
-				
-    Simulator::Schedule (Seconds (5.0), &RsuSpeedControl::ChangeSpeed, this);
-  }
+TypeId
+RsuEnv::GetTypeId(void) {
+	static TypeId tid = TypeId("RsuEnv")
+			.SetParent<OpenGymEnv> ()
+			.SetGroupName("Applications")
+			.AddConstructor<RsuEnv> ()
+			;
+	return tid;
+}
 
 void
-  RsuSpeedControl::HandleRead (Ptr<Socket> socket)
-  {
-    NS_LOG_FUNCTION(this << socket);
-    Ptr<Packet> packet;
-    packet = socket->Recv ();
+RsuEnv::DoDispose() {
+	NS_LOG_FUNCTION(this);
+}
 
-    uint8_t *buffer = new uint8_t[packet->GetSize ()];
-    packet->CopyData (buffer, packet->GetSize ());
-    std::string s = std::string ((char*) buffer);
-	std::vector<std::string> data = split (s, "*");
-	
-	if (data[0]!="1"){return;}
-	
-	std::string receivedID = data[1];
-    double velocity = (double) std::stod (data[2]);
-	double headway = (double) std::stod (data[3]);
-	
-	// Inserting vehicle data to RSU databse
-	std::map<std::string, std::pair<double,double>>::iterator it = m_vehicles_data.find(receivedID); 
-	if (it != m_vehicles_data.end()){
-		(it->second).first = velocity;
-		(it->second).second = headway;
-	}else {
-			m_vehicles_data.insert(std::make_pair(receivedID, std::make_pair(velocity,headway)));
+// ############################################# GYM SPECIFIC #############################################
+
+Ptr<OpenGymSpace>
+RsuEnv::GetObservationSpace() {
+	NS_LOG_FUNCTION(this);
+	float low = 0.0;
+	float high = 1.0;
+	std::vector<uint32_t> shape = {m_vehicles,};
+	std::string dtype = TypeNameGet<uint32_t> ();
+	Ptr<OpenGymBoxSpace> space = CreateObject<OpenGymBoxSpace> (low, high, shape, dtype);
+	NS_LOG_UNCOND("GetObservationSpace: " << space);
+	return space;
+}
+
+Ptr<OpenGymSpace>
+RsuEnv::GetActionSpace() {
+	NS_LOG_FUNCTION(this);
+	Ptr<OpenGymDiscreteSpace> space = CreateObject<OpenGymDiscreteSpace> (m_vehicles);
+	NS_LOG_UNCOND("GetActionSpace: " << space);
+	return space;
+}
+
+Ptr<OpenGymDataContainer>
+RsuEnv::GetObservation() {
+	NS_LOG_FUNCTION(this);
+	std::vector<uint32_t> shape = {m_vehicles,};
+	Ptr<OpenGymBoxContainer<uint32_t> > box = CreateObject<OpenGymBoxContainer<uint32_t> >(shape);
+
+	//  for (uint32_t i = 0; i < m_channelOccupation.size(); ++i) {
+	//    uint32_t value = m_channelOccupation.at(i);
+	//    box->AddValue(value);
+	//  }
+
+	NS_LOG_UNCOND("MyGetObservation: " << box);
+	return box;
+}
+
+float
+RsuEnv::GetReward() {
+	NS_LOG_FUNCTION(this);
+	float reward = 1.0;
+	NS_LOG_UNCOND("MyGetReward: " << reward);
+	return reward;
+}
+
+bool
+RsuEnv::GetGameOver() {
+	NS_LOG_FUNCTION(this);
+	bool isGameOver = false;
+	NS_LOG_UNCOND("MyGetGameOver: " << isGameOver);
+	return isGameOver;
+}
+
+std::string
+RsuEnv::GetExtraInfo() {
+	NS_LOG_FUNCTION(this);
+	std::string myInfo = "info";
+	NS_LOG_UNCOND("MyGetExtraInfo: " << myInfo);
+	return myInfo;
+}
+
+bool
+RsuEnv::ExecuteActions(Ptr<OpenGymDataContainer> action) {
+	NS_LOG_FUNCTION(this);
+	//    Ptr<OpenGymDiscreteContainer> discrete = DynamicCast<OpenGymDiscreteContainer>(action);
+	//    uint32_t nextChannel = discrete->GetValue();
+	//    m_currentChannel = nextChannel;
+	//
+	//    NS_LOG_UNCOND ("Current Channel: " << m_currentChannel);
+	return true;
+}
+
+// ########################################################################################################
+
+TypeId
+RsuSpeedControl::GetTypeId(void) {
+	static TypeId tid = TypeId("ns3::TrafficInfoServer")
+			.SetParent<Application> ()
+			.SetGroupName("Applications")
+			.AddConstructor<RsuSpeedControl> ()
+			.AddAttribute("Port", "Port on which we send packets.",
+			UintegerValue(9),
+			MakeUintegerAccessor(&RsuSpeedControl::m_port),
+			MakeUintegerChecker<uint16_t> ())
+			.AddAttribute("Interval",
+			"The time to wait between packets",
+			TimeValue(Seconds(5.0)),
+			MakeTimeAccessor(&RsuSpeedControl::m_interval),
+			MakeTimeChecker())
+			.AddAttribute("MaxPackets",
+			"The maximum number of packets the application will send",
+			UintegerValue(100),
+			MakeUintegerAccessor(&RsuSpeedControl::m_count),
+			MakeUintegerChecker<uint32_t> ())
+			.AddAttribute("Client",
+			"TraCI client for SUMO",
+			PointerValue(0),
+			MakePointerAccessor(&RsuSpeedControl::m_client),
+			MakePointerChecker<TraciClient> ())
+			.AddTraceSource("Tx", "A new packet is created and is sent",
+			MakeTraceSourceAccessor(&RsuSpeedControl::m_txTrace),
+			"ns3::Packet::TracedCallback")
+			;
+	return tid;
+}
+
+RsuSpeedControl::RsuSpeedControl() {
+	NS_LOG_FUNCTION(this);
+	m_sendEvent = EventId();
+	m_port = 0;
+	rx_socket = 0;
+	tx_socket = 0;
+	m_count = 1e9;
+	m_rsuGymEnv = 0;
+}
+
+RsuSpeedControl::~RsuSpeedControl() {
+	NS_LOG_FUNCTION(this);
+	tx_socket = 0;
+	rx_socket = 0;
+	m_rsuGymEnv = 0;
+}
+
+void
+RsuSpeedControl::DoDispose(void) {
+	NS_LOG_FUNCTION(this);
+	Application::DoDispose();
+}
+
+Ptr<RsuEnv>
+RsuSpeedControl::GetEnv(){
+		NS_LOG_FUNCTION(this);
+	return m_rsuGymEnv;
+}
+
+
+void
+RsuSpeedControl::StartApplication(void) {
+	NS_LOG_FUNCTION(this);
+
+	if (tx_socket == 0) {
+		TypeId tid = TypeId::LookupByName("ns3::UdpSocketFactory");
+		tx_socket = Socket::CreateSocket(GetNode(), tid);
+		Ptr<Ipv4> ipv4 = this->GetNode()->GetObject<Ipv4> ();
+		Ipv4InterfaceAddress iaddr = ipv4->GetAddress(1, 0);
+		Ipv4Address ipAddr = iaddr.GetBroadcast();
+		InetSocketAddress remote = InetSocketAddress(ipAddr, m_port);
+		tx_socket->SetAllowBroadcast(true);
+		tx_socket->Connect(remote);
+
+		ScheduleTransmit(Seconds(0.0));
+		Simulator::Schedule(Seconds(5.0), &RsuSpeedControl::ChangeSpeed, this);
+	}
+	TypeId tid = TypeId::LookupByName("ns3::UdpSocketFactory");
+	rx_socket = Socket::CreateSocket(GetNode(), tid);
+	InetSocketAddress local = InetSocketAddress(Ipv4Address::GetAny(), m_port);
+	rx_socket->Bind(local);
+	rx_socket->SetRecvCallback(MakeCallback(&RsuSpeedControl::HandleRead, this));
+
+	Ptr<RsuEnv> env = CreateObject<RsuEnv>();
+	m_rsuGymEnv = env;
+}
+
+void
+RsuSpeedControl::ScheduleTransmit(Time dt) {
+	NS_LOG_FUNCTION(this << dt);
+	m_sendEvent = Simulator::Schedule(dt, &RsuSpeedControl::Send, this);
+}
+
+void
+RsuSpeedControl::StopApplication() {
+	NS_LOG_FUNCTION(this);
+
+	if (tx_socket != 0) {
+		tx_socket->Close();
+		tx_socket->SetRecvCallback(MakeNullCallback<void, Ptr<Socket> > ());
 	}
 
-    Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
-    Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
-    Ipv4Address ipAddr = iaddr.GetLocal ();
+	if (rx_socket != 0) {
+		rx_socket->Close();
+		rx_socket->SetRecvCallback(MakeNullCallback<void, Ptr<Socket> > ());
+		rx_socket = 0;
+	}
 
-    NS_LOG_INFO("RX ##### vehicle->RSU at time " << Simulator::Now().GetSeconds()
-        << "s - [RSU ip:" << ipAddr << "]"
-		<< "[from vehicle:" << receivedID << "]"
-        << "[rx vel:" << velocity << "m/s]"
-		<< "[rx headway:" << headway << "]\n");
-  }
+	Simulator::Cancel(m_sendEvent);
+}
 
-  TypeId
-  VehicleSpeedControl::GetTypeId (void)
-  {
-    static TypeId tid =
-        TypeId ("ns3::TrafficInfoClient")
-        .SetParent<Application> ()
-        .SetGroupName ("Applications")
-        .AddConstructor<VehicleSpeedControl> ()
-        .AddAttribute (
-            "Port", "The port on which the client will listen for incoming packets.",
-            UintegerValue (0),
-            MakeUintegerAccessor (&VehicleSpeedControl::m_port),
-            MakeUintegerChecker<uint16_t> ())
-        .AddAttribute ("Interval",
-                   "The time to wait between packets",
-                   TimeValue (Seconds (5.0)),
-                   MakeTimeAccessor (&VehicleSpeedControl::m_interval),
-                   MakeTimeChecker ())
-        .AddAttribute (
-            "Client", "TraCI client for SUMO",
-            PointerValue (0),
-            MakePointerAccessor (&VehicleSpeedControl::m_client),
-            MakePointerChecker<TraciClient> ());
-    return tid;
-  }
+void
+RsuSpeedControl::Send() {
+	NS_LOG_FUNCTION(this << tx_socket);
 
-  VehicleSpeedControl::VehicleSpeedControl ()
-  {
-    NS_LOG_FUNCTION(this);
-    m_sendEvent = EventId ();
+	// ********************* Constructing message ********************* 
+	std::ostringstream msg;
+	msg << "0*";
+
+	// The message will be of form: "0*id1:velocity1|id2:velocity2|...."
+
+	std::map<std::string, std::pair<double, double>>::iterator it = m_vehicles_data.begin();
+	while (it != m_vehicles_data.end()) {
+		msg << "|" << it->first << ":" << std::to_string((it->second).first);
+		it++;
+	}
+
+	msg << '\0';
+
+	// *****************************************************************
+
+	Ptr<Packet> packet = Create<Packet> ((uint8_t*) msg.str().c_str(), msg.str().length());
+
+	Ptr<Ipv4> ipv4 = this->GetNode()->GetObject<Ipv4> ();
+	Ipv4InterfaceAddress iaddr = ipv4->GetAddress(1, 0);
+	Ipv4Address ipAddr = iaddr.GetLocal();
+
+	tx_socket->Send(packet);
+	NS_LOG_INFO("TX ##### RSU->vehicle at time " << Simulator::Now().GetSeconds()
+			<< "s - [RSU ip:" << ipAddr << "]\n");
+
+	ScheduleTransmit(m_interval);
+}
+
+void
+RsuSpeedControl::ChangeSpeed() {
+
+	NS_LOG_INFO("\nVehicles Data at RSU with ip: " << this->GetNode()->GetObject<Ipv4> ()->GetAddress(1, 0).GetLocal() << " \n");
+
+
+	std::map<std::string, std::pair<double, double>>::iterator it = m_vehicles_data.begin();
+	while (it != m_vehicles_data.end()) {
+		NS_LOG_INFO(it->first << " :: " << (it->second).first << " :: " << (it->second).second);
+
+		//TODO CHANGE THIS  
+		(it->second).first = rand() % 60;
+		it++;
+	}
+
+	NS_LOG_INFO("\n");
+
+	Simulator::Schedule(Seconds(5.0), &RsuSpeedControl::ChangeSpeed, this);
+}
+
+void
+RsuSpeedControl::HandleRead(Ptr<Socket> socket) {
+	NS_LOG_FUNCTION(this << socket);
+	Ptr<Packet> packet;
+	packet = socket->Recv();
+
+	uint8_t *buffer = new uint8_t[packet->GetSize()];
+	packet->CopyData(buffer, packet->GetSize());
+	std::string s = std::string((char*) buffer);
+	std::vector<std::string> data = split(s, "*");
+
+	if (data[0] != "1") {
+		return;
+	}
+
+	std::string receivedID = data[1];
+	double velocity = (double) std::stod(data[2]);
+	double headway = (double) std::stod(data[3]);
+
+	// Inserting vehicle data to RSU databse
+	std::map<std::string, std::pair<double, double>>::iterator it = m_vehicles_data.find(receivedID);
+	if (it != m_vehicles_data.end()) {
+		(it->second).first = velocity;
+		(it->second).second = headway;
+	} else {
+		m_vehicles_data.insert(std::make_pair(receivedID, std::make_pair(velocity, headway)));
+	}
+
+	Ptr<Ipv4> ipv4 = this->GetNode()->GetObject<Ipv4> ();
+	Ipv4InterfaceAddress iaddr = ipv4->GetAddress(1, 0);
+	Ipv4Address ipAddr = iaddr.GetLocal();
+
+	NS_LOG_INFO("RX ##### vehicle->RSU at time " << Simulator::Now().GetSeconds()
+			<< "s - [RSU ip:" << ipAddr << "]"
+			<< "[from vehicle:" << receivedID << "]"
+			<< "[rx vel:" << velocity << "m/s]"
+			<< "[rx headway:" << headway << "]\n");
+}
+
+TypeId
+VehicleSpeedControl::GetTypeId(void) {
+	static TypeId tid =
+			TypeId("ns3::TrafficInfoClient")
+			.SetParent<Application> ()
+			.SetGroupName("Applications")
+			.AddConstructor<VehicleSpeedControl> ()
+			.AddAttribute(
+			"Port", "The port on which the client will listen for incoming packets.",
+			UintegerValue(0),
+			MakeUintegerAccessor(&VehicleSpeedControl::m_port),
+			MakeUintegerChecker<uint16_t> ())
+			.AddAttribute("Interval",
+			"The time to wait between packets",
+			TimeValue(Seconds(5.0)),
+			MakeTimeAccessor(&VehicleSpeedControl::m_interval),
+			MakeTimeChecker())
+			.AddAttribute(
+			"Client", "TraCI client for SUMO",
+			PointerValue(0),
+			MakePointerAccessor(&VehicleSpeedControl::m_client),
+			MakePointerChecker<TraciClient> ());
+	return tid;
+}
+
+VehicleSpeedControl::VehicleSpeedControl() {
+	NS_LOG_FUNCTION(this);
+	m_sendEvent = EventId();
 	tx_socket = 0;
-    rx_socket = 0;
-    m_port = 0;
-    m_client = nullptr;
-    last_velocity = -1;
-  }
+	rx_socket = 0;
+	m_port = 0;
+	m_client = nullptr;
+	last_velocity = -1;
+}
 
-  VehicleSpeedControl::~VehicleSpeedControl ()
-  {
-    NS_LOG_FUNCTION(this);
-    tx_socket = 0;
-    rx_socket = 0;
-  }
+VehicleSpeedControl::~VehicleSpeedControl() {
+	NS_LOG_FUNCTION(this);
+	tx_socket = 0;
+	rx_socket = 0;
+}
 
-  void
-  VehicleSpeedControl::DoDispose (void)
-  {
-    NS_LOG_FUNCTION(this);
-    Application::DoDispose ();
-  }
+void
+VehicleSpeedControl::DoDispose(void) {
+	NS_LOG_FUNCTION(this);
+	Application::DoDispose();
+}
 
-  void
-  VehicleSpeedControl::StartApplication (void)
-  {
-    NS_LOG_FUNCTION(this);
+void
+VehicleSpeedControl::StartApplication(void) {
+	NS_LOG_FUNCTION(this);
 
-    TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
-    rx_socket = Socket::CreateSocket (GetNode (), tid);
-    InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), m_port);
-    rx_socket->Bind (local);
-    rx_socket->SetRecvCallback (MakeCallback (&VehicleSpeedControl::HandleRead, this));
+	TypeId tid = TypeId::LookupByName("ns3::UdpSocketFactory");
+	rx_socket = Socket::CreateSocket(GetNode(), tid);
+	InetSocketAddress local = InetSocketAddress(Ipv4Address::GetAny(), m_port);
+	rx_socket->Bind(local);
+	rx_socket->SetRecvCallback(MakeCallback(&VehicleSpeedControl::HandleRead, this));
 
-    if (tx_socket == 0)
-      {
-        TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
-        tx_socket = Socket::CreateSocket (GetNode (), tid);
-        Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
-        Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
-        Ipv4Address ipAddr = iaddr.GetBroadcast ();
-        InetSocketAddress remote = InetSocketAddress (ipAddr, m_port);
-        tx_socket->SetAllowBroadcast (true);
-        tx_socket->Connect (remote);
+	if (tx_socket == 0) {
+		TypeId tid = TypeId::LookupByName("ns3::UdpSocketFactory");
+		tx_socket = Socket::CreateSocket(GetNode(), tid);
+		Ptr<Ipv4> ipv4 = this->GetNode()->GetObject<Ipv4> ();
+		Ipv4InterfaceAddress iaddr = ipv4->GetAddress(1, 0);
+		Ipv4Address ipAddr = iaddr.GetBroadcast();
+		InetSocketAddress remote = InetSocketAddress(ipAddr, m_port);
+		tx_socket->SetAllowBroadcast(true);
+		tx_socket->Connect(remote);
 
-        ScheduleTransmit (Seconds (0.0));
-        Simulator::Schedule (Seconds (5.0), &VehicleSpeedControl::Send, this);
-      }
-  }
+		ScheduleTransmit(Seconds(0.0));
+		Simulator::Schedule(Seconds(5.0), &VehicleSpeedControl::Send, this);
+	}
+}
 
-  void
-  VehicleSpeedControl::StopApplication ()
-  {
-    NS_LOG_FUNCTION(this);
-	
-	if (tx_socket != 0)
-      {
-        tx_socket->Close ();
-        tx_socket->SetRecvCallback (MakeNullCallback<void, Ptr<Socket> > ());
-      }
-	
-    if (rx_socket != 0)
-      {
-        rx_socket->Close ();
-        rx_socket->SetRecvCallback (MakeNullCallback<void, Ptr<Socket> > ());
-        rx_socket = 0;
-      }
-  }
+void
+VehicleSpeedControl::StopApplication() {
+	NS_LOG_FUNCTION(this);
 
-  void
-  VehicleSpeedControl::StopApplicationNow ()
-  {
-    NS_LOG_FUNCTION(this);
-    StopApplication ();
-  }
+	if (tx_socket != 0) {
+		tx_socket->Close();
+		tx_socket->SetRecvCallback(MakeNullCallback<void, Ptr<Socket> > ());
+	}
 
-  void
-  VehicleSpeedControl::HandleRead (Ptr<Socket> socket)
-  {
-    NS_LOG_FUNCTION(this << socket);
-    Ptr<Packet> packet;
-    packet = socket->Recv ();
+	if (rx_socket != 0) {
+		rx_socket->Close();
+		rx_socket->SetRecvCallback(MakeNullCallback<void, Ptr<Socket> > ());
+		rx_socket = 0;
+	}
+}
 
-    uint8_t *buffer = new uint8_t[packet->GetSize ()];
-    packet->CopyData (buffer, packet->GetSize ());
-    std::string s = std::string ((char*) buffer);
-	std::vector<std::string> data = split (s, "*");
+void
+VehicleSpeedControl::StopApplicationNow() {
+	NS_LOG_FUNCTION(this);
+	StopApplication();
+}
 
-	if (data[0]!="0"){
+void
+VehicleSpeedControl::HandleRead(Ptr<Socket> socket) {
+	NS_LOG_FUNCTION(this << socket);
+	Ptr<Packet> packet;
+	packet = socket->Recv();
+
+	uint8_t *buffer = new uint8_t[packet->GetSize()];
+	packet->CopyData(buffer, packet->GetSize());
+	std::string s = std::string((char*) buffer);
+	std::vector<std::string> data = split(s, "*");
+
+	if (data[0] != "0") {
 		// Dumping data from vehicleDumping
 		return;
 	}
-	
+
 	double velocity = -999;
-	std::vector<std::string> map_data = split (data[1], "|");
-	for (uint8_t i=0;i< map_data.size(); i++ ){
-		std::vector<std::string> parameters = split(map_data[i],":");
-		if (parameters[0] == m_client->GetVehicleId(this->GetNode())){
+	std::vector<std::string> map_data = split(data[1], "|");
+	for (uint8_t i = 0; i < map_data.size(); i++) {
+		std::vector<std::string> parameters = split(map_data[i], ":");
+		if (parameters[0] == m_client->GetVehicleId(this->GetNode())) {
 			velocity = std::stod(parameters[1]);
 		}
 	}
-	
-	if (velocity == -999){
-    // Dumping data from RSU
+
+	if (velocity == -999) {
+		// Dumping data from RSU
 		return;
 	}
 
-    Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
-    Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
-    Ipv4Address ipAddr = iaddr.GetLocal ();
-	
-    NS_LOG_INFO("RX ***** RSU->vehicle at time " << Simulator::Now().GetSeconds()
-        << "s - "
-        << "[vehicle ip:" << ipAddr << "]"
-		<< "[vehicle id:" << m_client->GetVehicleId(this->GetNode()) << "]"
-        << "[vel:" << m_client->TraCIAPI::vehicle.getSpeed(m_client->GetVehicleId(this->GetNode())) << "m/s]"
-        << "[rx vel:" << velocity << "m/s]\n");
+	Ptr<Ipv4> ipv4 = this->GetNode()->GetObject<Ipv4> ();
+	Ipv4InterfaceAddress iaddr = ipv4->GetAddress(1, 0);
+	Ipv4Address ipAddr = iaddr.GetLocal();
 
-    if (velocity != last_velocity)
-      {
-        m_client->TraCIAPI::vehicle.setSpeed (m_client->GetVehicleId (this->GetNode ()), velocity);
-        last_velocity = velocity;
-      }
-  }
-  
+	NS_LOG_INFO("RX ***** RSU->vehicle at time " << Simulator::Now().GetSeconds()
+			<< "s - "
+			<< "[vehicle ip:" << ipAddr << "]"
+			<< "[vehicle id:" << m_client->GetVehicleId(this->GetNode()) << "]"
+			<< "[vel:" << m_client->TraCIAPI::vehicle.getSpeed(m_client->GetVehicleId(this->GetNode())) << "m/s]"
+			<< "[rx vel:" << velocity << "m/s]\n");
+
+	if (velocity != last_velocity) {
+		m_client->TraCIAPI::vehicle.setSpeed(m_client->GetVehicleId(this->GetNode()), velocity);
+		last_velocity = velocity;
+	}
+}
+
 void
-  VehicleSpeedControl::Send ()
-  {
-    NS_LOG_FUNCTION(this << tx_socket);
-	
+VehicleSpeedControl::Send() {
+	NS_LOG_FUNCTION(this << tx_socket);
+
 	// Get Headway Just before sending 
 	// Headway in seconds  = Headway in meters / velocity
-	if (last_velocity <= 0){
+	if (last_velocity <= 0) {
 		last_headway = 0.0;
-	}else{
-		last_headway = m_client->TraCIAPI::vehicle.getLeader (m_client->GetVehicleId(this->GetNode()),0).second / last_velocity;
+	} else {
+		last_headway = m_client->TraCIAPI::vehicle.getLeader(m_client->GetVehicleId(this->GetNode()), 0).second / last_velocity;
 	}
-	
-    std::ostringstream msg;
-    msg << "1*" << m_client->GetVehicleId(this->GetNode()) << "*" << std::to_string (last_velocity) << "*" << std::to_string (last_headway) <<'\0';
-    Ptr<Packet> packet = Create<Packet> ((uint8_t*) msg.str ().c_str (), msg.str ().length ());
 
-    Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
-    Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
-    Ipv4Address ipAddr = iaddr.GetLocal ();
+	std::ostringstream msg;
+	msg << "1*" << m_client->GetVehicleId(this->GetNode()) << "*" << std::to_string(last_velocity) << "*" << std::to_string(last_headway) << '\0';
+	Ptr<Packet> packet = Create<Packet> ((uint8_t*) msg.str().c_str(), msg.str().length());
 
-   tx_socket->Send (packet);
-    NS_LOG_INFO("TX ***** Vehicle->RSU at time " << Simulator::Now().GetSeconds()
-                << "s - "
-			    << "[vehicle ip:" << ipAddr << "]"
-				<< "[vehicle id:" << m_client->GetVehicleId(this->GetNode()) << "]"
-                << "[tx vel:" << last_velocity << "m/s]"
-				<< "[tx headway:" << last_headway << "s]\n");
+	Ptr<Ipv4> ipv4 = this->GetNode()->GetObject<Ipv4> ();
+	Ipv4InterfaceAddress iaddr = ipv4->GetAddress(1, 0);
+	Ipv4Address ipAddr = iaddr.GetLocal();
 
-    ScheduleTransmit (m_interval);
-  }
+	tx_socket->Send(packet);
+	NS_LOG_INFO("TX ***** Vehicle->RSU at time " << Simulator::Now().GetSeconds()
+			<< "s - "
+			<< "[vehicle ip:" << ipAddr << "]"
+			<< "[vehicle id:" << m_client->GetVehicleId(this->GetNode()) << "]"
+			<< "[tx vel:" << last_velocity << "m/s]"
+			<< "[tx headway:" << last_headway << "s]\n");
 
- void
-  VehicleSpeedControl::ScheduleTransmit (Time dt)
-  {
-    NS_LOG_FUNCTION(this << dt);
-    m_sendEvent = Simulator::Schedule (dt, &VehicleSpeedControl::Send, this);
-  }
+	ScheduleTransmit(m_interval);
+}
+
+void
+VehicleSpeedControl::ScheduleTransmit(Time dt) {
+	NS_LOG_FUNCTION(this << dt);
+	m_sendEvent = Simulator::Schedule(dt, &VehicleSpeedControl::Send, this);
+}
 
 } // Namespace ns3
