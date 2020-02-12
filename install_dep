@@ -104,9 +104,8 @@ echo "** Done **"
 
 echo "To complete set up we need to close this terminal window"
 echo "Click on the ENTER key to close this window"
-read key
-
-case $key in
-"")
-  exit;;
-esac
+read -s -n 1 key
+if [[ $key = "" ]];
+then
+  exit
+fi
