@@ -41,8 +41,8 @@ echo "** Done **"
 
 echo "Installing StableBaselines"
 echo "Which type of StableBaselines would you like?"
-echo "1: Regular"
-echo "2: With OpenMPI support"
+echo "[ 1 ] Regular"
+echo "[ 2 ] With OpenMPI support"
 echo "* Note: OpenMPI has been known to cause issues with Tensorflow in the past."
 
 read sb_option
@@ -105,4 +105,8 @@ echo "** Done **"
 echo "To complete set up we need to close this terminal window"
 echo "Click on the ENTER key to close this window"
 read key
-if [[ -z $key ]]; then exit; fi
+
+case $key in
+"")
+  exit;;
+esac
