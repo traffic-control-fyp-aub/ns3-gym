@@ -32,7 +32,7 @@ class Packet;
  *
  * Traffic information is broadcasted
  */
-class RsuSpeedControl : public Application , public OpenGymEnv
+class RsuSpeedControl : public Application
 {
 public:
   /**

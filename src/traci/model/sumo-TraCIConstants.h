@@ -340,7 +340,7 @@ const int TYPE_COLOR = 0x11;
 // RESULT TYPES
 // ****************************************
 // result type: Ok
-const int RTYPE_OK = 0x00;
+const int RTYPE_OK = 0x00; 
 // result type: not implemented
 const int RTYPE_NOTIMPLEMENTED = 0x01;
 // result type: error

@@ -135,8 +135,8 @@ namespace ns3
   RsuSpeedControl::GetObservation()
   {
     NS_LOG_FUNCTION (this);
-//    std::vector<uint32_t> shape = {m_channelNum,};
-    Ptr<OpenGymBoxContainer<uint32_t> > box = CreateObject<OpenGymBoxContainer<uint32_t> >(shape);
+    std::vector<uint32_t> values;
+    Ptr<OpenGymBoxContainer<uint32_t> > box = CreateObject<OpenGymBoxContainer<uint32_t> >(values);
 //	
 //    for (uint32_t i = 0; i < m_channelOccupation.size(); ++i) {
 //    	uint32_t value = m_channelOccupation.at(i);
