@@ -12,7 +12,6 @@
 #include "ns3/traced-callback.h"
 
 
-
 namespace ns3 {
 
 	std::vector<std::string> split(const std::string& input, const std::string& regex);

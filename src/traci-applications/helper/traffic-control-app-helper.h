@@ -8,6 +8,8 @@
 #include "ns3/ipv4-address.h"
 #include "ns3/ipv6-address.h"
 #include "ns3/traci-client.h"
+#include "ns3/traffic-control-app.h"
+
 
 namespace ns3 {
 
@@ -61,6 +63,8 @@ public:
    *          NodeContainer.
    */
   ApplicationContainer Install (NodeContainer c) const;
+  
+  Ptr<RsuEnv> GetRsuEnviroment();
 
 private:
   /**
@@ -71,6 +75,8 @@ private:
    * \returns Ptr to the application installed.
    */
   Ptr<Application> InstallPriv (Ptr<Node> node) const;
+
+  Ptr<RsuEnv> m_rsuGymEnv;
 
   ObjectFactory m_factory; //!< Object factory.
 };
@@ -151,3 +157,4 @@ private:
 } // namespace ns3
 
 #endif /* TRAFFIC_INFO_HELPER_H */
+
