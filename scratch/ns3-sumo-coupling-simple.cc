@@ -107,6 +107,9 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoWaitForSocket", TimeValue (Seconds (1.0)));
   
   /*** 8. Create and Setup Applications for the RSU node and set position ***/  
+  Ptr<OpenGymInterface> openGymInterface;
+  openGymInterface = OpenGymInterface::Get(5555);
+  
   RsuSpeedControlHelper rsuSpeedControlHelper1 (9); // Port #9
   rsuSpeedControlHelper1.SetAttribute ("Interval", TimeValue (Seconds (5.0)));    // packet interval
   rsuSpeedControlHelper1.SetAttribute ("Client", (PointerValue) (sumoClient));    // pass TraciClient object for accessing sumo in application
@@ -123,9 +126,6 @@ main (int argc, char *argv[])
   ApplicationContainer rsuSpeedControlApps2 = rsuSpeedControlHelper2.Install (nodePool.Get (1));
   rsuSpeedControlApps2.Start (Seconds (1.0));
   rsuSpeedControlApps2.Stop (simulationTime);
-  
-  Ptr<OpenGymInterface> openGymInterface;
-  openGymInterface = OpenGymInterface::Get(5555);
 
   Ptr<MobilityModel> mobilityRsuNode1 = nodePool.Get (0)->GetObject<MobilityModel> ();
   mobilityRsuNode1->SetPosition (Vector (100.0, 125.0, 3.0)); // set RSU to fixed position

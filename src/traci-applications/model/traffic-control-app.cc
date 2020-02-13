@@ -58,7 +58,7 @@ NS_OBJECT_ENSURE_REGISTERED(RsuEnv);
 RsuEnv::RsuEnv() {
 	NS_LOG_FUNCTION(this);
 	SetOpenGymInterface(OpenGymInterface::Get());
-	m_vehicles=0;
+	m_vehicles = 0;
 }
 
 RsuEnv::~RsuEnv() {
@@ -86,9 +86,9 @@ Ptr<OpenGymSpace>
 RsuEnv::GetObservationSpace() {
 	NS_LOG_FUNCTION(this);
 	float low = 0.0;
-	float high = 1.0;
-	std::vector<uint32_t> shape = {m_vehicles,};
-	std::string dtype = TypeNameGet<uint32_t> ();
+	float high = 3.5;
+	std::vector<uint32_t> shape = {2 * m_vehicles,};
+    std::string dtype = TypeNameGet<uint32_t> ();
 	Ptr<OpenGymBoxSpace> space = CreateObject<OpenGymBoxSpace> (low, high, shape, dtype);
 	NS_LOG_UNCOND("GetObservationSpace: " << space);
 	return space;
@@ -97,9 +97,14 @@ RsuEnv::GetObservationSpace() {
 Ptr<OpenGymSpace>
 RsuEnv::GetActionSpace() {
 	NS_LOG_FUNCTION(this);
-	Ptr<OpenGymDiscreteSpace> space = CreateObject<OpenGymDiscreteSpace> (m_vehicles);
-	NS_LOG_UNCOND("GetActionSpace: " << space);
-	return space;
+	float low = -1.0;
+	float high = 1.0;
+	std::vector<uint32_t> shape = {m_vehicles,};
+  std::string dtype = TypeNameGet<uint32_t> ();
+
+	Ptr<OpenGymBoxSpace> box = CreateObject<OpenGymBoxSpace> (low, high, shape, dtype);
+	NS_LOG_INFO("GetActionSpace: " << box);
+	return box;
 }
 
 Ptr<OpenGymDataContainer>
@@ -108,10 +113,13 @@ RsuEnv::GetObservation() {
 	std::vector<uint32_t> shape = {m_vehicles,};
 	Ptr<OpenGymBoxContainer<uint32_t> > box = CreateObject<OpenGymBoxContainer<uint32_t> >(shape);
 
-	//  for (uint32_t i = 0; i < m_channelOccupation.size(); ++i) {
-	//    uint32_t value = m_channelOccupation.at(i);
-	//    box->AddValue(value);
-	//  }
+	// send zeros first time
+
+	
+//	  for (uint32_t i = 0; i < m_channelOccupation.size(); ++i) {
+//	    uint32_t value = m_channelOccupation.at(i);
+//	    box->AddValue(value);
+//	  }
 
 	NS_LOG_UNCOND("MyGetObservation: " << box);
 	return box;
@@ -128,6 +136,7 @@ RsuEnv::GetReward() {
 bool
 RsuEnv::GetGameOver() {
 	NS_LOG_FUNCTION(this);
+	// BAse this on exit status
 	bool isGameOver = false;
 	NS_LOG_UNCOND("MyGetGameOver: " << isGameOver);
 	return isGameOver;
@@ -144,12 +153,14 @@ RsuEnv::GetExtraInfo() {
 bool
 RsuEnv::ExecuteActions(Ptr<OpenGymDataContainer> action) {
 	NS_LOG_FUNCTION(this);
-	//    Ptr<OpenGymDiscreteContainer> discrete = DynamicCast<OpenGymDiscreteContainer>(action);
-	//    uint32_t nextChannel = discrete->GetValue();
-	//    m_currentChannel = nextChannel;
-	//
-	//    NS_LOG_UNCOND ("Current Channel: " << m_currentChannel);
-	return true;
+	Ptr<OpenGymBoxContainer<uint32_t> > box = DynamicCast<OpenGymBoxContainer<uint32_t> >(action);
+	
+	//Here we will get data (velovities)
+    NS_LOG_INFO(box->GetValue(0));
+    NS_LOG_INFO(box->GetValue(1));
+
+    NS_LOG_INFO ("MyExecuteActions: " << action);
+    return true;
 }
 
 // ########################################################################################################
@@ -210,11 +221,10 @@ RsuSpeedControl::DoDispose(void) {
 }
 
 Ptr<RsuEnv>
-RsuSpeedControl::GetEnv(){
-		NS_LOG_FUNCTION(this);
+RsuSpeedControl::GetEnv() {
+	NS_LOG_FUNCTION(this);
 	return m_rsuGymEnv;
 }
-
 
 void
 RsuSpeedControl::StartApplication(void) {
