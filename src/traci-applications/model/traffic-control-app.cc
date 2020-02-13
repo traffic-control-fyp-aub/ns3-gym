@@ -57,12 +57,9 @@ NS_OBJECT_ENSURE_REGISTERED(RsuEnv);
 
 RsuEnv::RsuEnv() {
 	NS_LOG_FUNCTION(this);
+	SetOpenGymInterface(OpenGymInterface::Get());
 	m_vehicles=0;
 }
-
-//RsuEnv::RsuEnv(uint32_t channelNum) {
-//	NS_LOG_FUNCTION(this);
-//}
 
 RsuEnv::~RsuEnv() {
 	NS_LOG_FUNCTION(this);

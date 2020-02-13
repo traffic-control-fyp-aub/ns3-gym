@@ -49,18 +49,10 @@ Ptr<Application>
 RsuSpeedControlHelper::InstallPriv (Ptr<Node> node) const
 {
   Ptr<RsuSpeedControl> app = m_factory.Create<RsuSpeedControl> ();
-  m_rsuGymEnv = app->GetEnv();
   node->AddApplication (app);
 
   return app;
 }
-
-Ptr<RsuEnv> 
-RsuSpeedControlHelper::GetRsuEnviroment() const
-{
-	return m_rsuGymEnv;
-}
-
 
 VehicleSpeedControlHelper::VehicleSpeedControlHelper (uint16_t port)
 {

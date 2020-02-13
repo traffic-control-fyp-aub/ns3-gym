@@ -27,7 +27,6 @@ namespace ns3 {
 	class RsuEnv : public OpenGymEnv {
 	public:
 		RsuEnv();
-//		RsuEnv(uint32_t channelNum);
 		virtual ~RsuEnv();
 		static TypeId GetTypeId(void);
 		virtual void DoDispose();

@@ -64,8 +64,6 @@ public:
    */
   ApplicationContainer Install (NodeContainer c) const;
   
-  Ptr<RsuEnv> GetRsuEnviroment();
-
 private:
   /**
    * Install an ns3::TrafficInfoServer on the node configured with all the
@@ -75,9 +73,6 @@ private:
    * \returns Ptr to the application installed.
    */
   Ptr<Application> InstallPriv (Ptr<Node> node) const;
-
-  Ptr<RsuEnv> m_rsuGymEnv;
-
   ObjectFactory m_factory; //!< Object factory.
 };
 
