@@ -177,7 +177,7 @@ class RSUEnv(gym.Env):
         #   By A. Kreidieh
         #
         #   Below is mathematical form of our reward function:
-        #   ||v_desired|| - ( sum(||v_desired - v_i(t)|| ))/N - (alpha)( summation(max(h_max - h_i(t), 0)) )
+        #   ||v_max|| - ( sum(||v_desired - v_i(t)|| ))/N - (alpha)( summation(max(h_max - h_i(t), 0)) )
         #
         #   where:
         #       - v_desired is the desired velocity of the system calculated by the road side unit
