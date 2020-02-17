@@ -42,7 +42,7 @@ main (int argc, char *argv[])
   //nodePool.Create (5);
 
 /** scenario3 **/
-  nodePool.Create (5);
+  nodePool.Create (6);
 
   uint32_t nodeCounter (0);
 
@@ -151,7 +151,7 @@ main (int argc, char *argv[])
 
       // Install Application
       ApplicationContainer vehicleSpeedControlApps = vehicleSpeedControlHelper.Install (includedNode);
-      vehicleSpeedControlApps.Start (Seconds (0.0));
+      vehicleSpeedControlApps.Start (Seconds (1.0));
       vehicleSpeedControlApps.Stop (simulationTime);
 
       return includedNode;
