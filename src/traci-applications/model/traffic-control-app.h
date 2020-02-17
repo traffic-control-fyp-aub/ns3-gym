@@ -39,9 +39,20 @@ namespace ns3 {
 		bool GetGameOver();
 		std::string GetExtraInfo();
 		bool ExecuteActions(Ptr<OpenGymDataContainer> action);
+		std::vector<double> ExportNewSpeeds();
+		void ImportSpeedsAndHeadWays(std::vector<double> RSU_headways,std::vector<double> RSU_speeds);
 		
 		uint32_t m_vehicles;
-
+		double m_alpha;
+		double m_beta;
+		double max_headway_time;
+		double max_velocity_value;
+		// Look into this
+		double desired_velocity_value;
+		
+		std::vector<double> actual_speeds;
+		std::vector<double> actual_headways;
+		std::vector<double> new_speeds;
 	};
 
 	/**
@@ -97,7 +108,7 @@ namespace ns3 {
 		TracedCallback<Ptr<const Packet> > m_txTrace;
 		
 		// GymEnv
-		  Ptr<RsuEnv> m_rsuGymEnv;
+		Ptr<RsuEnv> m_rsuGymEnv;
 
 	};
 

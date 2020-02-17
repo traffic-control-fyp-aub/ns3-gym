@@ -31,6 +31,7 @@
 #include "ns3/uinteger.h"
 #include <string>
 #include <stdlib.h>
+#include <cmath>
 #include <boost/algorithm/string/classification.hpp> // Include boost::for is_any_of
 #include <boost/algorithm/string/split.hpp>
 #include <bits/stl_map.h> // Include for boost::split
@@ -57,8 +58,15 @@ NS_OBJECT_ENSURE_REGISTERED(RsuEnv);
 
 RsuEnv::RsuEnv() {
 	NS_LOG_FUNCTION(this);
-	SetOpenGymInterface(OpenGymInterface::Get());
+	this->SetOpenGymInterface(OpenGymInterface::Get());
+	NS_LOG_INFO("Set Up Interface : " << OpenGymInterface::Get() << "\n");
 	m_vehicles = 0;
+	m_alpha = 0.9;
+	m_beta = 0.99;
+	max_headway_time = 2.0;
+	max_velocity_value = 3.5;
+	// Look into this
+	desired_velocity_value = 3.0;
 }
 
 RsuEnv::~RsuEnv() {
@@ -86,9 +94,9 @@ Ptr<OpenGymSpace>
 RsuEnv::GetObservationSpace() {
 	NS_LOG_FUNCTION(this);
 	float low = 0.0;
-	float high = 3.5;
+	float high = max_velocity_value;
 	std::vector<uint32_t> shape = {2 * m_vehicles,};
-    std::string dtype = TypeNameGet<uint32_t> ();
+	std::string dtype = TypeNameGet<uint32_t> ();
 	Ptr<OpenGymBoxSpace> space = CreateObject<OpenGymBoxSpace> (low, high, shape, dtype);
 	NS_LOG_UNCOND("GetObservationSpace: " << space);
 	return space;
@@ -100,7 +108,7 @@ RsuEnv::GetActionSpace() {
 	float low = -1.0;
 	float high = 1.0;
 	std::vector<uint32_t> shape = {m_vehicles,};
-  std::string dtype = TypeNameGet<uint32_t> ();
+	std::string dtype = TypeNameGet<uint32_t> ();
 
 	Ptr<OpenGymBoxSpace> box = CreateObject<OpenGymBoxSpace> (low, high, shape, dtype);
 	NS_LOG_INFO("GetActionSpace: " << box);
@@ -115,11 +123,17 @@ RsuEnv::GetObservation() {
 
 	// send zeros first time
 
-	
-//	  for (uint32_t i = 0; i < m_channelOccupation.size(); ++i) {
-//	    uint32_t value = m_channelOccupation.at(i);
-//	    box->AddValue(value);
-//	  }
+	// Add Current headways to the observation
+	for (uint32_t i = 0; i < actual_headways.size(); ++i) {
+		double value = actual_headways[i];
+		box->AddValue(value);
+	}
+
+	// Add current speeds to the observation
+	for (uint32_t i = 0; i < actual_speeds.size(); ++i) {
+		double value = actual_speeds[i];
+		box->AddValue(value);
+	}
 
 	NS_LOG_UNCOND("MyGetObservation: " << box);
 	return box;
@@ -128,7 +142,17 @@ RsuEnv::GetObservation() {
 float
 RsuEnv::GetReward() {
 	NS_LOG_FUNCTION(this);
-	float reward = 1.0;
+	double reward = 0.0;
+	double max_headway_summation = 0.0;
+	for (uint32_t i = 0; i < actual_headways.size(); i++) {
+		max_headway_summation += fmax(max_headway_time - actual_headways[i], 0.0);
+	}
+	double abs_speed_diff_summation = 0.0;
+	for (uint32_t i = 0; i < actual_velocities.size(); i++) {
+		abs_speed_diff_summation += abs(desired_velocity_value - actual_velocities[i]);
+	}
+	reward = max_velocity_value - (abs_speed_diff_summation / m_vehicles) - (max_headway_summation * m_alpha);
+	reward *= m_beta;
 	NS_LOG_UNCOND("MyGetReward: " << reward);
 	return reward;
 }
@@ -154,13 +178,32 @@ bool
 RsuEnv::ExecuteActions(Ptr<OpenGymDataContainer> action) {
 	NS_LOG_FUNCTION(this);
 	Ptr<OpenGymBoxContainer<uint32_t> > box = DynamicCast<OpenGymBoxContainer<uint32_t> >(action);
-	
-	//Here we will get data (velovities)
-    NS_LOG_INFO(box->GetValue(0));
-    NS_LOG_INFO(box->GetValue(1));
 
-    NS_LOG_INFO ("MyExecuteActions: " << action);
-    return true;
+	//Here we will get data (velocities)
+	new_speeds = box->GetData()
+
+			NS_LOG_INFO(box->GetValue(0));
+	NS_LOG_INFO(box->GetValue(1));
+
+	NS_LOG_INFO("MyExecuteActions: " << action);
+	return true;
+}
+
+std::vector<double>
+RsuEnv::ExportNewSpeeds() {
+	NS_LOG_FUNCTION(this);
+	return new_speeds;
+}
+
+void
+RsuEnv::ImportSpeedsAndHeadWays(std::vector<double> RSU_headways, std::vector<double> RSU_speeds) {
+	NS_LOG_FUNCTION(this);
+
+	actual_headways.clear();
+	actual_speeds.clear();
+	actual_headways = RSU_headways;
+	actual_speeds = RSU_headways;
+	Notify();
 }
 
 // ########################################################################################################
@@ -251,6 +294,7 @@ RsuSpeedControl::StartApplication(void) {
 
 	Ptr<RsuEnv> env = CreateObject<RsuEnv>();
 	m_rsuGymEnv = env;
+	NS_LOG_INFO("New Gym Enviroment" << env << "\n");
 }
 
 void
