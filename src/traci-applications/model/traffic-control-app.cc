@@ -142,14 +142,14 @@ RsuEnv::GetObservation() {
 float
 RsuEnv::GetReward() {
 	NS_LOG_FUNCTION(this);
-	double reward = 0.0;
+	float reward = 0.0;
 	double max_headway_summation = 0.0;
 	for (uint32_t i = 0; i < actual_headways.size(); i++) {
 		max_headway_summation += fmax(max_headway_time - actual_headways[i], 0.0);
 	}
 	double abs_speed_diff_summation = 0.0;
-	for (uint32_t i = 0; i < actual_velocities.size(); i++) {
-		abs_speed_diff_summation += abs(desired_velocity_value - actual_velocities[i]);
+	for (uint32_t i = 0; i < actual_speeds.size(); i++) {
+		abs_speed_diff_summation += abs(desired_velocity_value - actual_speeds[i]);
 	}
 	reward = max_velocity_value - (abs_speed_diff_summation / m_vehicles) - (max_headway_summation * m_alpha);
 	reward *= m_beta;
@@ -180,16 +180,16 @@ RsuEnv::ExecuteActions(Ptr<OpenGymDataContainer> action) {
 	Ptr<OpenGymBoxContainer<uint32_t> > box = DynamicCast<OpenGymBoxContainer<uint32_t> >(action);
 
 	//Here we will get data (velocities)
-	new_speeds = box->GetData()
+	new_speeds = box->GetData();
 
-			NS_LOG_INFO(box->GetValue(0));
+	NS_LOG_INFO(box->GetValue(0));
 	NS_LOG_INFO(box->GetValue(1));
 
 	NS_LOG_INFO("MyExecuteActions: " << action);
 	return true;
 }
 
-std::vector<double>
+std::vector<uint32_t>
 RsuEnv::ExportNewSpeeds() {
 	NS_LOG_FUNCTION(this);
 	return new_speeds;

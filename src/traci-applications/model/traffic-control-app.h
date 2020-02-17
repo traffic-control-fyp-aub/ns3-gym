@@ -39,7 +39,7 @@ namespace ns3 {
 		bool GetGameOver();
 		std::string GetExtraInfo();
 		bool ExecuteActions(Ptr<OpenGymDataContainer> action);
-		std::vector<double> ExportNewSpeeds();
+		std::vector<uint32_t> ExportNewSpeeds();
 		void ImportSpeedsAndHeadWays(std::vector<double> RSU_headways,std::vector<double> RSU_speeds);
 		
 		uint32_t m_vehicles;
@@ -52,7 +52,7 @@ namespace ns3 {
 		
 		std::vector<double> actual_speeds;
 		std::vector<double> actual_headways;
-		std::vector<double> new_speeds;
+		std::vector<uint32_t> new_speeds;
 	};
 
 	/**
