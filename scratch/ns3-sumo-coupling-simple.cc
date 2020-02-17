@@ -33,7 +33,7 @@ main (int argc, char *argv[])
     }
 
   /*** 1. Create node pool and counter; large enough to cover all sumo vehicles ***/
-  ns3::Time simulationTime (ns3::Seconds(50));
+  ns3::Time simulationTime (ns3::Seconds(500));
   NodeContainer nodePool;
 /** scenario1 **/
   //nodePool.Create (32);
@@ -115,17 +115,17 @@ main (int argc, char *argv[])
   rsuSpeedControlHelper1.SetAttribute ("Client", (PointerValue) (sumoClient));    // pass TraciClient object for accessing sumo in application
   
   
-  RsuSpeedControlHelper rsuSpeedControlHelper2 (9); // Port #9
-  rsuSpeedControlHelper2.SetAttribute ("Interval", TimeValue (Seconds (5.0)));    // packet interval
-  rsuSpeedControlHelper2.SetAttribute ("Client", (PointerValue) (sumoClient));    // pass TraciClient object for accessing sumo in application
+//  RsuSpeedControlHelper rsuSpeedControlHelper2 (9); // Port #9
+//  rsuSpeedControlHelper2.SetAttribute ("Interval", TimeValue (Seconds (5.0)));    // packet interval
+//  rsuSpeedControlHelper2.SetAttribute ("Client", (PointerValue) (sumoClient));    // pass TraciClient object for accessing sumo in application
 
   ApplicationContainer rsuSpeedControlApps = rsuSpeedControlHelper1.Install (nodePool.Get (0));
-  rsuSpeedControlApps.Start (Seconds (1.0));
+  rsuSpeedControlApps.Start (Seconds (10.0));
   rsuSpeedControlApps.Stop (simulationTime);
 
-  ApplicationContainer rsuSpeedControlApps2 = rsuSpeedControlHelper2.Install (nodePool.Get (1));
-  rsuSpeedControlApps2.Start (Seconds (1.0));
-  rsuSpeedControlApps2.Stop (simulationTime);
+//  ApplicationContainer rsuSpeedControlApps2 = rsuSpeedControlHelper2.Install (nodePool.Get (1));
+//  rsuSpeedControlApps2.Start (Seconds (10.0));
+//  rsuSpeedControlApps2.Stop (simulationTime);
 
   Ptr<MobilityModel> mobilityRsuNode1 = nodePool.Get (0)->GetObject<MobilityModel> ();
   mobilityRsuNode1->SetPosition (Vector (100.0, 125.0, 3.0)); // set RSU to fixed position
@@ -151,7 +151,7 @@ main (int argc, char *argv[])
 
       // Install Application
       ApplicationContainer vehicleSpeedControlApps = vehicleSpeedControlHelper.Install (includedNode);
-      vehicleSpeedControlApps.Start (Seconds (1.0));
+      vehicleSpeedControlApps.Start (Seconds (0.0));
       vehicleSpeedControlApps.Stop (simulationTime);
 
       return includedNode;

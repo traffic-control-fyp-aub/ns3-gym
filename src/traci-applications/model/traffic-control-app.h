@@ -24,6 +24,11 @@ namespace ns3 {
 	 * \defgroup TrafficInfo TrafficInfo
 	 */
 	
+	
+	/**
+		 * \brief The RL environment for the RSU to contril speeds 
+		 * an object of this class is used in the RsuControl class 
+		 */
 	class RsuEnv : public OpenGymEnv {
 	public:
 		RsuEnv();
@@ -32,27 +37,61 @@ namespace ns3 {
 		virtual void DoDispose();
 
 		// GYM specific methods
+		/**
+		 * \brief called on Notify. Used to set observation space params for the agent. The observation space is responsible for values processed by agent.
+		 * \return a pointer to OpenGymSpace object.
+		 */
 		Ptr<OpenGymSpace> GetObservationSpace();
+
+		/**
+		 * \brief called on Notify. Used to set Action space params for the agent. THe Action space consists of agent-specific actions that depend on observations.
+		 * \return a pointer to OpenGymSpace object.
+		 */
 		Ptr<OpenGymSpace> GetActionSpace();
+		
+		/**
+		 * \brief called on Notify. Used to send new observations (new speeds and headways) to the agent.
+		 * \return a pointer to OpenGymDataContainer object that contains observation values.
+		 */
 		Ptr<OpenGymDataContainer> GetObservation();
+		
+		/**
+		 * \brief called on Notify. Calculates the reward based on actions performed by the agent.
+		 * \return the float value of the reward.
+		 */
 		float GetReward();
 		bool GetGameOver();
 		std::string GetExtraInfo();
+		
+		/**
+		 * \brief called on Notify. Collects new agent actions and saves them.
+		 * \return
+		 */
 		bool ExecuteActions(Ptr<OpenGymDataContainer> action);
+		
+		/**
+		 * \brief Called from RSU class to get new speed values for vehicles
+		 * \return vector of speeds
+		 */
 		std::vector<uint32_t> ExportNewSpeeds();
+		
+		/**
+		 * \brief Called from RSU class to supply new observation data (current headways and velocities)
+		 */
 		void ImportSpeedsAndHeadWays(std::vector<double> RSU_headways,std::vector<double> RSU_speeds);
 		
-		uint32_t m_vehicles;
-		double m_alpha;
-		double m_beta;
-		double max_headway_time;
-		double max_velocity_value;
-		// Look into this
-		double desired_velocity_value;
 		
-		std::vector<double> actual_speeds;
-		std::vector<double> actual_headways;
-		std::vector<uint32_t> new_speeds;
+		uint32_t m_vehicles;					//!< Number of vehicles
+		double m_alpha;							//!< Constant for reward
+		double m_beta;							//!< Constant for reward
+		double max_headway_time;				//!< maximum headway in seconds
+		double max_velocity_value;				//!< Maximum velocity in m/s
+		// Look into this
+		double desired_velocity_value;			//!< Desired velocity value which is less than but close to max
+		
+		std::vector<double> actual_speeds;		//!< Vecor of current vehicle speeds in the environment
+		std::vector<double> actual_headways;	//!< Vecor of current vehicle headways in the environment
+		std::vector<uint32_t> new_speeds;		//!< Vecor of new vehicle speeds to be transmitted
 	};
 
 	/**
@@ -108,7 +147,7 @@ namespace ns3 {
 		TracedCallback<Ptr<const Packet> > m_txTrace;
 		
 		// GymEnv
-		Ptr<RsuEnv> m_rsuGymEnv;
+		Ptr<RsuEnv> m_rsuGymEnv; //!< Gym environment object
 
 	};
 
