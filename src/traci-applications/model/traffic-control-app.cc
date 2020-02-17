@@ -358,15 +358,29 @@ void
 RsuSpeedControl::ChangeSpeed() {
 
 	NS_LOG_INFO("\nVehicles Data at RSU with ip: " << this->GetNode()->GetObject<Ipv4> ()->GetAddress(1, 0).GetLocal() << " \n");
-
+	std::vector<double> speeds;
+	std::vector<double> headways;
 
 	std::map<std::string, std::pair<double, double>>::iterator it = m_vehicles_data.begin();
 	while (it != m_vehicles_data.end()) {
 		NS_LOG_INFO(it->first << " :: " << (it->second).first << " :: " << (it->second).second);
-
-		//TODO CHANGE THIS  
-		(it->second).first = rand() % 60;
+		
+		speeds.push_back((it->second).first);
+		headways.push_back((it->second).second);
 		it++;
+	}
+	
+	m_rsuGymEnv->ImportSpeedsAndHeadWays(headways,speeds);
+	std::vector<uint32_t> new_speeds = m_rsuGymEnv->ExportNewSpeeds();
+	
+	it = m_vehicles_data.begin();
+	uint32_t i = 0;
+	while (it != m_vehicles_data.end()) {		
+		(it->second).first = new_speeds[i];
+		i++;
+		it++;
+		NS_LOG_INFO(it->first << " :: " << (it->second).first << " :: " << (it->second).second);
+
 	}
 
 	NS_LOG_INFO("\n");
