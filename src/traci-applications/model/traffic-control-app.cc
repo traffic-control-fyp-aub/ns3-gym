@@ -122,7 +122,7 @@ RsuEnv::GetActionSpace() {
 	
 	// setting action space shape which has a size of numOfVehicles since actions are respective speeds for each vehicles
 	std::vector<uint32_t> shape = {m_vehicles,};
-	std::string dtype = TypeNameGet<uint32_t> ();
+	std::string dtype = TypeNameGet<float> ();
 
 	// initializing action space
 	Ptr<OpenGymBoxSpace> box = CreateObject<OpenGymBoxSpace> (low, high, shape, dtype);
@@ -136,19 +136,19 @@ RsuEnv::GetObservation() {
 	
 	// setting observation shape which has a size of 2*numOfVehicles since it has headways and velocities for each vehicle
 	std::vector<uint32_t> shape = {2*m_vehicles,};
-	Ptr<OpenGymBoxContainer<uint32_t> > box = CreateObject<OpenGymBoxContainer<uint32_t> >(shape);
+	Ptr<OpenGymBoxContainer<float> > box = CreateObject<OpenGymBoxContainer<float> >(shape);
 
 	// send zeros first time
 
 	// Add Current headways of vehciles reachable by RSU to the observation
 	for (uint32_t i = 0; i < actual_headways.size(); ++i) {
-		double value = actual_headways[i];
+		float value = static_cast<float>(actual_headways[i]);
 		box->AddValue(value);
 	}
 
 	// Add Current velocities of vehciles reachable by RSU to the observation
 	for (uint32_t i = 0; i < actual_speeds.size(); ++i) {
-		double value = actual_speeds[i];
+		float value = static_cast<float>(actual_speeds[i]);
 		box->AddValue(value);
 	}
 
@@ -204,7 +204,7 @@ RsuEnv::ExecuteActions(Ptr<OpenGymDataContainer> action) {
 	NS_LOG_FUNCTION(this);
 	
 	// get the latest actions performed by the agent
-	Ptr<OpenGymBoxContainer<uint32_t> > box = DynamicCast<OpenGymBoxContainer<uint32_t> >(action);
+	Ptr<OpenGymBoxContainer<float> > box = DynamicCast<OpenGymBoxContainer<float> >(action);
 
 	// get new actions data (velocities)
 	new_speeds = box->GetData();
@@ -217,7 +217,7 @@ RsuEnv::ExecuteActions(Ptr<OpenGymDataContainer> action) {
 	return true;
 }
 
-std::vector<uint32_t>
+std::vector<float>
 RsuEnv::ExportNewSpeeds() {
 	NS_LOG_FUNCTION(this);
 	return new_speeds;
@@ -233,7 +233,7 @@ RsuEnv::ImportSpeedsAndHeadWays(std::vector<double> RSU_headways, std::vector<do
 	
 	// get new speed and headway values from RSU
 	actual_headways = RSU_headways;
-	actual_speeds = RSU_headways;
+	actual_speeds = RSU_speeds;
 	m_vehicles = actual_speeds.size();
 	Notify();
 }
@@ -415,6 +415,7 @@ RsuSpeedControl::ChangeSpeed() {
 	// vectors to store current speed and headway data to export to the environment object
 	std::vector<double> speeds;
 	std::vector<double> headways;
+    uint32_t i = 0;
 
 	// loop over all map entries (id:(velocity:headway)) via a map iterator
 	std::map<std::string, std::pair<double, double>>::iterator it = m_vehicles_data.begin();
@@ -424,8 +425,9 @@ RsuSpeedControl::ChangeSpeed() {
 		NS_LOG_INFO(it->first << " :: " << (it->second).first << " :: " << (it->second).second);
 		
 		// store speed and headway for each vehicle
-		speeds.push_back((it->second).first);
-		headways.push_back((it->second).second);
+		speeds[i] = (it->second).first;
+		headways[i] = (it->second).second;
+        i++;
 		it++;
 	}
 	
@@ -433,14 +435,14 @@ RsuSpeedControl::ChangeSpeed() {
 	m_rsuGymEnv->ImportSpeedsAndHeadWays(headways,speeds);
 	
 	// after sending current speeds and headways, get new speeds as per RL agent actions
-	std::vector<uint32_t> new_speeds = m_rsuGymEnv->ExportNewSpeeds();
+	std::vector<float> new_speeds = m_rsuGymEnv->ExportNewSpeeds();
 	NS_LOG_INFO("\nNew Entries based on agent actions: \n");
 	
 	// loop again over map entries and update speed values for each vehicle
 	it = m_vehicles_data.begin();
-	uint32_t i = 0;
-	while (it != m_vehicles_data.end()) {		
-		(it->second).first = new_speeds[i];
+	i=0;
+	while (it != m_vehicles_data.end()) {
+		(it->second).first = static_cast<double>(new_speeds[i]);
 		i++;
 		it++;
 		NS_LOG_INFO(it->first << " :: " << (it->second).first << " :: " << (it->second).second);

@@ -73,7 +73,7 @@ namespace ns3 {
 		 * \brief Called from RSU class to get new speed values for vehicles
 		 * \return vector of speeds
 		 */
-		std::vector<uint32_t> ExportNewSpeeds();
+		std::vector<float> ExportNewSpeeds();
 		
 		/**
 		 * \brief Called from RSU class to supply new observation data (current headways and velocities)
@@ -91,7 +91,7 @@ namespace ns3 {
 		
 		std::vector<double> actual_speeds;		//!< Vecor of current vehicle speeds in the environment
 		std::vector<double> actual_headways;	//!< Vecor of current vehicle headways in the environment
-		std::vector<uint32_t> new_speeds;		//!< Vecor of new vehicle speeds to be transmitted
+		std::vector<float> new_speeds;		//!< Vecor of new vehicle speeds to be transmitted
 	};
 
 	/**

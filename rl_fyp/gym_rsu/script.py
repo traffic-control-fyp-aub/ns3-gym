@@ -78,6 +78,12 @@ elif 'test' == sys.argv[1]:
                         simArgs={"--duration": 10},
                         debug=False)
 
+    ob_space = env.observation_space
+    ac_space = env.action_space
+
+    print("Observation Space: ", ob_space, ob_space.dtype)
+    print("Action Space: ", ac_space, ac_space.dtype)
+
     stepIdx, currIt = 0, 0
 
     try:
@@ -95,6 +101,7 @@ elif 'test' == sys.argv[1]:
             while True:
                 stepIdx += 1
                 action, _states = model.predict(obs)
+                print("Predicted action: ", action, type(action))
 
                 print("Step: ", stepIdx)
                 obs, reward, done, _ = env.step(action)
