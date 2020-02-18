@@ -6,7 +6,6 @@ import pandas as pd
 from beautifultable import BeautifulTable
 
 import math
-import random
 
 """
     Custom OpenAI Gym environment from the perspective
@@ -19,11 +18,7 @@ MAX_VELOCITY_VALUE = 3.5  # maximum allowed velocity for vehicles in meters per 
 ALPHA = 0.1  # gain used to diminish the magnitude of the penalty
 DESIRED_VELOCITY = 3  # desired system wide target (average) velocity
 NUMBER_OF_VEHICLES = 4  # number of vehicles present in the environment
-TOTAL_SECONDS_OF_INTEREST = 60*15  # 60 seconds/minute * 15 minutes
 EPSILON_THRESHOLD = math.pow(10, -5)  # threshold used to check if reward is advancing or not
-CIRCUIT_LENGTH = 1500  # length of the traffic circuit environment
-FLOW_WINDOW_CONSTANT = 15  # flow volume within the window frame of 15 minutes
-TRAFFIC_FLOW_THRESHOLD = 1.4  # Flow Q-value threshold (reported commonly in traffic literature)
 MEAN_VELOCITY = 1.75  # value to center normal distribution velocity sampling
 MEAN_HEADWAY = 1.5  # value to center normal distribution headway sampling
 SIGMA = 0.1  # standard deviation for normal distribution velocity sampling
