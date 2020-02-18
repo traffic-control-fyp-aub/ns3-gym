@@ -104,7 +104,7 @@ RsuEnv::GetObservationSpace() {
 	
 	// setting observation space shape which has a size of 2*numOfVehicles since it has headways and velocities for each vehicle
 	std::vector<uint32_t> shape = {2 * m_vehicles,};
-	std::string dtype = TypeNameGet<uint32_t> ();
+	std::string dtype = TypeNameGet<float> ();
 
 	// initializing observation space
 	Ptr<OpenGymBoxSpace> space = CreateObject<OpenGymBoxSpace> (low, high, shape, dtype);
@@ -208,10 +208,6 @@ RsuEnv::ExecuteActions(Ptr<OpenGymDataContainer> action) {
 
 	// get new actions data (velocities)
 	new_speeds = box->GetData();
-
-	// DELETE THIS.!
-	NS_LOG_INFO(box->GetValue(0));
-	NS_LOG_INFO(box->GetValue(1));
 
 	NS_LOG_INFO("MyExecuteActions: " << action);
 	return true;
@@ -425,9 +421,9 @@ RsuSpeedControl::ChangeSpeed() {
 		NS_LOG_INFO(it->first << " :: " << (it->second).first << " :: " << (it->second).second);
 		
 		// store speed and headway for each vehicle
-		speeds[i] = (it->second).first;
-		headways[i] = (it->second).second;
-        i++;
+		speeds.push_back((it->second).first);
+        headways.push_back((it->second).second);
+		i++;
 		it++;
 	}
 	
