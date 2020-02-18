@@ -78,18 +78,6 @@ elif 'test' == sys.argv[1]:
                         simArgs={"--duration": 10},
                         debug=False)
 
-    env.reset()
-
-    # Collecting the observation and action spaces of the environment
-    # Note that these are different from the ones present in the RSU environment
-    # These depend on the C++ implementation one follows when creating the ns3
-    # side of the simulation environment
-    ob_space = env.observation_space
-    ac_space = env.action_space
-
-    print("Observation space: ", ob_space, ob_space.dtype)
-    print("Action space: ", ac_space, ac_space.dtype)
-
     stepIdx, currIt = 0, 0
 
     try:
