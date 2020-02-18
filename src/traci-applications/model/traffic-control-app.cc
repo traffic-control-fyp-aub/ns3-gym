@@ -64,9 +64,9 @@ RsuEnv::RsuEnv() {
 	m_alpha = 0.9;
 	m_beta = 0.99;
 	max_headway_time = 2.0;
-	max_velocity_value = 3.5;
+	max_velocity_value = 60;
 	// Look into this
-	desired_velocity_value = 3.0;
+	desired_velocity_value = 50;
 	
 	// Opening interface with simulation script
 	this->SetOpenGymInterface(OpenGymInterface::Get());
@@ -209,7 +209,7 @@ RsuEnv::ExecuteActions(Ptr<OpenGymDataContainer> action) {
 	// get new actions data (velocities)
 	new_speeds = box->GetData();
 
-	NS_LOG_INFO("MyExecuteActions: " << action);
+	NS_LOG_UNCOND("MyExecuteActions: " << action);
 	return true;
 }
 
@@ -427,12 +427,13 @@ RsuSpeedControl::ChangeSpeed() {
 		it++;
 	}
 	
+	NS_LOG_INFO("\n");
 	// call import method to send speeds and headways to environment and notify state change
 	m_rsuGymEnv->ImportSpeedsAndHeadWays(headways,speeds);
 	
 	// after sending current speeds and headways, get new speeds as per RL agent actions
 	std::vector<float> new_speeds = m_rsuGymEnv->ExportNewSpeeds();
-	NS_LOG_INFO("\nNew Entries based on agent actions: \n");
+	NS_LOG_LOGIC("\nNew Entries based on agent actions: \n");
 	
 	// loop again over map entries and update speed values for each vehicle
 	it = m_vehicles_data.begin();
@@ -441,11 +442,11 @@ RsuSpeedControl::ChangeSpeed() {
 		(it->second).first += static_cast<double>(new_speeds[i]);
 		i++;
 		it++;
-		NS_LOG_INFO(it->first << " :: " << (it->second).first << " :: " << (it->second).second);
+		NS_LOG_LOGIC(it->first << " :: " << (it->second).first << " :: " << (it->second).second);
 
 	}
 
-	NS_LOG_INFO("\n");
+	NS_LOG_LOGIC("\n");
 
 	Simulator::Schedule(Seconds(5.0), &RsuSpeedControl::ChangeSpeed, this);
 }
@@ -660,12 +661,14 @@ VehicleSpeedControl::Send() {
 
 	// Get Headway Just before sending 
 	// Headway in seconds  = Headway in meters / velocity
-	if (last_velocity <= 0 || last_headway <=0) {
+	if (last_velocity <= 0){
 		last_headway = 0.0;
 		last_velocity = 0.0;
 	} else {
 		last_headway = m_client->TraCIAPI::vehicle.getLeader(m_client->GetVehicleId(this->GetNode()), 0).second / last_velocity;
 	}
+	
+	if (last_headway <=0) last_headway =0.0; 
 
 	// ********************* Constructing message ********************* 
 	
