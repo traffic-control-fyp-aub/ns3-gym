@@ -423,7 +423,7 @@ RsuSpeedControl::ChangeSpeed() {
 		// store speed and headway for each vehicle
 		speeds.push_back((it->second).first);
         headways.push_back((it->second).second);
-		i++;
+		i++;	
 		it++;
 	}
 	
@@ -438,7 +438,7 @@ RsuSpeedControl::ChangeSpeed() {
 	it = m_vehicles_data.begin();
 	i=0;
 	while (it != m_vehicles_data.end()) {
-		(it->second).first = static_cast<double>(new_speeds[i]);
+		(it->second).first += static_cast<double>(new_speeds[i]);
 		i++;
 		it++;
 		NS_LOG_INFO(it->first << " :: " << (it->second).first << " :: " << (it->second).second);
@@ -660,8 +660,9 @@ VehicleSpeedControl::Send() {
 
 	// Get Headway Just before sending 
 	// Headway in seconds  = Headway in meters / velocity
-	if (last_velocity <= 0) {
+	if (last_velocity <= 0 || last_headway <=0) {
 		last_headway = 0.0;
+		last_velocity = 0.0;
 	} else {
 		last_headway = m_client->TraCIAPI::vehicle.getLeader(m_client->GetVehicleId(this->GetNode()), 0).second / last_velocity;
 	}
