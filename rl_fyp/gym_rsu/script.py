@@ -87,7 +87,7 @@ elif argumentList.__len__() == 3:
         # gym environment.
         print("Please specify one of the following training methods: [ online | offline ]")
         exit(0)
-    elif sys.argv[2] is ['train'] and sys.argv[3] in ['online']:
+    elif sys.argv[2] is ['train'] and sys.argv[3] in ['online', '--online']:
         # Train using the ns3 SUMO environment
         # Creating the ns3 environment that will act as a link
         # between our agent and the live simulation
@@ -107,6 +107,27 @@ elif argumentList.__len__() == 3:
         stepIdx, currIt = 0, 0
 
         try:
+            print('Setting up the PPO model')
+            # Use the stable-baseline PPO policy to train
+            model = PPO2('MlpPolicy',
+                         env,
+                         verbose=1,
+                         ent_coef=0.0,
+                         lam=0.94,
+                         gamma=0.99,
+                         tensorboard_log='rsu_agents/ppo_2e6_rsu_tensorboard/')
+
+            print('Setting the ns3 + SUMO environment to the agent')
+            # Setting the ns3 + SUMO environment to the agent
+            model.set_env(env)
+
+            print('Training model')
+            # Start the learning process on the ns3 + SUMO environment
+            model.learn(total_timesteps=int(2e5))
+            print(' ** Done Training ** ')
+
+            print('Launching simulation')
+            # View the model performance in live simulation
             while True:
                 print("Start iteration: ", currIt)
                 obs = env.reset()
@@ -115,8 +136,6 @@ elif argumentList.__len__() == 3:
                 info = None
                 print("Step: ", stepIdx)
                 print("-- obs: ", obs)
-
-                model = PPO2.load(save_name)
 
                 while True:
                     stepIdx += 1
@@ -134,7 +153,7 @@ elif argumentList.__len__() == 3:
         finally:
             env.close()
             print("Done")
-    elif sys.argv[2] is ['train'] and sys.argv[3] in ['offline']:
+    elif sys.argv[2] is ['train'] and sys.argv[3] in ['offline', '--offline']:
         # Train using the RSU custom gym environment
         # Create environment
         env = gym.make("rsu-v0")
