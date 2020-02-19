@@ -18,99 +18,163 @@ from ns3gym import ns3env
 from stable_baselines import PPO2
 from stable_baselines.common.evaluation import evaluate_policy
 
+# Collect the list of command line arguments passed
+argumentList = sys.argv
+
 # Use this name to save the model
 # parameters after training is done
 save_name = 'rsu_agents/ppo_rsu_2e6'
 
-if len(sys.argv) == 1:
-    print("Please specify one of the following: [ test | train ]")
+if argumentList.__len__() == 2:
+    # User did not specify the file properly
+    print("Please specify one of the following: [ test | train ]"
+          " and if you specified to train then [ online | offline ]")
     exit(0)
-elif 'train' == sys.argv[1]:
-    # Create environment
-    env = gym.make("rsu-v0")
+elif argumentList.__len__() == 3:
+    if sys.argv[2] in ['test']:
+        # Load the previously trained agent parameters and start
+        # running the traffic simulation
+        # Creating the ns3 environment that will act as a link
+        # between our agent and the live simulation
+        env = ns3env.Ns3Env(port=5555,
+                            stepTime=0.5,
+                            startSim=0,
+                            simSeed=12,
+                            simArgs={"--duration": 10},
+                            debug=False)
 
-    # Use the stable-baseline PPO policy to train
-    model = PPO2('MlpPolicy',
-                 env,
-                 verbose=1,
-                 ent_coef=0.0,
-                 lam=0.94,
-                 gamma=0.99,
-                 tensorboard_log='rsu_agents/ppo_2e6_rsu_tensorboard/')
+        ob_space = env.observation_space
+        ac_space = env.action_space
 
-    # Train the agent
-    print("Beginning model training")
-    model.learn(total_timesteps=int(2e6))
-    print("** Done training the model **")
+        print("Observation Space: ", ob_space, ob_space.dtype)
+        print("Action Space: ", ac_space, ac_space.dtype)
 
-    # Save the agent
-    model.save(save_name)
+        stepIdx, currIt = 0, 0
 
-    # deleting it just to make sure we can load successfully again
-    del model
-
-    # Re-load the trained PPO algorithm with
-    # parameters saved as 'ppo_rsu'
-    model = PPO2.load(save_name)
-
-    # Evaluate the agent
-    mean_reward, n_steps = evaluate_policy(model, env, n_eval_episodes=10)
-    print(f'Mean Reward = {round(mean_reward, 4)}')
-
-    # Enjoy the trained agent
-    # ------------------------------------------------
-    # This has nothing to do with testing the agent in
-    # a live simulation. This is just a visualization
-    # in the terminal window.
-    # ------------------------------------------------
-    obs = env.reset()
-    for _ in range(3):
-        action, _states = model.predict(obs)
-        obs, reward, dones, info = env.step(action)
-        env.render()
-elif 'test' == sys.argv[1]:
-    # Creating the ns3 environment that will act as a link
-    # between our agent and the live simulation
-    env = ns3env.Ns3Env(port=5555,
-                        stepTime=0.5,
-                        startSim=0,
-                        simSeed=12,
-                        simArgs={"--duration": 10},
-                        debug=False)
-
-    ob_space = env.observation_space
-    ac_space = env.action_space
-
-    print("Observation Space: ", ob_space, ob_space.dtype)
-    print("Action Space: ", ac_space, ac_space.dtype)
-
-    stepIdx, currIt = 0, 0
-
-    try:
-        while True:
-            print("Start iteration: ", currIt)
-            obs = env.reset()
-            reward = 0
-            done = False
-            info = None
-            print("Step: ", stepIdx)
-            print("-- obs: ", obs)
-
-            model = PPO2.load(save_name)
-
+        try:
             while True:
-                stepIdx += 1
-                action, _states = model.predict(obs)
-                print("Predicted action: ", action, type(action))
-
+                print("Start iteration: ", currIt)
+                obs = env.reset()
+                reward = 0
+                done = False
+                info = None
                 print("Step: ", stepIdx)
-                obs, reward, done, _ = env.step(action)
+                print("-- obs: ", obs)
 
-                print(f'{obs}, {reward}, {done}')
+                model = PPO2.load(save_name)
 
-    except KeyboardInterrupt:
-        print("Ctrl-C -> Exit")
+                while True:
+                    stepIdx += 1
+                    action, _states = model.predict(obs)
+                    print("Predicted action: ", action, type(action))
 
-    finally:
-        env.close()
-        print("Done")
+                    print("Step: ", stepIdx)
+                    obs, reward, done, _ = env.step(action)
+
+                    print(f'{obs}, {reward}, {done}')
+
+        except KeyboardInterrupt:
+            print("Ctrl-C -> Exit")
+
+        finally:
+            env.close()
+            print("Done")
+    elif sys.argv[2] in ['train'] and sys.argv[3] is None:
+        # Raise and exception because the user needs to specify
+        # whether the training needs to be online or offline.
+        # Online means running it directly in the ns3 environment
+        # with SUMO and offline means running it with the RSU custom
+        # gym environment.
+        print("Please specify one of the following training methods: [ online | offline ]")
+        exit(0)
+    elif sys.argv[2] is ['train'] and sys.argv[3] in ['online']:
+        # Train using the ns3 SUMO environment
+        # Creating the ns3 environment that will act as a link
+        # between our agent and the live simulation
+        env = ns3env.Ns3Env(port=5555,
+                            stepTime=0.5,
+                            startSim=0,
+                            simSeed=12,
+                            simArgs={"--duration": 10},
+                            debug=False)
+
+        ob_space = env.observation_space
+        ac_space = env.action_space
+
+        print("Observation Space: ", ob_space, ob_space.dtype)
+        print("Action Space: ", ac_space, ac_space.dtype)
+
+        stepIdx, currIt = 0, 0
+
+        try:
+            while True:
+                print("Start iteration: ", currIt)
+                obs = env.reset()
+                reward = 0
+                done = False
+                info = None
+                print("Step: ", stepIdx)
+                print("-- obs: ", obs)
+
+                model = PPO2.load(save_name)
+
+                while True:
+                    stepIdx += 1
+                    action, _states = model.predict(obs)
+                    print("Predicted action: ", action, type(action))
+
+                    print("Step: ", stepIdx)
+                    obs, reward, done, _ = env.step(action)
+
+                    print(f'{obs}, {reward}, {done}')
+
+        except KeyboardInterrupt:
+            print("Ctrl-C -> Exit")
+
+        finally:
+            env.close()
+            print("Done")
+    elif sys.argv[2] is ['train'] and sys.argv[3] in ['offline']:
+        # Train using the RSU custom gym environment
+        # Create environment
+        env = gym.make("rsu-v0")
+
+        # Use the stable-baseline PPO policy to train
+        model = PPO2('MlpPolicy',
+                     env,
+                     verbose=1,
+                     ent_coef=0.0,
+                     lam=0.94,
+                     gamma=0.99,
+                     tensorboard_log='rsu_agents/ppo_2e6_rsu_tensorboard/')
+
+        # Train the agent
+        print("Beginning model training")
+        model.learn(total_timesteps=int(2e6))
+        print("** Done training the model **")
+
+        # Save the agent
+        model.save(save_name)
+
+        # deleting it just to make sure we can load successfully again
+        del model
+
+        # Re-load the trained PPO algorithm with
+        # parameters saved as 'ppo_rsu'
+        model = PPO2.load(save_name)
+
+        # Evaluate the agent
+        mean_reward, n_steps = evaluate_policy(model, env, n_eval_episodes=10)
+        print(f'Mean Reward = {round(mean_reward, 4)}')
+
+        # Enjoy the trained agent
+        # ------------------------------------------------
+        # This has nothing to do with testing the agent in
+        # a live simulation. This is just a visualization
+        # in the terminal window.
+        # ------------------------------------------------
+        obs = env.reset()
+        for _ in range(3):
+            action, _states = model.predict(obs)
+            obs, reward, dones, info = env.step(action)
+            env.render()

@@ -24,7 +24,7 @@ env = gym.make('rsu-v0')
 ## Running script file
 To run the **script.py** file in the custom environment directory type the following command:
 ```bash
-# Need to specify whether training your agent
-# or testing it on the RSU environment
-python3 script.py [train | test]
+# If you want to train your agent then you also need to
+# specify if you are training online or offline.
+python3 script.py [ test | train ] [ --online | --offline ]
 ```
