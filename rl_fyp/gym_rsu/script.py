@@ -52,6 +52,8 @@ elif argumentList.__len__() == 3:
         stepIdx, currIt = 0, 0
 
         try:
+            model = PPO2.load(save_name)
+            model.set_env(env)
             while True:
                 print("Start iteration: ", currIt)
                 obs = env.reset()
@@ -60,8 +62,6 @@ elif argumentList.__len__() == 3:
                 info = None
                 print("Step: ", stepIdx)
                 print("-- obs: ", obs)
-
-                model = PPO2.load(save_name)
 
                 while True:
                     stepIdx += 1
@@ -75,6 +75,7 @@ elif argumentList.__len__() == 3:
 
         except KeyboardInterrupt:
             print("Ctrl-C -> Exit")
+            env.close()
 
         finally:
             env.close()
@@ -149,6 +150,7 @@ elif argumentList.__len__() == 3:
 
         except KeyboardInterrupt:
             print("Ctrl-C -> Exit")
+            env.close()
 
         finally:
             env.close()
