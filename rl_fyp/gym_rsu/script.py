@@ -25,13 +25,13 @@ argumentList = sys.argv
 # parameters after training is done
 save_name = 'rsu_agents/ppo_rsu_2e6'
 
-if argumentList.__len__() == 2:
+if argumentList.__len__() == 1:
     # User did not specify the file properly
     print("Please specify one of the following: [ test | train ]"
-          " and if you specified to train then [ online | offline ]")
+          " and if you specified to train then [ --online | --offline ]")
     exit(0)
-elif argumentList.__len__() == 3:
-    if sys.argv[2] in ['test']:
+elif argumentList.__len__() == 2:
+    if sys.argv[1] in ['test']:
         # Load the previously trained agent parameters and start
         # running the traffic simulation
         # Creating the ns3 environment that will act as a link
@@ -80,7 +80,7 @@ elif argumentList.__len__() == 3:
         finally:
             env.close()
             print("Done")
-    elif sys.argv[2] in ['train'] and sys.argv[3] is None:
+    elif sys.argv[1] in ['train'] and sys.argv[2] is None:
         # Raise and exception because the user needs to specify
         # whether the training needs to be online or offline.
         # Online means running it directly in the ns3 environment
@@ -88,7 +88,7 @@ elif argumentList.__len__() == 3:
         # gym environment.
         print("Please specify one of the following training methods: [ online | offline ]")
         exit(0)
-    elif sys.argv[2] is ['train'] and sys.argv[3] in ['online', '--online']:
+    elif sys.argv[1] is ['train'] and sys.argv[2] in ['online', '--online']:
         # Train using the ns3 SUMO environment
         # Creating the ns3 environment that will act as a link
         # between our agent and the live simulation
@@ -155,7 +155,7 @@ elif argumentList.__len__() == 3:
         finally:
             env.close()
             print("Done")
-    elif sys.argv[2] is ['train'] and sys.argv[3] in ['offline', '--offline']:
+    elif sys.argv[1] is ['train'] and sys.argv[2] in ['offline', '--offline']:
         # Train using the RSU custom gym environment
         # Create environment
         env = gym.make("rsu-v0")
