@@ -88,6 +88,11 @@ namespace ns3 {
 		double max_velocity_value;				//!< Maximum velocity in m/s
 		// Look into this
 		double desired_velocity_value;			//!< Desired velocity value which is less than but close to max
+		double old_reward;
+		double current_reward;
+		float epsilon_threshold;
+		uint32_t current_step;
+		uint32_t horizon;
 		
 		std::vector<double> actual_speeds;		//!< Vecor of current vehicle speeds in the environment
 		std::vector<double> actual_headways;	//!< Vecor of current vehicle headways in the environment

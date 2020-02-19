@@ -58,7 +58,7 @@ NS_OBJECT_ENSURE_REGISTERED(RsuEnv);
 
 RsuEnv::RsuEnv() {
 	NS_LOG_FUNCTION(this);
-	
+
 	// Setting default values fot params
 	m_vehicles = 0;
 	m_alpha = 0.9;
@@ -67,7 +67,11 @@ RsuEnv::RsuEnv() {
 	max_velocity_value = 60;
 	// Look into this
 	desired_velocity_value = 50;
-	
+	old_reward = 0.0;
+	current_reward = 0.0;
+	current_step = 0;
+	horizon = 128;
+	epsilon_threshold = 1e-4;
 	// Opening interface with simulation script
 	this->SetOpenGymInterface(OpenGymInterface::Get());
 	NS_LOG_INFO("Set Up Interface : " << OpenGymInterface::Get() << "\n");
@@ -97,11 +101,11 @@ RsuEnv::DoDispose() {
 Ptr<OpenGymSpace>
 RsuEnv::GetObservationSpace() {
 	NS_LOG_FUNCTION(this);
-	
+
 	// set low and high values: low is for lowest speed/headway while high is for highest
 	float low = 0.0;
 	float high = max_velocity_value;
-	
+
 	// setting observation space shape which has a size of 2*numOfVehicles since it has headways and velocities for each vehicle
 	std::vector<uint32_t> shape = {2 * m_vehicles,};
 	std::string dtype = TypeNameGet<float> ();
@@ -115,11 +119,11 @@ RsuEnv::GetObservationSpace() {
 Ptr<OpenGymSpace>
 RsuEnv::GetActionSpace() {
 	NS_LOG_FUNCTION(this);
-	
+
 	// set low and high values
-	float low = -1.0;
-	float high = 1.0;
-	
+	float low = -5.0;
+	float high = 5.0;
+
 	// setting action space shape which has a size of numOfVehicles since actions are respective speeds for each vehicles
 	std::vector<uint32_t> shape = {m_vehicles,};
 	std::string dtype = TypeNameGet<float> ();
@@ -133,22 +137,22 @@ RsuEnv::GetActionSpace() {
 Ptr<OpenGymDataContainer>
 RsuEnv::GetObservation() {
 	NS_LOG_FUNCTION(this);
-	
+
 	// setting observation shape which has a size of 2*numOfVehicles since it has headways and velocities for each vehicle
-	std::vector<uint32_t> shape = {2*m_vehicles,};
+	std::vector<uint32_t> shape = {2 * m_vehicles,};
 	Ptr<OpenGymBoxContainer<float> > box = CreateObject<OpenGymBoxContainer<float> >(shape);
 
 	// send zeros first time
 
 	// Add Current headways of vehciles reachable by RSU to the observation
 	for (uint32_t i = 0; i < actual_headways.size(); ++i) {
-		float value = static_cast<float>(actual_headways[i]);
+		float value = static_cast<float> (actual_headways[i]);
 		box->AddValue(value);
 	}
 
 	// Add Current velocities of vehciles reachable by RSU to the observation
 	for (uint32_t i = 0; i < actual_speeds.size(); ++i) {
-		float value = static_cast<float>(actual_speeds[i]);
+		float value = static_cast<float> (actual_speeds[i]);
 		box->AddValue(value);
 	}
 
@@ -159,10 +163,10 @@ RsuEnv::GetObservation() {
 float
 RsuEnv::GetReward() {
 	NS_LOG_FUNCTION(this);
-	
+
 	// The following formula is used to calculate the reward for the agent:
 	// reward = beta * ( max_v - sum(|desired_v - v[i]|)/N - alpha * sum(max(max_h - h[i])))
-	
+
 	float reward = 0.0;
 	double max_headway_summation = 0.0;
 	for (uint32_t i = 0; i < actual_headways.size(); i++) {
@@ -173,7 +177,14 @@ RsuEnv::GetReward() {
 		abs_speed_diff_summation += abs(desired_velocity_value - actual_speeds[i]);
 	}
 	reward = max_velocity_value - (abs_speed_diff_summation / m_vehicles) - (max_headway_summation * m_alpha);
+
+	current_reward = reward;
+	if (current_step % horizon == 0) {
+		old_reward = current_reward;
+	}
+
 	reward *= m_beta;
+
 	NS_LOG_UNCOND("MyGetReward: " << reward);
 	return reward;
 }
@@ -181,12 +192,7 @@ RsuEnv::GetReward() {
 bool
 RsuEnv::GetGameOver() {
 	NS_LOG_FUNCTION(this);
-	
-	//////////////////////////////
-	// BAse this on exit status //
-    /////////////////////////////
-	
-	bool isGameOver = false;
+	bool isGameOver = pow(abs(old_reward - current_reward), 2) < epsilon_threshold;
 	NS_LOG_UNCOND("MyGetGameOver: " << isGameOver);
 	return isGameOver;
 }
@@ -202,13 +208,17 @@ RsuEnv::GetExtraInfo() {
 bool
 RsuEnv::ExecuteActions(Ptr<OpenGymDataContainer> action) {
 	NS_LOG_FUNCTION(this);
-	
+
 	// get the latest actions performed by the agent
 	Ptr<OpenGymBoxContainer<float> > box = DynamicCast<OpenGymBoxContainer<float> >(action);
 
 	// get new actions data (velocities)
 	new_speeds = box->GetData();
+	for (uint32_t i = 0; i < new_speeds.size(); i++) {
+		new_speeds[i] = new_speeds[i] < 0 ? - fmod(abs(new_speeds[i]), 5) : fmod(abs(new_speeds[i]), 5);
+	}
 
+	current_step++;
 	NS_LOG_UNCOND("MyExecuteActions: " << action);
 	return true;
 }
@@ -226,7 +236,7 @@ RsuEnv::ImportSpeedsAndHeadWays(std::vector<double> RSU_headways, std::vector<do
 	// remove old headway and speed values
 	actual_headways.clear();
 	actual_speeds.clear();
-	
+
 	// get new speed and headway values from RSU
 	actual_headways = RSU_headways;
 	actual_speeds = RSU_speeds;
@@ -316,7 +326,7 @@ RsuSpeedControl::StartApplication(void) {
 		ScheduleTransmit(Seconds(0.0));
 		Simulator::Schedule(Seconds(5.0), &RsuSpeedControl::ChangeSpeed, this);
 	}
-	
+
 	// set up socket used to receive packets
 	TypeId tid = TypeId::LookupByName("ns3::UdpSocketFactory");
 	rx_socket = Socket::CreateSocket(GetNode(), tid);
@@ -327,14 +337,14 @@ RsuSpeedControl::StartApplication(void) {
 	// set up RSU environment
 	Ptr<RsuEnv> env = CreateObject<RsuEnv>();
 	m_rsuGymEnv = env;
-	
+
 	NS_LOG_INFO("New Gym Enviroment" << env << "\n");
 }
 
 void
 RsuSpeedControl::ScheduleTransmit(Time dt) {
 	NS_LOG_FUNCTION(this << dt);
-	
+
 	// Call the send function after dt seconds
 	m_sendEvent = Simulator::Schedule(dt, &RsuSpeedControl::Send, this);
 }
@@ -360,13 +370,13 @@ RsuSpeedControl::StopApplication() {
 void
 RsuSpeedControl::Send() {
 	NS_LOG_FUNCTION(this << tx_socket);
-	
+
 	// Following is the process to broadcast list of messages to vehicles
 	// ********************* Constructing message ********************* 
-	
+
 	// new string for message 
 	std::ostringstream msg;
-	
+
 	// append 0 which is used to identify an RSU
 	msg << "0*";
 
@@ -374,12 +384,12 @@ RsuSpeedControl::Send() {
 
 	std::map<std::string, std::pair<double, double>>::iterator it = m_vehicles_data.begin();
 	while (it != m_vehicles_data.end()) {
-		
+
 		// append vehicle id then new speed respectively
 		msg << "|" << it->first << ":" << std::to_string((it->second).first);
 		it++;
 	}
-	
+
 	// terminate message by appending '\0' character
 	msg << '\0';
 
@@ -395,7 +405,7 @@ RsuSpeedControl::Send() {
 
 	// broadcast the packet
 	tx_socket->Send(packet);
-	
+
 	NS_LOG_INFO("TX ##### RSU->vehicle at time " << Simulator::Now().GetSeconds()
 			<< "s - [RSU ip:" << ipAddr << "]\n");
 
@@ -407,39 +417,39 @@ RsuSpeedControl::ChangeSpeed() {
 
 	NS_LOG_INFO("\nVehicles Data at RSU with ip: " << this->GetNode()->GetObject<Ipv4> ()->GetAddress(1, 0).GetLocal() << " \n");
 	NS_LOG_INFO("Current Entries: \n");
-			
+
 	// vectors to store current speed and headway data to export to the environment object
 	std::vector<double> speeds;
 	std::vector<double> headways;
-    uint32_t i = 0;
+	uint32_t i = 0;
 
 	// loop over all map entries (id:(velocity:headway)) via a map iterator
 	std::map<std::string, std::pair<double, double>>::iterator it = m_vehicles_data.begin();
 	while (it != m_vehicles_data.end()) {
-		
+
 		// print the initial content in the RSU map
 		NS_LOG_INFO(it->first << " :: " << (it->second).first << " :: " << (it->second).second);
-		
+
 		// store speed and headway for each vehicle
 		speeds.push_back((it->second).first);
-        headways.push_back((it->second).second);
-		i++;	
+		headways.push_back((it->second).second);
+		i++;
 		it++;
 	}
-	
+
 	NS_LOG_INFO("\n");
 	// call import method to send speeds and headways to environment and notify state change
-	m_rsuGymEnv->ImportSpeedsAndHeadWays(headways,speeds);
-	
+	m_rsuGymEnv->ImportSpeedsAndHeadWays(headways, speeds);
+
 	// after sending current speeds and headways, get new speeds as per RL agent actions
 	std::vector<float> new_speeds = m_rsuGymEnv->ExportNewSpeeds();
 	NS_LOG_LOGIC("\nNew Entries based on agent actions: \n");
-	
+
 	// loop again over map entries and update speed values for each vehicle
 	it = m_vehicles_data.begin();
-	i=0;
+	i = 0;
 	while (it != m_vehicles_data.end()) {
-		(it->second).first += static_cast<double>(new_speeds[i]);
+		(it->second).first += static_cast<double> (new_speeds[i]);
 		i++;
 		it++;
 		NS_LOG_LOGIC(it->first << " :: " << (it->second).first << " :: " << (it->second).second);
@@ -454,7 +464,7 @@ RsuSpeedControl::ChangeSpeed() {
 void
 RsuSpeedControl::HandleRead(Ptr<Socket> socket) {
 	NS_LOG_FUNCTION(this << socket);
-	
+
 	// receive packet from vehicle at receiving socket of RSU
 	Ptr<Packet> packet;
 	packet = socket->Recv();
@@ -472,17 +482,17 @@ RsuSpeedControl::HandleRead(Ptr<Socket> socket) {
 
 	// get id of the sender vehcile 
 	std::string receivedID = data[1];
-	
+
 	// get speed of sender vehicle
 	double velocity = (double) std::stod(data[2]);
-	
+
 	// get headway of sender vehicle
 	double headway = (double) std::stod(data[3]);
 
 	// Inserting vehicle data to RSU database
 	// using map iterator, find any matching id in the map
 	std::map<std::string, std::pair<double, double>>::iterator it = m_vehicles_data.find(receivedID);
-	
+
 	// if previous data of this vehicle is found, update
 	if (it != m_vehicles_data.end()) {
 
@@ -604,7 +614,7 @@ VehicleSpeedControl::StopApplicationNow() {
 void
 VehicleSpeedControl::HandleRead(Ptr<Socket> socket) {
 	NS_LOG_FUNCTION(this << socket);
-	
+
 	// receive packet from RSU
 	Ptr<Packet> packet;
 	packet = socket->Recv();
@@ -625,7 +635,7 @@ VehicleSpeedControl::HandleRead(Ptr<Socket> socket) {
 	std::vector<std::string> map_data = split(data[1], "|");
 	for (uint8_t i = 0; i < map_data.size(); i++) {
 		std::vector<std::string> parameters = split(map_data[i], ":");
-		
+
 		// when id of current vehicle is found, get respective speed and save value
 		if (parameters[0] == m_client->GetVehicleId(this->GetNode())) {
 			velocity = std::stod(parameters[1]);
@@ -661,20 +671,20 @@ VehicleSpeedControl::Send() {
 
 	// Get Headway Just before sending 
 	// Headway in seconds  = Headway in meters / velocity
-	if (last_velocity <= 0){
+	if (last_velocity <= 0) {
 		last_headway = 0.0;
 		last_velocity = 0.0;
 	} else {
 		last_headway = m_client->TraCIAPI::vehicle.getLeader(m_client->GetVehicleId(this->GetNode()), 0).second / last_velocity;
 	}
-	
-	if (last_headway <=0) last_headway =0.0; 
+
+	if (last_headway <= 0) last_headway = 0.0;
 
 	// ********************* Constructing message ********************* 
-	
+
 	// new message string
 	std::ostringstream msg;
-	
+
 	// append 1 which is the identifier of a vehicle, append the current velocity and headway
 	msg << "1*" << m_client->GetVehicleId(this->GetNode()) << "*" << std::to_string(last_velocity) << "*" << std::to_string(last_headway) << '\0';
 	Ptr<Packet> packet = Create<Packet> ((uint8_t*) msg.str().c_str(), msg.str().length());
