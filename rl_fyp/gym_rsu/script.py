@@ -17,6 +17,7 @@ from ns3gym import ns3env
 
 from stable_baselines import PPO2
 from stable_baselines.common.evaluation import evaluate_policy
+from stable_baselines.common.vec_env import DummyVecEnv
 
 # Collect the list of command line arguments passed
 argumentList = sys.argv
@@ -25,12 +26,19 @@ argumentList = sys.argv
 # parameters after training is done
 save_name = 'rsu_agents/ppo_rsu_2e6'
 
+ns3_obj = None
+
+
+def make_ns3_env():
+    return ns3_obj
+
+
 if argumentList.__len__() == 1:
     # User did not specify the file properly
     print("Please specify one of the following: [ test | train ]"
           " and if you specified to train then [ --online | --offline ]")
     exit(0)
-elif argumentList.__len__() == 2:
+elif argumentList.__len__() is 2:
     if sys.argv[1] in ['test']:
         # Load the previously trained agent parameters and start
         # running the traffic simulation
@@ -80,7 +88,7 @@ elif argumentList.__len__() == 2:
         finally:
             env.close()
             print("Done")
-    elif sys.argv[1] in ['train'] and sys.argv[2] is None:
+    elif sys.argv[1] in ['train']:
         # Raise and exception because the user needs to specify
         # whether the training needs to be online or offline.
         # Online means running it directly in the ns3 environment
@@ -88,19 +96,23 @@ elif argumentList.__len__() == 2:
         # gym environment.
         print("Please specify one of the following training methods: [ online | offline ]")
         exit(0)
-    elif sys.argv[1] is ['train'] and sys.argv[2] in ['online', '--online']:
+elif argumentList.__len__() is 3:
+    if sys.argv[1] in ['train'] and sys.argv[2] in ['online']:
         # Train using the ns3 SUMO environment
         # Creating the ns3 environment that will act as a link
         # between our agent and the live simulation
-        env = ns3env.Ns3Env(port=5555,
-                            stepTime=0.5,
-                            startSim=0,
-                            simSeed=12,
-                            simArgs={"--duration": 10},
-                            debug=False)
+        ns3_obj = ns3env.Ns3Env(port=5555,
+                                stepTime=0.5,
+                                startSim=0,
+                                simSeed=12,
+                                simArgs={"--duration": 10},
+                                debug=False)
 
-        ob_space = env.observation_space
-        ac_space = env.action_space
+        ob_space = ns3_obj.observation_space
+        ac_space = ns3_obj.action_space
+
+        # Vectorized environment to be able to set it to PPO
+        env = DummyVecEnv([make_ns3_env])
 
         print("Observation Space: ", ob_space, ob_space.dtype)
         print("Action Space: ", ac_space, ac_space.dtype)
@@ -116,7 +128,7 @@ elif argumentList.__len__() == 2:
                          ent_coef=0.0,
                          lam=0.94,
                          gamma=0.99,
-                         tensorboard_log='rsu_agents/ppo_2e6_rsu_tensorboard/')
+                         tensorboard_log='rsu_agents/ppo_2e5_rsu_tensorboard/')
 
             print('Setting the ns3 + SUMO environment to the agent')
             # Setting the ns3 + SUMO environment to the agent
@@ -155,7 +167,7 @@ elif argumentList.__len__() == 2:
         finally:
             env.close()
             print("Done")
-    elif sys.argv[1] is ['train'] and sys.argv[2] in ['offline', '--offline']:
+    elif sys.argv[1] in ['train'] and sys.argv[2] in ['offline']:
         # Train using the RSU custom gym environment
         # Create environment
         env = gym.make("rsu-v0")
