@@ -72,6 +72,7 @@ RsuEnv::RsuEnv() {
 	current_step = 0;
 	horizon = 128;
 	epsilon_threshold = 1e-4;
+	max_delta = 5.0;
 	// Opening interface with simulation script
 	this->SetOpenGymInterface(OpenGymInterface::Get());
 	NS_LOG_INFO("Set Up Interface : " << OpenGymInterface::Get() << "\n");
@@ -121,8 +122,8 @@ RsuEnv::GetActionSpace() {
 	NS_LOG_FUNCTION(this);
 
 	// set low and high values
-	float low = -5.0;
-	float high = 5.0;
+	float low = -max_delta;
+	float high = max_delta;
 
 	// setting action space shape which has a size of numOfVehicles since actions are respective speeds for each vehicles
 	std::vector<uint32_t> shape = {m_vehicles,};
@@ -214,9 +215,11 @@ RsuEnv::ExecuteActions(Ptr<OpenGymDataContainer> action) {
 
 	// get new actions data (velocities)
 	new_speeds = box->GetData();
-	for (uint32_t i = 0; i < new_speeds.size(); i++) {
-		new_speeds[i] = new_speeds[i] < 0 ? - fmod(abs(new_speeds[i]), 5) : fmod(abs(new_speeds[i]), 5);
-	}
+	
+	// make sure all values are in the range [+]
+//	for (uint32_t i = 0; i < new_speeds.size(); i++) {
+//		new_speeds[i] = new_speeds[i] < 0 ? - fmod(abs(new_speeds[i]), max_delta) : fmod(abs(new_speeds[i]), max_delta);
+//	}
 
 	current_step++;
 	NS_LOG_UNCOND("MyExecuteActions: " << action);
