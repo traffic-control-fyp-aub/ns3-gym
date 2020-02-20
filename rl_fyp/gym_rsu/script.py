@@ -123,7 +123,6 @@ elif argumentList.__len__() is 3:
             print('Setting up the PPO model')
             # Use the stable-baseline PPO policy to train
             model = PPO2('MlpPolicy',
-                         env,
                          verbose=1,
                          ent_coef=0.0,
                          lam=0.94,
