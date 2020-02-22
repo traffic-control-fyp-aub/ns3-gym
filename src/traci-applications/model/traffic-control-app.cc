@@ -58,7 +58,8 @@ NS_OBJECT_ENSURE_REGISTERED(RsuEnv);
 
 RsuEnv::RsuEnv() {
 	NS_LOG_FUNCTION(this);
-
+	// Opening interface with simulation script
+	this->SetOpenGymInterface(OpenGymInterface::Get());
 	// Setting default values fot params
 	m_vehicles = 0;
 	m_alpha = 0.9;
@@ -73,8 +74,7 @@ RsuEnv::RsuEnv() {
 	horizon = 128;
 	epsilon_threshold = 1e-4;
 	max_delta = 5.0;
-	// Opening interface with simulation script
-	this->SetOpenGymInterface(OpenGymInterface::Get());
+
 	NS_LOG_INFO("Set Up Interface : " << OpenGymInterface::Get() << "\n");
 }
 
@@ -145,13 +145,13 @@ RsuEnv::GetObservation() {
 
 	// send zeros first time
 
-	// Add Current headways of vehciles reachable by RSU to the observation
+	// Add Current headways of vehicles reachable by RSU to the observation
 	for (uint32_t i = 0; i < actual_headways.size(); ++i) {
 		float value = static_cast<float> (actual_headways[i]);
 		box->AddValue(value);
 	}
 
-	// Add Current velocities of vehciles reachable by RSU to the observation
+	// Add Current velocities of vehicles reachable by RSU to the observation
 	for (uint32_t i = 0; i < actual_speeds.size(); ++i) {
 		float value = static_cast<float> (actual_speeds[i]);
 		box->AddValue(value);
@@ -193,7 +193,8 @@ RsuEnv::GetReward() {
 bool
 RsuEnv::GetGameOver() {
 	NS_LOG_FUNCTION(this);
-	bool isGameOver = pow(abs(old_reward - current_reward), 2) < epsilon_threshold;
+	bool isGameOver = false;
+//	isGameOver = pow(abs(old_reward - current_reward), 2) < epsilon_threshold;
 	NS_LOG_UNCOND("MyGetGameOver: " << isGameOver);
 	return isGameOver;
 }
