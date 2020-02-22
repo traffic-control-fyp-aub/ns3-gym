@@ -30,6 +30,11 @@ ns3_obj = None
 
 
 def make_ns3_env():
+    """
+        This function is created as a bug fix to train
+        our PPO agent which requires that all its environments
+        be wrapped in a vectorized environment layer.
+    """
     return ns3_obj
 
 
@@ -104,7 +109,6 @@ elif argumentList.__len__() is 3:
                                 stepTime=0.5,
                                 startSim=0,
                                 simSeed=12,
-                                simArgs={"--duration": 10},
                                 debug=True)
 
         ob_space = ns3_obj.observation_space
@@ -134,6 +138,9 @@ elif argumentList.__len__() is 3:
             # Start the learning process on the ns3 + SUMO environment
             model.learn(total_timesteps=int(2e5))
             print(' ** Done Training ** ')
+
+            print('Saving Model')
+            model.save('ppo_ns3_online')
 
             print('Launching simulation')
             # View the model performance in live simulation
