@@ -60,9 +60,8 @@ elif argumentList.__len__() is 2:
         stepIdx, currIt = 0, 0
 
         try:
+            model = PPO2.load(save_name)
             while True:
-                model = PPO2.load(save_name)
-
                 print("Start iteration: ", currIt)
                 obs = env.reset()
                 reward = 0
