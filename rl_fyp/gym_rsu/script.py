@@ -106,7 +106,7 @@ elif argumentList.__len__() is 3:
                                 startSim=0,
                                 simSeed=12,
                                 simArgs={"--duration": 10},
-                                debug=False)
+                                debug=True)
 
         ob_space = ns3_obj.observation_space
         ac_space = ns3_obj.action_space
@@ -123,15 +123,13 @@ elif argumentList.__len__() is 3:
             print('Setting up the PPO model')
             # Use the stable-baseline PPO policy to train
             model = PPO2('MlpPolicy',
+                         env=env,
+                         learning_rate=3e-4,
                          verbose=1,
                          ent_coef=0.0,
                          lam=0.94,
                          gamma=0.99,
                          tensorboard_log='rsu_agents/ppo_2e5_rsu_tensorboard/')
-
-            print('Setting the ns3 + SUMO environment to the agent')
-            # Setting the ns3 + SUMO environment to the agent
-            model.set_env(env)
 
             print('Training model')
             # Start the learning process on the ns3 + SUMO environment
@@ -157,7 +155,7 @@ elif argumentList.__len__() is 3:
                     print("Step: ", stepIdx)
                     obs, reward, done, _ = env.step(action)
 
-                    print(f'{obs}, {reward}, {done}')
+                    print(f'Obs: {obs}, Reward: {reward}, Done: {done}')
 
         except KeyboardInterrupt:
             print("Ctrl-C -> Exit")
