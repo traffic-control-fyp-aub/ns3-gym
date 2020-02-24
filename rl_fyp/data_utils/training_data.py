@@ -7,7 +7,7 @@ import math
     generating data to train the RSUEnv
 """
 
-MEAN_VELOCITY = 1.75  # value to center normal distribution velocity sampling
+MEAN_VELOCITY = 21  # value to center normal distribution velocity sampling
 MEAN_HEADWAY = 1.5  # value to center normal distribution headway sampling
 SIGMA = 0.1  # standard deviation for normal distribution velocity/headway sampling
 PATH_TO_CSV = "rl_fyp/training_data/training_data_frame.csv"  # path to where the dataframe was saved as a CSV file
