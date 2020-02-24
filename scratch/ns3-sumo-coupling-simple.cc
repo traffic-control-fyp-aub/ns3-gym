@@ -33,7 +33,7 @@ main (int argc, char *argv[])
     }
 
   /*** 1. Create node pool and counter; large enough to cover all sumo vehicles ***/
-  ns3::Time simulationTime (ns3::Seconds(2000));
+  ns3::Time simulationTime (ns3::Seconds(20000));
   NodeContainer nodePool;
 /** scenario1 **/
   //nodePool.Create (32);
@@ -42,7 +42,7 @@ main (int argc, char *argv[])
   //nodePool.Create (5);
 
 /** scenario3 **/
-  nodePool.Create (6);
+  nodePool.Create (22);
 
   uint32_t nodeCounter (0);
 
@@ -128,10 +128,10 @@ main (int argc, char *argv[])
 //  rsuSpeedControlApps2.Stop (simulationTime);
 
   Ptr<MobilityModel> mobilityRsuNode1 = nodePool.Get (0)->GetObject<MobilityModel> ();
-  mobilityRsuNode1->SetPosition (Vector (100.0, 125.0, 3.0)); // set RSU to fixed position
+  mobilityRsuNode1->SetPosition (Vector (125.0, 125.0, 3.0)); // set RSU to fixed position
   nodeCounter++;    // one node (RSU) consumed from "node pool"
   Ptr<MobilityModel> mobilityRsuNode2 = nodePool.Get (1)->GetObject<MobilityModel> ();
-  mobilityRsuNode2->SetPosition (Vector (470.0, 125.0, 3.0)); // set RSU to fixed position
+//  mobilityRsuNode2->SetPosition (Vector (500.0, 250.0, 3.0)); // set RSU to fixed position
   nodeCounter++;  // two nodes (RSU) consumed from "node pool"
 
 
