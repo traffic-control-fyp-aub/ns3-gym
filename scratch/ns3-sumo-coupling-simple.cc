@@ -47,7 +47,7 @@ main (int argc, char *argv[])
   uint32_t nodeCounter (0);
 
   /*** 2. Create and setup channel ***/
-  std::string phyMode ("OfdmRate6MbpsBW10MHz");
+  std::string phyMode ("OfdmRate6MbpsBW10MHz"); // Transmission range between (between 300-400) check http://www.cse.chalmers.se/~chrpro/VANET.pdf fot specifications on transmission range
   YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
   wifiPhy.Set ("TxPowerStart", DoubleValue (20));
   wifiPhy.Set ("TxPowerEnd", DoubleValue (20));
