@@ -149,7 +149,11 @@ def test_take_action(rsu_env, action, epsilon):
 
 
 @pytest.mark.parametrize("obs_vel, reward, done, epsilon",
-                         [(np.array([20, 20, 20, 20]),
+                         [(np.array([20, 20, 20, 20,
+                                     20, 20, 20, 20,
+                                     20, 20, 20, 20,
+                                     20, 20, 20, 20,
+                                     20, 20, 20, 20]),
                           20,
                           False,
                            25)])
