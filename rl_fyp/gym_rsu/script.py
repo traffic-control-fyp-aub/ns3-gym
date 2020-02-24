@@ -182,22 +182,22 @@ elif argumentList.__len__() is 3:
                      ent_coef=0.0,
                      lam=0.94,
                      gamma=0.99,
-                     tensorboard_log='rsu_agents/ppo_2e6_rsu_tensorboard/')
+                     tensorboard_log='rsu_agents/ppo_offline_tensorboard/')
 
         # Train the agent
         print("Beginning model training")
-        model.learn(total_timesteps=int(2e6))
+        model.learn(total_timesteps=int(2e5))
         print("** Done training the model **")
 
         # Save the agent
-        model.save(save_name)
+        model.save('rsu_agents/ppo_offline_weights')
 
         # deleting it just to make sure we can load successfully again
         del model
 
         # Re-load the trained PPO algorithm with
         # parameters saved as 'ppo_rsu'
-        model = PPO2.load(save_name)
+        model = PPO2.load('ppo_offline_weights')
 
         # Evaluate the agent
         mean_reward, n_steps = evaluate_policy(model, env, n_eval_episodes=10)

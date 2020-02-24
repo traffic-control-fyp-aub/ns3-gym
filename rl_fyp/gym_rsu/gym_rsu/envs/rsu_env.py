@@ -211,13 +211,13 @@ class RSUEnv(gym.Env):
         self.current_step = 0
 
         velocities = np.asarray([])
-        for _ in range(4):
+        for _ in range(NUMBER_OF_VEHICLES):
             # Generate new samples of velocities from a normal distribution
             # centered around the mean velocity with standard deviation sigma.
             velocities = np.append(velocities, round(abs(np.random.normal(MEAN_VELOCITY, SIGMA)), 2))
 
         headways = np.asarray([])
-        for _ in range(4):
+        for _ in range(NUMBER_OF_VEHICLES):
             # Generate new samples of headways from a normal distribution
             # centered around the mean headway with standard deviation sigma.
             headways = np.append(headways, round(abs(np.random.normal(MEAN_HEADWAY, SIGMA)), 2))
