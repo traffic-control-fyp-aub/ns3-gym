@@ -123,7 +123,7 @@ def test_env_reset(rsu_env, next_headway, next_velocity, max_headway, max_veloci
                                      -1, 0.5, -0.75, 0.3,
                                      -1, 0.5, -0.75, 0.3,
                                      -1, 0.5, -0.75, 0.3,
-                                     -1, 0.5, -0.75, 0.3]), 25)])
+                                     -1, 0.5, -0.75, 0.3]), 30)])
 def test_take_action(rsu_env, action, epsilon):
     """
         Test the take action utility function
