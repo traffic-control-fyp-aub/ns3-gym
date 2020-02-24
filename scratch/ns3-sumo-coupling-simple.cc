@@ -42,7 +42,7 @@ main (int argc, char *argv[])
   //nodePool.Create (5);
 
 /** scenario3 **/
-  nodePool.Create (6);
+  nodePool.Create (22);
 
   uint32_t nodeCounter (0);
 

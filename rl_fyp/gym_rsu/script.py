@@ -61,7 +61,7 @@ elif argumentList.__len__() is 2:
         stepIdx, currIt = 0, 0
 
         try:
-            model = PPO2.load('CHANGE_NAME')  # FIXME - change this name accordingly (command line arg?)
+            model = PPO2.load('rsu_agents/ppo_offline_weights')  # FIXME - change this name accordingly
             while True:
                 print("Start iteration: ", currIt)
                 obs = env.reset()
@@ -193,7 +193,7 @@ elif argumentList.__len__() is 3:
 
         # Re-load the trained PPO algorithm with
         # parameters saved as 'ppo_rsu'
-        model = PPO2.load('ppo_offline_weights')
+        model = PPO2.load('rsu_agents/ppo_offline_weights')
 
         # Evaluate the agent
         mean_reward, n_steps = evaluate_policy(model, env, n_eval_episodes=10)
