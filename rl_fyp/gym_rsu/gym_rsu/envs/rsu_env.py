@@ -14,12 +14,12 @@ import math
 DIRECT_PATH_TO_DATA_FRAME = "/home/rayyan/Desktop/FYP/repos/ns3-gym/rl_fyp/training_data/training_data_frame.csv"
 PATH_TO_DATA_FRAME = "rl_fyp/training_data/training_data_frame.csv"
 MAX_HEADWAY_TIME = 2  # maximum allowed headway time for vehicles in seconds
-MAX_VELOCITY_VALUE = 3.5  # maximum allowed velocity for vehicles in meters per second
+MAX_VELOCITY_VALUE = 25  # maximum allowed velocity for vehicles in meters per second
 ALPHA = 0.1  # gain used to diminish the magnitude of the penalty
-DESIRED_VELOCITY = 3  # desired system wide target (average) velocity
-NUMBER_OF_VEHICLES = 4  # number of vehicles present in the environment
+DESIRED_VELOCITY = 21  # desired system wide target (average) velocity
+NUMBER_OF_VEHICLES = 20  # number of vehicles present in the environment
 EPSILON_THRESHOLD = math.pow(10, -5)  # threshold used to check if reward is advancing or not
-MEAN_VELOCITY = 1.75  # value to center normal distribution velocity sampling
+MEAN_VELOCITY = 20  # value to center normal distribution velocity sampling
 MEAN_HEADWAY = 1.5  # value to center normal distribution headway sampling
 SIGMA = 0.1  # standard deviation for normal distribution velocity sampling
 BETA = 0.99  # constant to be used in the delay modifier calculation
@@ -84,8 +84,8 @@ class RSUEnv(gym.Env):
 
         # Initializing my action space to be a vector of length NUMBER_OF_VEHICLES
         # which consists of a continuous interval from -1 to +1
-        self.action_space = gym.spaces.Box(low=-1,
-                                           high=1,
+        self.action_space = gym.spaces.Box(low=-5,
+                                           high=5,
                                            shape=(NUMBER_OF_VEHICLES,),
                                            dtype=np.float32)
 
@@ -384,7 +384,7 @@ class RSUEnv(gym.Env):
         """
         # Converting the values to be between -1 and 1
         for index in range(len(action)):
-            temp = abs(action[index]) % 1
+            temp = abs(action[index]) % 5
             if action[index] < 0:
                 action[index] = round(-temp, 2)
             else:
