@@ -22,10 +22,6 @@ from stable_baselines.common.vec_env import DummyVecEnv
 # Collect the list of command line arguments passed
 argumentList = sys.argv
 
-# Use this name to save the model
-# parameters after training is done
-save_name = 'rsu_agents/ppo_rsu_2e6'
-
 ns3_obj = None
 
 
@@ -65,7 +61,7 @@ elif argumentList.__len__() is 2:
         stepIdx, currIt = 0, 0
 
         try:
-            model = PPO2.load(save_name)
+            model = PPO2.load('CHANGE_NAME')  # FIXME - change this name accordingly (command line arg?)
             while True:
                 print("Start iteration: ", currIt)
                 obs = env.reset()
@@ -132,7 +128,7 @@ elif argumentList.__len__() is 3:
                          ent_coef=0.0,
                          lam=0.94,
                          gamma=0.99,
-                         tensorboard_log='rsu_agents/ppo_2e5_rsu_tensorboard/')
+                         tensorboard_log='rsu_agents/ppo_online_tensorboard/')
 
             print('Training model')
             # Start the learning process on the ns3 + SUMO environment
@@ -140,7 +136,7 @@ elif argumentList.__len__() is 3:
             print(' ** Done Training ** ')
 
             print('Saving Model')
-            model.save('ppo_ns3_online')
+            model.save('rsu_agents/ppo_ns3_online')
 
             print('Launching simulation')
             # View the model performance in live simulation
@@ -164,8 +160,8 @@ elif argumentList.__len__() is 3:
                     print(f'Obs: {obs}, Reward: {reward}, Done: {done}')
 
         except KeyboardInterrupt:
-            print("Ctrl-C -> Exit")
             env.close()
+            print("Ctrl-C -> Exit")
 
         finally:
             env.close()
