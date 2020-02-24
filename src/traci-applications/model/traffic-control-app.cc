@@ -62,12 +62,13 @@ RsuEnv::RsuEnv() {
 	this->SetOpenGymInterface(OpenGymInterface::Get());
 	// Setting default values fot params
 	m_vehicles = 0;
+	m_max_vehicles = 20;
 	m_alpha = 0.9;
 	m_beta = 0.99;
 	max_headway_time = 2.0;
-	max_velocity_value = 60;
+	max_velocity_value = 25;
 	// Look into this
-	desired_velocity_value = 50;
+	desired_velocity_value = 21;
 	old_reward = 0.0;
 	current_reward = 0.0;
 	current_step = 0;
@@ -108,7 +109,7 @@ RsuEnv::GetObservationSpace() {
 	float high = max_velocity_value;
 
 	// setting observation space shape which has a size of 2*numOfVehicles since it has headways and velocities for each vehicle
-	std::vector<uint32_t> shape = {2 * m_vehicles,};
+	std::vector<uint32_t> shape = {2 * m_max_vehicles,};
 	std::string dtype = TypeNameGet<float> ();
 
 	// initializing observation space
@@ -126,7 +127,7 @@ RsuEnv::GetActionSpace() {
 	float high = max_delta;
 
 	// setting action space shape which has a size of numOfVehicles since actions are respective speeds for each vehicles
-	std::vector<uint32_t> shape = {m_vehicles,};
+	std::vector<uint32_t> shape = {m_max_vehicles,};
 	std::string dtype = TypeNameGet<float> ();
 
 	// initializing action space
@@ -140,7 +141,7 @@ RsuEnv::GetObservation() {
 	NS_LOG_FUNCTION(this);
 
 	// setting observation shape which has a size of 2*numOfVehicles since it has headways and velocities for each vehicle
-	std::vector<uint32_t> shape = {2 * m_vehicles,};
+	std::vector<uint32_t> shape = {2 * m_max_vehicles,};
 	Ptr<OpenGymBoxContainer<float> > box = CreateObject<OpenGymBoxContainer<float> >(shape);
 
 	// send zeros first time
@@ -230,7 +231,12 @@ RsuEnv::ExecuteActions(Ptr<OpenGymDataContainer> action) {
 std::vector<float>
 RsuEnv::ExportNewSpeeds() {
 	NS_LOG_FUNCTION(this);
-	return new_speeds;
+	std::vector<float> new_speeds_no_paddings;
+	// Remove unecessary paddings from new speeds
+	for (uint32_t i=0 ; i< m_vehicles ; i++){
+		new_speeds_no_paddings.push_back(new_speeds[i]);
+	}
+	return new_speeds_no_paddings;
 }
 
 void
@@ -243,7 +249,15 @@ RsuEnv::ImportSpeedsAndHeadWays(std::vector<double> RSU_headways, std::vector<do
 
 	// get new speed and headway values from RSU
 	actual_headways = RSU_headways;
+	// pad zeros to eliminate missmatch with headways
+	for (uint32_t i=actual_headways.size() ; i< m_max_vehicles ; i++){
+		actual_headways.push_back(0.0);
+	}
 	actual_speeds = RSU_speeds;
+	// pad zeros to eliminate missmatch with speeds
+	for (uint32_t i=actual_speeds.size() ; i< m_max_vehicles ; i++){
+		actual_speeds.push_back(0.0);
+	}
 	m_vehicles = actual_speeds.size();
 	Notify();
 }

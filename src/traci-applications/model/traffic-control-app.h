@@ -82,6 +82,7 @@ namespace ns3 {
 		
 		
 		uint32_t m_vehicles;					//!< Number of vehicles
+		uint32_t m_max_vehicles;					//!< Number of vehicles
 		double m_alpha;							//!< Constant for reward
 		double m_beta;							//!< Constant for reward
 		double max_headway_time;				//!< maximum headway in seconds
