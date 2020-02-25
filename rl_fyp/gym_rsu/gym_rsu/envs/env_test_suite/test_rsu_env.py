@@ -25,12 +25,12 @@ def rsu_env():
 
 
 @pytest.mark.parametrize("obs_space, action_space, reward", [(gym.spaces.Box(0,
-                                                                             25,
-                                                                             shape=(40,),
-                                                                             dtype=np.float16),
-                                                              gym.spaces.Box(-5,
-                                                                             5,
+                                                                             100,
                                                                              shape=(20,),
+                                                                             dtype=np.float16),
+                                                              gym.spaces.Box(-10,
+                                                                             10,
+                                                                             shape=(10,),
                                                                              dtype=np.float16),
                                                               0)])
 def test_env_init(rsu_env, obs_space, action_space, reward):
@@ -64,7 +64,7 @@ def test_env_init(rsu_env, obs_space, action_space, reward):
 
 
 @pytest.mark.parametrize("next_headway, next_velocity, max_headway, max_velocity, epsilon",
-                         [(1, 20, 2, 25, 5)])
+                         [(1, 90, 2, 100, 35)])
 def test_next_observation(rsu_env, next_headway, next_velocity, max_headway, max_velocity, epsilon):
     """
         Test the next observation
@@ -91,7 +91,7 @@ def test_next_observation(rsu_env, next_headway, next_velocity, max_headway, max
 
 
 @pytest.mark.parametrize("next_headway, next_velocity, max_headway, max_velocity, epsilon",
-                         [(1, 20, 2, 25, 25)])
+                         [(1, 90, 2, 100, 35)])
 def test_env_reset(rsu_env, next_headway, next_velocity, max_headway, max_velocity, epsilon):
     """
         Test the environmental reset function
@@ -115,15 +115,15 @@ def test_env_reset(rsu_env, next_headway, next_velocity, max_headway, max_veloci
 
     # Check that environment is resetting next velocity properly
     for index in range(20, 40):
-        assert math.pow(abs(obs[index] - round(abs(np.random.normal(20, 0.1)), 2)), 2) <= epsilon
+        assert math.pow(abs(obs[index] - round(abs(np.random.normal(90, 0.1)), 2)), 2) <= epsilon
 
 
 @pytest.mark.parametrize("action, epsilon",
-                         [(np.array([-1, 0.5, -0.75, 0.3,
-                                     -1, 0.5, -0.75, 0.3,
-                                     -1, 0.5, -0.75, 0.3,
-                                     -1, 0.5, -0.75, 0.3,
-                                     -1, 0.5, -0.75, 0.3]), 30)])
+                         [(np.array([-10, 5, -7.5, 3,
+                                     -10, 5, -7.5, 3,
+                                     -10, 5, -7.5, 3,
+                                     -10, 5, -7.5, 3,
+                                     -10, 5, -7.5, 3]), 35)])
 def test_take_action(rsu_env, action, epsilon):
     """
         Test the take action utility function
@@ -145,18 +145,18 @@ def test_take_action(rsu_env, action, epsilon):
     rsu_env._take_action(action)
 
     for index, _ in rsu_env.df.iterrows():
-        assert math.pow(abs(rsu_env.df.at[index, 'Velocity'] - (25 + action[index])), 2) <= epsilon
+        assert math.pow(abs(rsu_env.df.at[index, 'Velocity'] - (100 + action[index])), 2) <= epsilon
 
 
 @pytest.mark.parametrize("obs_vel, reward, done, epsilon",
-                         [(np.array([20, 20, 20, 20,
-                                     20, 20, 20, 20,
-                                     20, 20, 20, 20,
-                                     20, 20, 20, 20,
-                                     20, 20, 20, 20]),
-                          20,
+                         [(np.array([90, 90, 90, 90,
+                                     90, 90, 90, 90,
+                                     90, 90, 90, 90,
+                                     90, 90, 90, 90,
+                                     90, 90, 90, 90]),
+                          35,
                           False,
-                           25)])
+                           35)])
 def test_step_func(rsu_env, obs_vel, reward, done, epsilon):
     """
         Test the step function in the RSUEnv.

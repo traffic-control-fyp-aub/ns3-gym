@@ -82,8 +82,8 @@ elif argumentList.__len__() is 2:
                     print(f'{obs}, {reward}, {done}')
 
         except KeyboardInterrupt:
-            print("Ctrl-C -> Exit")
             env.close()
+            print("Ctrl-C -> Exit")
 
         finally:
             env.close()

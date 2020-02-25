@@ -7,8 +7,8 @@
 ns3-gym/rl_fyp/gym_rsu/rl_fyp.gym_rsu
 
 # ignore big tensorboard file
-rl_fyp/gym_rsu/rsu_agents/ppo_2e6_rsu_tensorboard
-rl_fyp/gym_rsu/rsu_agents/ppo_2e5_rsu_tensorboard/
+rl_fyp/gym_rsu/rsu_agents/ppo_offline_tensorboard
+rl_fyp/gym_rsu/rsu_agents/ppo_online_tensorboard
 
 # User-specific stuff
 .idea

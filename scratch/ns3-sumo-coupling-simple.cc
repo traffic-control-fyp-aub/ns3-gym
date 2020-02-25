@@ -33,7 +33,7 @@ main (int argc, char *argv[])
     }
 
   /*** 1. Create node pool and counter; large enough to cover all sumo vehicles ***/
-  ns3::Time simulationTime (ns3::Seconds(20000));
+  ns3::Time simulationTime (ns3::Seconds(500000));
   NodeContainer nodePool;
 /** scenario1 **/
   //nodePool.Create (32);
@@ -42,7 +42,7 @@ main (int argc, char *argv[])
   //nodePool.Create (5);
 
 /** scenario3 **/
-  nodePool.Create (22);
+  nodePool.Create (12);
 
   uint32_t nodeCounter (0);
 
@@ -151,7 +151,7 @@ main (int argc, char *argv[])
 
       // Install Application
       ApplicationContainer vehicleSpeedControlApps = vehicleSpeedControlHelper.Install (includedNode);
-      vehicleSpeedControlApps.Start (Seconds (0.0));
+      vehicleSpeedControlApps.Start (Seconds (1.0));
       vehicleSpeedControlApps.Stop (simulationTime);
 
       return includedNode;

@@ -62,19 +62,19 @@ RsuEnv::RsuEnv() {
 	this->SetOpenGymInterface(OpenGymInterface::Get());
 	// Setting default values fot params
 	m_vehicles = 0;
-	m_max_vehicles = 20;
+	m_max_vehicles = 10;
 	m_alpha = 0.9;
 	m_beta = 0.99;
 	max_headway_time = 2.0;
-	max_velocity_value = 25;
+	max_velocity_value = 100; // was 25
 	// Look into this
-	desired_velocity_value = 21;
+	desired_velocity_value = 90; // was 21
 	old_reward = 0.0;
 	current_reward = 0.0;
 	current_step = 0;
 	horizon = 128;
 	epsilon_threshold = 1e-4;
-	max_delta = 5.0;
+	max_delta = 10.0;
 
 	NS_LOG_INFO("Set Up Interface : " << OpenGymInterface::Get() << "\n");
 }
