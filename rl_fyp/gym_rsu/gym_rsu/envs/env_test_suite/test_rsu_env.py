@@ -110,11 +110,11 @@ def test_env_reset(rsu_env, next_headway, next_velocity, max_headway, max_veloci
     obs = rsu_env.reset()
 
     # Check that environment is resetting next headway properly
-    for index in range(20):
+    for index in range(10):
         assert math.pow(abs(obs[index] - round(abs(np.random.normal(1.5, 0.1)), 2)), 2) <= epsilon
 
     # Check that environment is resetting next velocity properly
-    for index in range(20, 40):
+    for index in range(10, 20):
         assert math.pow(abs(obs[index] - round(abs(np.random.normal(90, 0.1)), 2)), 2) <= epsilon
 
 
