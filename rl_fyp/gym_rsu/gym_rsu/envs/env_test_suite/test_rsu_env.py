@@ -188,6 +188,8 @@ def test_step_func(rsu_env, obs_vel, reward, done, epsilon):
 
     obs, rew, d, _ = rsu_env.step()
 
+    print(obs)
+
     # Assert that the done condition is correct
     assert d == done
 
