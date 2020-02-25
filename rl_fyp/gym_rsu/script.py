@@ -132,7 +132,7 @@ elif argumentList.__len__() is 3:
 
             print('Training model')
             # Start the learning process on the ns3 + SUMO environment
-            model.learn(total_timesteps=int(2e5))
+            model.learn(total_timesteps=int(1e3))
             print(' ** Done Training ** ')
 
             print('Saving Model')

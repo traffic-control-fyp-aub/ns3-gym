@@ -121,7 +121,7 @@ def test_env_reset(rsu_env, next_headway, next_velocity, max_headway, max_veloci
 @pytest.mark.parametrize("action, epsilon",
                          [(np.array([-10, 5, -7.5, 3,
                                      -10, 5, -7.5, 3,
-                                     -10, 5]), 35)])
+                                     -10, 5]), 100)])
 def test_take_action(rsu_env, action, epsilon):
     """
         Test the take action utility function
@@ -154,7 +154,7 @@ def test_take_action(rsu_env, action, epsilon):
                                      90, 90, 90, 90]),
                           35,
                           False,
-                           90)])
+                           4000)])
 def test_step_func(rsu_env, obs_vel, reward, done, epsilon):
     """
         Test the step function in the RSUEnv.
