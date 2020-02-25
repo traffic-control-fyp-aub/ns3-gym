@@ -154,7 +154,7 @@ def test_take_action(rsu_env, action, epsilon):
                                      90, 90, 90, 90]),
                           35,
                           False,
-                           35)])
+                           90)])
 def test_step_func(rsu_env, obs_vel, reward, done, epsilon):
     """
         Test the step function in the RSUEnv.
