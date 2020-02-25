@@ -23,6 +23,7 @@ from stable_baselines.common.vec_env import DummyVecEnv
 argumentList = sys.argv
 
 ns3_obj = None
+model_online = None
 
 
 def make_ns3_env():
@@ -121,22 +122,19 @@ elif argumentList.__len__() is 3:
         try:
             print('Setting up the PPO model')
             # Use the stable-baseline PPO policy to train
-            model = PPO2('MlpPolicy',
-                         env=env,
-                         learning_rate=3e-4,
-                         verbose=1,
-                         ent_coef=0.0,
-                         lam=0.94,
-                         gamma=0.99,
-                         tensorboard_log='rsu_agents/ppo_online_tensorboard/')
+            model_online = PPO2('MlpPolicy',
+                                env=env,
+                                learning_rate=3e-4,
+                                verbose=1,
+                                ent_coef=0.0,
+                                lam=0.94,
+                                gamma=0.99,
+                                tensorboard_log='rsu_agents/ppo_online_tensorboard/')
 
             print('Training model')
             # Start the learning process on the ns3 + SUMO environment
-            model.learn(total_timesteps=int(1e3))
+            model_online.learn(total_timesteps=int(10))
             print(' ** Done Training ** ')
-
-            print('Saving Model')
-            model.save('rsu_agents/ppo_ns3_online')
 
             print('Launching simulation')
             # View the model performance in live simulation
@@ -151,7 +149,7 @@ elif argumentList.__len__() is 3:
 
                 while True:
                     stepIdx += 1
-                    action, _states = model.predict(obs)
+                    action, _states = model_online.predict(obs)
                     print("Predicted action: ", action, type(action))
 
                     print("Step: ", stepIdx)
@@ -160,6 +158,7 @@ elif argumentList.__len__() is 3:
                     print(f'Obs: {obs}, Reward: {reward}, Done: {done}')
 
         except KeyboardInterrupt:
+            model_online.save('rsu_agents/ppo_ns3_online')
             env.close()
             print("Ctrl-C -> Exit")
 

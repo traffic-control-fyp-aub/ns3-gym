@@ -33,7 +33,7 @@ main (int argc, char *argv[])
     }
 
   /*** 1. Create node pool and counter; large enough to cover all sumo vehicles ***/
-  ns3::Time simulationTime (ns3::Seconds(500000));
+  ns3::Time simulationTime (ns3::Seconds(30000));
   NodeContainer nodePool;
 /** scenario1 **/
   //nodePool.Create (32);
@@ -181,6 +181,7 @@ main (int argc, char *argv[])
   Simulator::Stop (simulationTime);
 
   Simulator::Run ();
+  openGymInterface->NotifySimulationEnd();
   Simulator::Destroy ();
 
   return 0;
