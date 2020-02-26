@@ -62,7 +62,7 @@ elif argumentList.__len__() is 2:
         stepIdx, currIt = 0, 0
 
         try:
-            model = PPO2.load('rsu_agents/ppo_offline_weights')  # FIXME - change this name accordingly
+            model = PPO2.load('rsu_agents/ppo_ns3_online')  # FIXME - change this name accordingly
             while True:
                 print("Start iteration: ", currIt)
                 obs = env.reset()
@@ -133,7 +133,7 @@ elif argumentList.__len__() is 3:
 
             print('Training model')
             # Start the learning process on the ns3 + SUMO environment
-            model_online.learn(total_timesteps=int(10))
+            model_online.learn(total_timesteps=int(1))
             print(' ** Done Training ** ')
 
             print('Launching simulation')
