@@ -433,20 +433,20 @@ RsuSpeedControl::Send() {
 void
 RsuSpeedControl::ChangeSpeed() {
 
-	NS_LOG_INFO("\nVehicles Data at RSU with ip: " << this->GetNode()->GetObject<Ipv4> ()->GetAddress(1, 0).GetLocal() << " \n");
+	NS_LOG_INFO("\nVehicles Data at RSU"<<this->GetNode()->GetId()<<" with ip: " << this->GetNode()->GetObject<Ipv4> ()->GetAddress(1, 0).GetLocal() << " \n");
 	NS_LOG_INFO("Current Entries: \n");
-
 	// vectors to store current speed and headway data to export to the environment object
 	std::vector<double> speeds;
 	std::vector<double> headways;
 	uint32_t i = 0;
 
+	NS_LOG_INFO("RSU" << this->GetNode()->GetId() << " table at time = " <<  Simulator::Now().GetSeconds() << " :\n" );
 	// loop over all map entries (id:(velocity:headway)) via a map iterator
 	std::map<std::string, std::pair<double, double>>::iterator it = m_vehicles_data.begin();
 	while (it != m_vehicles_data.end()) {
 
 		// print the initial content in the RSU map
-		NS_LOG_INFO(it->first << " :: " << (it->second).first << " :: " << (it->second).second);
+		NS_LOG_INFO("RSU" << this->GetNode()->GetId() << " table data = " << it->first << " :: " << (it->second).first << " :: " << (it->second).second);
 
 		// store speed and headway for each vehicle
 		speeds.push_back((it->second).first);
