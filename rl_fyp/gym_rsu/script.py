@@ -1,4 +1,31 @@
+"""
+    Usage:
+    ------
+    >> python3 script.py [ test | train ] [ online | offline ] [ algorithm name ] [ algorithm_params ]
+        + test: Load and test the performance of a previously trained algorithm into
+            `   the ns3-SUMO simulator.
+        + train: Train an agent from scratch either directly on the ns3-SUMO simulator
+                 or through an offline custom openAI gym environment called RSUEnv
+
+        * if you specified the 'test' parameter then you do no need to enter the choice of
+          offline or online however you do still need to specify the algorithm name because
+          we use that to load in the saved agent directly from the command line.
+
+        * if you specified the 'train' parameter then you need to fill in all the remaining
+          parameters [ online | offline ] and the algorithm you which to train with.
+
+        * Here is a list of algorithms we already support:
+            - PPO
+
+    *Note that model naming convention whenever training and then saving will
+    always be:
+                    rsu_agents/[algorithm_name]_ns3_[online | offline].zip
+
+    This will later be used to help facilitate testing the agents directly from
+    the CLI instead of having to edit this script file every time.
+"""
 import sys
+from rl_fyp.utils.model_setup import model_setup
 
 import gym
 
@@ -22,8 +49,24 @@ from stable_baselines.common.vec_env import DummyVecEnv
 # Collect the list of command line arguments passed
 argumentList = sys.argv
 
+# Dummy variable that we use in order to get rid of a bug we
+# were facing in regards to training in a vectorized environment
+# which is necessary for some algorithms such as PPO
 ns3_obj = None
+
+# This variable is used to help facilitate the process of setting up
+# the agent based on the CLI input specified by the user
 model_online = None
+
+
+# This variable is used to set the string value name of the model
+# selected by the user through the CLI
+model_name = ""
+
+
+# This variable is used to generate a string that is based on the user CLI input
+# and will be used to save the model after it is done training.
+saved_model_name = ""
 
 
 def make_ns3_env():
@@ -50,7 +93,6 @@ elif argumentList.__len__() is 2:
                             stepTime=0.5,
                             startSim=0,
                             simSeed=12,
-                            simArgs={"--duration": 10},
                             debug=False)
 
         ob_space = env.observation_space
@@ -62,7 +104,7 @@ elif argumentList.__len__() is 2:
         stepIdx, currIt = 0, 0
 
         try:
-            model = PPO2.load('rsu_agents/ppo_ns3_online')  # FIXME - change this name accordingly
+            model = PPO2.load(f'rsu_agents/{model_name}_ns3_online')
             while True:
                 print("Start iteration: ", currIt)
                 obs = env.reset()
@@ -122,41 +164,27 @@ elif argumentList.__len__() is 3:
         try:
             print('Setting up the PPO model')
             # Use the stable-baseline PPO policy to train
-            model_online = PPO2('MlpPolicy',
-                                env=env,
-                                learning_rate=3e-4,
-                                verbose=1,
-                                ent_coef=0.0,
-                                lam=0.94,
-                                gamma=0.99,
-                                tensorboard_log='rsu_agents/ppo_online_tensorboard/')
+            # model_online = PPO2('MlpPolicy',
+            #                     env=env,
+            #                     learning_rate=3e-4,
+            #                     verbose=1,
+            #                     ent_coef=0.0,
+            #                     lam=0.94,
+            #                     gamma=0.99)
+
+            model_online = model_setup('PPO2',
+                                       env,
+                                       'MlpPolicy',
+                                       lr=3e-4,
+                                       v=1,
+                                       ent=0.0,
+                                       lbd=0.94,
+                                       g=0.99)
 
             print('Training model')
             # Start the learning process on the ns3 + SUMO environment
             model_online.learn(total_timesteps=int(1))
             print(' ** Done Training ** ')
-
-            print('Launching simulation')
-            # View the model performance in live simulation
-            while True:
-                print("Start iteration: ", currIt)
-                obs = env.reset()
-                reward = 0
-                done = False
-                info = None
-                print("Step: ", stepIdx)
-                print("-- obs: ", obs)
-
-                while True:
-                    stepIdx += 1
-                    action, _states = model_online.predict(obs)
-                    print("Predicted action: ", action, type(action))
-
-                    print("Step: ", stepIdx)
-                    obs, reward, done, _ = env.step(action)
-
-                    print(f'Obs: {obs}, Reward: {reward}, Done: {done}')
-
         except KeyboardInterrupt:
             model_online.save('rsu_agents/ppo_ns3_online')
             env.close()
@@ -185,14 +213,14 @@ elif argumentList.__len__() is 3:
         print("** Done training the model **")
 
         # Save the agent
-        model.save('rsu_agents/ppo_offline_weights')
+        model.save('rsu_agents/ppo_ns3_offline')
 
         # deleting it just to make sure we can load successfully again
         del model
 
         # Re-load the trained PPO algorithm with
         # parameters saved as 'ppo_rsu'
-        model = PPO2.load('rsu_agents/ppo_offline_weights')
+        model = PPO2.load('rsu_agents/ppo_ns3_offline')
 
         # Evaluate the agent
         mean_reward, n_steps = evaluate_policy(model, env, n_eval_episodes=10)
