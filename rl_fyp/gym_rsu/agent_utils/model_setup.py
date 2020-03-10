@@ -50,14 +50,12 @@ def model_setup(algorithm_name, env, policy='MlpPolicy', **kwargs):
 
         # Get the default values in case no user specifications
         signature = inspect.signature(PPO2.__init__)
-        for name, parameter in signature.items():
-            default_values[name] = parameter.default
 
-        lr = kwargs.pop('lr', default_values['learning_rate'])
-        v = kwargs.pop('v', default_values['verbose'])
-        ent = kwargs.pop('ent', default_values['ent_coef'])
-        lbd = kwargs.pop('lbd', default_values['lam'])
-        g = kwargs.pop('g', default_values['gamma'])
+        lr = kwargs.pop('lr', signature.parameters['learning_rate'].default)
+        v = kwargs.pop('v', signature.parameters['verbose'].default)
+        ent = kwargs.pop('ent', signature.parameters['ent_coef'].default)
+        lbd = kwargs.pop('lbd', signature.parameters['lam'].default)
+        g = kwargs.pop('g', signature.parameters['gamma'].default)
 
         model = PPO2(policy=policy,
                      env=env,

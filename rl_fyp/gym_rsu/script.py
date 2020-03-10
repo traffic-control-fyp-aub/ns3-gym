@@ -25,7 +25,7 @@
     the CLI instead of having to edit this script file every time.
 """
 import sys
-from rl_fyp.utils.model_setup import model_setup
+from agent_utils.model_setup import model_setup
 
 import gym
 
@@ -198,6 +198,7 @@ elif argumentList.__len__() >= 3:
                                            lbd=float(params[params.index("lbd")+1]),
                                            g=float(params[params.index("g")+1]))
             else:
+                print(f'Setting up default {str(argumentList[agent_index])} parameters')
                 # Otherwise just set up the model and use the default values
                 model_online = model_setup(str(argumentList[agent_index]), env, 'MlpPolicy')
 
