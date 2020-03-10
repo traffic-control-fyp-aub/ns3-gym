@@ -49,6 +49,7 @@ from stable_baselines.common.vec_env import DummyVecEnv
 # Collect the list of command line arguments passed
 argumentList = sys.argv
 
+
 # Dummy variable that we use in order to get rid of a bug we
 # were facing in regards to training in a vectorized environment
 # which is necessary for some algorithms such as PPO
@@ -139,8 +140,22 @@ elif argumentList.__len__() is 2:
         # gym environment.
         print("Please specify one of the following training methods: [ online | offline ]")
         exit(0)
-elif argumentList.__len__() is 3:
+elif argumentList.__len__() >= 3:
     if sys.argv[1] in ['train'] and sys.argv[2] in ['online']:
+
+        # Find the index of the agent name parameter
+        agent_index = argumentList.index("online") + 1
+
+        # List of user specified parameters through the CLI
+        params = None
+
+        if agent_index < argumentList.__len__():
+            # Get the rest of the parameters specified by the user in the CLI
+            # only if the user actually specified any. Otherwise no point in doing
+            # so and use the default parameters
+            for list_index in range(agent_index+1, argumentList.__len__()):
+                params = argumentList[list_index].split("=")
+
         # Train using the ns3 SUMO environment
         # Creating the ns3 environment that will act as a link
         # between our agent and the live simulation
@@ -162,7 +177,7 @@ elif argumentList.__len__() is 3:
         stepIdx, currIt = 0, 0
 
         try:
-            print('Setting up the PPO model')
+            print('Setting up the model')
             # Use the stable-baseline PPO policy to train
             # model_online = PPO2('MlpPolicy',
             #                     env=env,
@@ -172,21 +187,26 @@ elif argumentList.__len__() is 3:
             #                     lam=0.94,
             #                     gamma=0.99)
 
-            model_online = model_setup('PPO2',
-                                       env,
-                                       'MlpPolicy',
-                                       lr=3e-4,
-                                       v=1,
-                                       ent=0.0,
-                                       lbd=0.94,
-                                       g=0.99)
+            if params is not None:
+                # Case where user has specified some CLI arguments for the agent
+                model_online = model_setup(str(argumentList[agent_index]),
+                                           env,
+                                           'MlpPolicy',
+                                           lr=float(params[params.index("lr")+1]),
+                                           v=int(params[params.index("v")+1]),
+                                           ent=float(params[params.index("ent")+1]),
+                                           lbd=float(params[params.index("lbd")+1]),
+                                           g=float(params[params.index("g")+1]))
+            else:
+                # Otherwise just set up the model and use the default values
+                model_online = model_setup(str(argumentList[agent_index]), env, 'MlpPolicy')
 
             print('Training model')
             # Start the learning process on the ns3 + SUMO environment
             model_online.learn(total_timesteps=int(1))
             print(' ** Done Training ** ')
         except KeyboardInterrupt:
-            model_online.save('rsu_agents/ppo_ns3_online')
+            model_online.save(f'rsu_agents/{str(argumentList[agent_index])}_ns3_online')
             env.close()
             print("Ctrl-C -> Exit")
 
