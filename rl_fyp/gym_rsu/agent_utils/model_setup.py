@@ -37,7 +37,6 @@ def model_setup(algorithm_name, env, policy='MlpPolicy', **kwargs):
     assert algorithm_name in list_of_algorithms, 'Algorithm must be supported by stable baselines'
 
     model = None
-    default_values = dict()
 
     if algorithm_name in [list_of_algorithms[0]]:
         # TD3 algorithm

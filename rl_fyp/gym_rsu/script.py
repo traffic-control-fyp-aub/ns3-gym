@@ -15,7 +15,7 @@
           parameters [ online | offline ] and the algorithm you which to train with.
 
         * Here is a list of algorithms we already support:
-            - PPO
+            - PPO2
 
     *Note that model naming convention whenever training and then saving will
     always be:
@@ -146,15 +146,23 @@ elif argumentList.__len__() >= 3:
         # Find the index of the agent name parameter
         agent_index = argumentList.index("online") + 1
 
-        # List of user specified parameters through the CLI
+        # Temp list of user specified parameters through the CLI
         params = None
 
-        if agent_index < argumentList.__len__():
+        # Dictionary to store the user specified model parameters
+        params_dict = dict()
+
+        if agent_index < argumentList.__len__() - 1:
             # Get the rest of the parameters specified by the user in the CLI
             # only if the user actually specified any. Otherwise no point in doing
             # so and use the default parameters
             for list_index in range(agent_index+1, argumentList.__len__()):
+                # Split the string into the variable name and the variable value
                 params = argumentList[list_index].split("=")
+
+                # Add a new entry into the dictionary with the key being the variable
+                # name and the value being the variable value
+                params_dict[params[0]] = params_dict[params[1]]
 
         # Train using the ns3 SUMO environment
         # Creating the ns3 environment that will act as a link
@@ -192,11 +200,11 @@ elif argumentList.__len__() >= 3:
                 model_online = model_setup(str(argumentList[agent_index]),
                                            env,
                                            'MlpPolicy',
-                                           lr=float(params[params.index("lr")+1]),
-                                           v=int(params[params.index("v")+1]),
-                                           ent=float(params[params.index("ent")+1]),
-                                           lbd=float(params[params.index("lbd")+1]),
-                                           g=float(params[params.index("g")+1]))
+                                           lr=float(params_dict["lr"]),
+                                           v=int(params_dict["v"]),
+                                           ent=float(params_dict["ent"]),
+                                           lbd=float(params_dict["lbd"]),
+                                           g=float(params_dict["g"]))
             else:
                 print(f'Setting up default {str(argumentList[agent_index])} parameters')
                 # Otherwise just set up the model and use the default values
