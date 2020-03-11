@@ -60,16 +60,6 @@ ns3_obj = None
 model_online = None
 
 
-# This variable is used to set the string value name of the model
-# selected by the user through the CLI
-model_name = ""
-
-
-# This variable is used to generate a string that is based on the user CLI input
-# and will be used to save the model after it is done training.
-saved_model_name = ""
-
-
 def make_ns3_env():
     """
         This function is created as a bug fix to train
