@@ -105,7 +105,7 @@ elif argumentList.__len__() is 2:
         stepIdx, currIt = 0, 0
 
         try:
-            model = PPO2.load(f'rsu_agents/{model_name}_ns3_online')
+            model = PPO2.load(f'rsu_agents/ppo_ns3_online_old')
             while True:
                 print("Start iteration: ", currIt)
                 obs = env.reset()
@@ -140,7 +140,7 @@ elif argumentList.__len__() is 2:
         # gym environment.
         print("Please specify one of the following training methods: [ online | offline ]")
         exit(0)
-elif argumentList.__len__() >= 3:
+elif argumentList.__len__() >= 4:
     if sys.argv[1] in ['train'] and sys.argv[2] in ['online']:
 
         # Find the index of the agent name parameter
@@ -152,7 +152,12 @@ elif argumentList.__len__() >= 3:
         # Dictionary to store the user specified model parameters
         params_dict = dict()
 
+        # Check whether the user has entered model paramters via the CLI
+        entered_cli = False
+
         if agent_index < argumentList.__len__() - 1:
+            print('Adding user specified CLI parameters')
+            entered_cli = True
             # Get the rest of the parameters specified by the user in the CLI
             # only if the user actually specified any. Otherwise no point in doing
             # so and use the default parameters
@@ -195,7 +200,7 @@ elif argumentList.__len__() >= 3:
             #                     lam=0.94,
             #                     gamma=0.99)
 
-            if params is not None:
+            if entered_cli:
                 # Case where user has specified some CLI arguments for the agent
                 model_online = model_setup(str(argumentList[agent_index]),
                                            env,
@@ -212,7 +217,7 @@ elif argumentList.__len__() >= 3:
 
             print('Training model')
             # Start the learning process on the ns3 + SUMO environment
-            model_online.learn(total_timesteps=int(1))
+            model_online.learn(total_timesteps=int(10))
             print(' ** Done Training ** ')
         except KeyboardInterrupt:
             model_online.save(f'rsu_agents/{str(argumentList[agent_index])}_ns3_online')
