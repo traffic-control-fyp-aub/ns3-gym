@@ -41,7 +41,8 @@ Terminal 1 (ns3 side):
 Terminal 2 (gym side):
 ```bash
 # This should be run under rl_fyp/gym_rsu
-python3 script.py test
+# e.g.: python3 script.py test PPO2
+python3 script.py test [ algorithm_name ]
 ```
 
 # SUMO

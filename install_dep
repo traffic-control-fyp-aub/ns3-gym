@@ -57,18 +57,19 @@ fi
 echo "** Done **"
 
 echo "Installing ns3-gym dependencies"
-apt-get install gcc g++ python
+sudo apt-get install gcc g++ python
 sudo add-apt-repository ppa:maarten-fonville/protobuf
 sudo apt-get update
 
-apt-get install libzmq5 libzmq5-dev
-apt-get install libprotobuf-dev
-apt-get install protobuf-compiler
+sudo apt-get install libzmq5 libzmq5-dev
+sudo apt-get install libprotobuf-dev
+sudo apt-get install protobuf-compiler
 
 echo "Configuring and building ns3-gym"
 
-# If you don't want examples then omit the option
-./waf configure --enable-examples
+# If you want examples then run the following configuration commad instead
+# ./waf configure --enable-examples
+./waf configure
 ./waf build
 
 echo "** Done **"
