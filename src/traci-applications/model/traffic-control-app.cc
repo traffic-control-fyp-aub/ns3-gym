@@ -565,7 +565,7 @@ VehicleSpeedControl::VehicleSpeedControl() {
 	rx_socket = 0;
 	m_port = 0;
 	m_client = nullptr;
-	last_velocity = -1;
+	last_velocity = 0;
 }
 
 VehicleSpeedControl::~VehicleSpeedControl() {

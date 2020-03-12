@@ -17,7 +17,7 @@ rewards = {}
 with open(rsu_data_file,'r') as f1,  open(rewards_file, 'r') as f2:
     line = f1.readline()
     time = 0
-    max_time = 9000
+    # max_time = 9000
     speeds = []
     headways = []
     try:
@@ -27,8 +27,8 @@ with open(rsu_data_file,'r') as f1,  open(rewards_file, 'r') as f2:
                 reward = float(f2.readline().split(':')[1].strip())
                 rewards[time] = reward
 
-                if (time>max_time):
-                    break
+                # if (time>max_time):
+                #     break
 
             line = f1.readline()
 

@@ -21,28 +21,31 @@ NS_LOG_COMPONENT_DEFINE("ns3-sumo-coupling-simple");
 int
 main (int argc, char *argv[])
 {
-  /*** 0. Logging Options ***/
-  bool verbose = true;
-
-  CommandLine cmd;
-  cmd.Parse (argc, argv);
-  if (verbose)
-    {
-      LogComponentEnable ("TraciClient", LOG_LEVEL_INFO);
-      LogComponentEnable ("TrafficControlApplication", LOG_LEVEL_INFO);
-    }
-
+	LogComponentEnable ("TraciClient", LOG_LEVEL_INFO);
+    LogComponentEnable ("TrafficControlApplication", LOG_LEVEL_INFO);
+	  
+  /*** 0. Command Options ***/
+	uint32_t scenario = 1;
+	CommandLine cmd;
+    cmd.AddValue ("scenario",  "simulation scenario",scenario);
+	cmd.Parse (argc, argv);
+	
   /*** 1. Create node pool and counter; large enough to cover all sumo vehicles ***/
   ns3::Time simulationTime (ns3::Seconds(300000));
   NodeContainer nodePool;
-/** scenario1 **/
-  //nodePool.Create (32);
-
-/** scenario2 **/
-  //nodePool.Create (5);
-
-/** scenario3 **/
-  nodePool.Create (12);
+  
+  switch(scenario){
+	  case 1:							// Circle scenario
+		  nodePool.Create (32);
+		  break;
+	  case 2:							// Merge scenario
+		  nodePool.Create (5);
+		  break;
+	  case 3:							// Square scenario
+	  default:
+		  nodePool.Create (11);
+		  break;
+  }
 
   uint32_t nodeCounter (0);
 
@@ -84,15 +87,19 @@ main (int argc, char *argv[])
 
   /*** 7. Setup Traci and start SUMO ***/
   Ptr<TraciClient> sumoClient = CreateObject<TraciClient> ();
-
-/** scenario1 **/
- // sumoClient->SetAttribute ("SumoConfigPath", StringValue ("rl_fyp/sumo_files/circle-simple/circle.sumo.cfg"));
-
-/** scenario2 **/
-  //sumoClient->SetAttribute ("SumoConfigPath", StringValue ("rl_fyp/sumo_files/sumo-highway-merge/merge-baseline_20191204-1224431575455083.45716.sumo.cfg"));
-
-/** scenario3 -training environment  **/
-  sumoClient->SetAttribute ("SumoConfigPath", StringValue ("rl_fyp/sumo_files/training_loop/training-loop.sumo.cfg"));
+  
+  switch(scenario){
+	  case 1:							// Square scenario
+		  sumoClient->SetAttribute ("SumoConfigPath", StringValue ("rl_fyp/sumo_files/circle-simple/circle.sumo.cfg"));
+		  break;
+	  case 2:							// Square scenario
+		  sumoClient->SetAttribute ("SumoConfigPath", StringValue ("rl_fyp/sumo_files/sumo-highway-merge/merge-baseline_20191204-1224431575455083.45716.sumo.cfg"));
+		  break;
+	  case 3:							// Square scenario
+	  default:
+		  sumoClient->SetAttribute ("SumoConfigPath", StringValue ("rl_fyp/sumo_files/training_loop/training-loop.sumo.cfg"));
+		  break;
+  }
 
   sumoClient->SetAttribute ("SumoBinaryPath", StringValue (""));    // use system installation of sumo
   sumoClient->SetAttribute ("SynchInterval", TimeValue (Seconds (0.1)));
@@ -114,25 +121,15 @@ main (int argc, char *argv[])
   rsuSpeedControlHelper1.SetAttribute ("Interval", TimeValue (Seconds (5.0)));    // packet interval
   rsuSpeedControlHelper1.SetAttribute ("Client", (PointerValue) (sumoClient));    // pass TraciClient object for accessing sumo in application
   
-  
-//  RsuSpeedControlHelper rsuSpeedControlHelper2 (9); // Port #9
-//  rsuSpeedControlHelper2.SetAttribute ("Interval", TimeValue (Seconds (5.0)));    // packet interval
-//  rsuSpeedControlHelper2.SetAttribute ("Client", (PointerValue) (sumoClient));    // pass TraciClient object for accessing sumo in application
 
   ApplicationContainer rsuSpeedControlApps = rsuSpeedControlHelper1.Install (nodePool.Get (0));
   rsuSpeedControlApps.Start (Seconds (10.0));
   rsuSpeedControlApps.Stop (simulationTime);
 
-//  ApplicationContainer rsuSpeedControlApps2 = rsuSpeedControlHelper2.Install (nodePool.Get (1));
-//  rsuSpeedControlApps2.Start (Seconds (10.0));
-//  rsuSpeedControlApps2.Stop (simulationTime);
 
   Ptr<MobilityModel> mobilityRsuNode1 = nodePool.Get (0)->GetObject<MobilityModel> ();
   mobilityRsuNode1->SetPosition (Vector (125.0, 125.0, 3.0)); // set RSU to fixed position
   nodeCounter++;    // one node (RSU) consumed from "node pool"
-  Ptr<MobilityModel> mobilityRsuNode2 = nodePool.Get (1)->GetObject<MobilityModel> ();
-//  mobilityRsuNode2->SetPosition (Vector (500.0, 250.0, 3.0)); // set RSU to fixed position
-  nodeCounter++;  // two nodes (RSU) consumed from "node pool"
 
 
   /*** 9. Setup interface and application for dynamic nodes ***/
