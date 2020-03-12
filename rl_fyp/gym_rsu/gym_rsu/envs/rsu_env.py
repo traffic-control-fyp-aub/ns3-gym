@@ -6,7 +6,6 @@ import pandas as pd
 from beautifultable import BeautifulTable
 
 import math
-import random
 
 """
     Custom OpenAI Gym environment from the perspective
@@ -15,16 +14,12 @@ import random
 DIRECT_PATH_TO_DATA_FRAME = "/home/rayyan/Desktop/FYP/repos/ns3-gym/rl_fyp/training_data/training_data_frame.csv"
 PATH_TO_DATA_FRAME = "rl_fyp/training_data/training_data_frame.csv"
 MAX_HEADWAY_TIME = 2  # maximum allowed headway time for vehicles in seconds
-MAX_VELOCITY_VALUE = 3.5  # maximum allowed velocity for vehicles in meters per second
+MAX_VELOCITY_VALUE = 100  # maximum allowed velocity for vehicles in meters per second
 ALPHA = 0.1  # gain used to diminish the magnitude of the penalty
-DESIRED_VELOCITY = 3  # desired system wide target (average) velocity
-NUMBER_OF_VEHICLES = 4  # number of vehicles present in the environment
-TOTAL_SECONDS_OF_INTEREST = 60*15  # 60 seconds/minute * 15 minutes
+DESIRED_VELOCITY = 90  # desired system wide target (average) velocity
+NUMBER_OF_VEHICLES = 10  # number of vehicles present in the environment
 EPSILON_THRESHOLD = math.pow(10, -5)  # threshold used to check if reward is advancing or not
-CIRCUIT_LENGTH = 1500  # length of the traffic circuit environment
-FLOW_WINDOW_CONSTANT = 15  # flow volume within the window frame of 15 minutes
-TRAFFIC_FLOW_THRESHOLD = 1.4  # Flow Q-value threshold (reported commonly in traffic literature)
-MEAN_VELOCITY = 1.75  # value to center normal distribution velocity sampling
+MEAN_VELOCITY = 92  # value to center normal distribution velocity sampling
 MEAN_HEADWAY = 1.5  # value to center normal distribution headway sampling
 SIGMA = 0.1  # standard deviation for normal distribution velocity sampling
 BETA = 0.99  # constant to be used in the delay modifier calculation
@@ -89,8 +84,8 @@ class RSUEnv(gym.Env):
 
         # Initializing my action space to be a vector of length NUMBER_OF_VEHICLES
         # which consists of a continuous interval from -1 to +1
-        self.action_space = gym.spaces.Box(low=-1,
-                                           high=1,
+        self.action_space = gym.spaces.Box(low=-10,
+                                           high=10,
                                            shape=(NUMBER_OF_VEHICLES,),
                                            dtype=np.float32)
 
@@ -177,7 +172,7 @@ class RSUEnv(gym.Env):
         #   By A. Kreidieh
         #
         #   Below is mathematical form of our reward function:
-        #   ||v_desired|| - ( sum(||v_desired - v_i(t)|| ))/N - (alpha)( summation(max(h_max - h_i(t), 0)) )
+        #   ||v_max|| - ( sum(||v_desired - v_i(t)|| ))/N - (alpha)( summation(max(h_max - h_i(t), 0)) )
         #
         #   where:
         #       - v_desired is the desired velocity of the system calculated by the road side unit
@@ -216,13 +211,13 @@ class RSUEnv(gym.Env):
         self.current_step = 0
 
         velocities = np.asarray([])
-        for _ in range(4):
+        for _ in range(NUMBER_OF_VEHICLES):
             # Generate new samples of velocities from a normal distribution
             # centered around the mean velocity with standard deviation sigma.
             velocities = np.append(velocities, round(abs(np.random.normal(MEAN_VELOCITY, SIGMA)), 2))
 
         headways = np.asarray([])
-        for _ in range(4):
+        for _ in range(NUMBER_OF_VEHICLES):
             # Generate new samples of headways from a normal distribution
             # centered around the mean headway with standard deviation sigma.
             headways = np.append(headways, round(abs(np.random.normal(MEAN_HEADWAY, SIGMA)), 2))
@@ -389,7 +384,7 @@ class RSUEnv(gym.Env):
         """
         # Converting the values to be between -1 and 1
         for index in range(len(action)):
-            temp = abs(action[index]) % 1
+            temp = abs(action[index]) % 10
             if action[index] < 0:
                 action[index] = round(-temp, 2)
             else:

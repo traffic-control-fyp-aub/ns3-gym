@@ -157,7 +157,6 @@
         <df name="subdir">
           <in>scratch-simulator-subdir.cc</in>
         </df>
-        <in>ns3-sumo-coupling-simple.cc</in>
         <in>scratch-simulator.cc</in>
       </df>
       <df name="src">
@@ -2966,13 +2965,6 @@
         </ccTool>
       </item>
       <item path="scratch/linear-mesh/sim.cc" ex="false" tool="1" flavor2="8">
-        <ccTool flags="0">
-        </ccTool>
-      </item>
-      <item path="scratch/ns3-sumo-coupling-simple.cc"
-            ex="false"
-            tool="1"
-            flavor2="8">
         <ccTool flags="0">
         </ccTool>
       </item>

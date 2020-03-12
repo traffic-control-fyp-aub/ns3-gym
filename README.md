@@ -18,8 +18,32 @@ Continuing to scroll down, you will find the three different subsections that wi
 
 The above command must be run the working directory of ns3-gym.
 
-**The above script does not take care of the entire set up of SUMO. You still have to set the SUMO paths in your terminal.**
+## Run simple traffic simulation
+```bash
+# The following two commands are needed only
+# if this is the first time running
+# ------------------------------------------ 
+./waf configure --enable-examples
+./waf build
+# ------------------------------------------
+./waf --run scratch/ns3-sumo-coupling-simple
+```
 
+## Run our traffic agent
+You must have two terminal windows open to perform the following:
+
+Terminal 1 (ns3 side): 
+```bash
+# This should be run the main working directory
+./waf --run scratch/ns3-sumo-coupling-simple
+```
+
+Terminal 2 (gym side):
+```bash
+# This should be run under rl_fyp/gym_rsu
+# e.g.: python3 script.py test PPO2
+python3 script.py test [ algorithm_name ]
+```
 
 # SUMO
 

@@ -48,7 +48,7 @@ RsuSpeedControlHelper::Install (NodeContainer c) const
 Ptr<Application>
 RsuSpeedControlHelper::InstallPriv (Ptr<Node> node) const
 {
-  Ptr<Application> app = m_factory.Create<RsuSpeedControl> ();
+  Ptr<RsuSpeedControl> app = m_factory.Create<RsuSpeedControl> ();
   node->AddApplication (app);
 
   return app;

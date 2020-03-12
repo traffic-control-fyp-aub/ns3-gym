@@ -14,6 +14,7 @@
 #include <functional>
 #include <stdlib.h>
 
+
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE("ns3-sumo-coupling-simple");
 
@@ -32,7 +33,7 @@ main (int argc, char *argv[])
     }
 
   /*** 1. Create node pool and counter; large enough to cover all sumo vehicles ***/
-  ns3::Time simulationTime (ns3::Seconds(50));
+  ns3::Time simulationTime (ns3::Seconds(300000));
   NodeContainer nodePool;
 /** scenario1 **/
   //nodePool.Create (32);
@@ -41,12 +42,12 @@ main (int argc, char *argv[])
   //nodePool.Create (5);
 
 /** scenario3 **/
-  nodePool.Create (5);
+  nodePool.Create (12);
 
   uint32_t nodeCounter (0);
 
   /*** 2. Create and setup channel ***/
-  std::string phyMode ("OfdmRate6MbpsBW10MHz");
+  std::string phyMode ("OfdmRate6MbpsBW10MHz"); // Transmission range between (between 300-400) check http://www.cse.chalmers.se/~chrpro/VANET.pdf fot specifications on transmission range
   YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
   wifiPhy.Set ("TxPowerStart", DoubleValue (20));
   wifiPhy.Set ("TxPowerEnd", DoubleValue (20));
@@ -104,32 +105,33 @@ main (int argc, char *argv[])
   sumoClient->SetAttribute ("SumoSeed", IntegerValue (10));
   sumoClient->SetAttribute ("SumoAdditionalCmdOptions", StringValue ("--verbose true"));
   sumoClient->SetAttribute ("SumoWaitForSocket", TimeValue (Seconds (1.0)));
-
-  /*** 8. Create and Setup Applications for the RSU node and set position ***/
+  
+  /*** 8. Create and Setup Applications for the RSU node and set position ***/  
+  Ptr<OpenGymInterface> openGymInterface;
+  openGymInterface = OpenGymInterface::Get(5555);
+  
   RsuSpeedControlHelper rsuSpeedControlHelper1 (9); // Port #9
-  rsuSpeedControlHelper1.SetAttribute ("Velocity", UintegerValue (30));           // initial velocity value which is sent to vehicles
   rsuSpeedControlHelper1.SetAttribute ("Interval", TimeValue (Seconds (5.0)));    // packet interval
   rsuSpeedControlHelper1.SetAttribute ("Client", (PointerValue) (sumoClient));    // pass TraciClient object for accessing sumo in application
-
-  RsuSpeedControlHelper rsuSpeedControlHelper2 (9); // Port #9
-  rsuSpeedControlHelper2.SetAttribute ("Velocity", UintegerValue (30));           // initial velocity value which is sent to vehicles
-  rsuSpeedControlHelper2.SetAttribute ("Interval", TimeValue (Seconds (5.0)));    // packet interval
-  rsuSpeedControlHelper2.SetAttribute ("Client", (PointerValue) (sumoClient));    // pass TraciClient object for accessing sumo in application
-
+  
+  
+//  RsuSpeedControlHelper rsuSpeedControlHelper2 (9); // Port #9
+//  rsuSpeedControlHelper2.SetAttribute ("Interval", TimeValue (Seconds (5.0)));    // packet interval
+//  rsuSpeedControlHelper2.SetAttribute ("Client", (PointerValue) (sumoClient));    // pass TraciClient object for accessing sumo in application
 
   ApplicationContainer rsuSpeedControlApps = rsuSpeedControlHelper1.Install (nodePool.Get (0));
-  rsuSpeedControlApps.Start (Seconds (1.0));
+  rsuSpeedControlApps.Start (Seconds (10.0));
   rsuSpeedControlApps.Stop (simulationTime);
 
-  ApplicationContainer rsuSpeedControlApps2 = rsuSpeedControlHelper2.Install (nodePool.Get (1));
-  rsuSpeedControlApps2.Start (Seconds (1.0));
-  rsuSpeedControlApps2.Stop (simulationTime);
+//  ApplicationContainer rsuSpeedControlApps2 = rsuSpeedControlHelper2.Install (nodePool.Get (1));
+//  rsuSpeedControlApps2.Start (Seconds (10.0));
+//  rsuSpeedControlApps2.Stop (simulationTime);
 
   Ptr<MobilityModel> mobilityRsuNode1 = nodePool.Get (0)->GetObject<MobilityModel> ();
-  mobilityRsuNode1->SetPosition (Vector (100.0, 125.0, 3.0)); // set RSU to fixed position
+  mobilityRsuNode1->SetPosition (Vector (125.0, 125.0, 3.0)); // set RSU to fixed position
   nodeCounter++;    // one node (RSU) consumed from "node pool"
   Ptr<MobilityModel> mobilityRsuNode2 = nodePool.Get (1)->GetObject<MobilityModel> ();
-  mobilityRsuNode2->SetPosition (Vector (470.0, 125.0, 3.0)); // set RSU to fixed position
+//  mobilityRsuNode2->SetPosition (Vector (500.0, 250.0, 3.0)); // set RSU to fixed position
   nodeCounter++;  // two nodes (RSU) consumed from "node pool"
 
 
@@ -149,7 +151,7 @@ main (int argc, char *argv[])
 
       // Install Application
       ApplicationContainer vehicleSpeedControlApps = vehicleSpeedControlHelper.Install (includedNode);
-      vehicleSpeedControlApps.Start (Seconds (0.0));
+      vehicleSpeedControlApps.Start (Seconds (1.0));
       vehicleSpeedControlApps.Stop (simulationTime);
 
       return includedNode;
@@ -179,6 +181,7 @@ main (int argc, char *argv[])
   Simulator::Stop (simulationTime);
 
   Simulator::Run ();
+  openGymInterface->NotifySimulationEnd();
   Simulator::Destroy ();
 
   return 0;
