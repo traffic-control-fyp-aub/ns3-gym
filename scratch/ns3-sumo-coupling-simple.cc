@@ -39,7 +39,7 @@ main (int argc, char *argv[])
 		  nodePool.Create (11);
 		  break;
 	  case 2:							// Merge scenario
-		  nodePool.Create (11);
+		  nodePool.Create (2000);
 		  break;
 	  case 3:							// Square scenario
 	  default:
