@@ -36,10 +36,10 @@ main (int argc, char *argv[])
   
   switch(scenario){
 	  case 1:							// Circle scenario
-		  nodePool.Create (32);
+		  nodePool.Create (11);
 		  break;
 	  case 2:							// Merge scenario
-		  nodePool.Create (5);
+		  nodePool.Create (11);
 		  break;
 	  case 3:							// Square scenario
 	  default:
@@ -128,7 +128,18 @@ main (int argc, char *argv[])
 
 
   Ptr<MobilityModel> mobilityRsuNode1 = nodePool.Get (0)->GetObject<MobilityModel> ();
-  mobilityRsuNode1->SetPosition (Vector (125.0, 125.0, 3.0)); // set RSU to fixed position
+  switch(scenario){
+	  case 1:							// Circle scenario
+		  mobilityRsuNode1->SetPosition (Vector (70.0, 70.0, 3.0)); // set RSU to fixed position
+		  break;
+	  case 2:							// Merge scenario
+		  mobilityRsuNode1->SetPosition (Vector (125.0, 125.0, 3.0)); // set RSU to fixed position
+		  break;
+	  case 3:							// Square scenario
+	  default:
+		  mobilityRsuNode1->SetPosition (Vector (125.0, 125.0, 3.0)); // set RSU to fixed position
+		  break;
+  }
   nodeCounter++;    // one node (RSU) consumed from "node pool"
 
 

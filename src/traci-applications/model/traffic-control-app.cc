@@ -427,6 +427,7 @@ RsuSpeedControl::Send() {
 	NS_LOG_INFO("TX ##### RSU->vehicle at time " << Simulator::Now().GetSeconds()
 			<< "s - [RSU ip:" << ipAddr << "]\n");
 
+	m_vehicles_data.clear();
 	ScheduleTransmit(m_interval);
 }
 
