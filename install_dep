@@ -76,11 +76,7 @@ echo "Installing gym add on"
 
 pip3 install install ./src/opengym/model/ns3gym
 
-echo "Cloning SUMO into ../sumo (one level outside ns3-gym)"
-cd ../
-git clone https://github.com/eclipse/sumo
-
-echo "Installing system dependencies for SUMO"
+echo "Installing SUMO and dependencies"
 sudo apt-get update
 sudo apt-get install -y cmake swig libgtest-dev python-pygame python-scipy
 sudo apt-get install -y autoconf libtool pkg-config libgdal-dev libxerces-c-dev
