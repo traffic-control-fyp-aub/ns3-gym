@@ -207,7 +207,7 @@ elif argumentList.__len__() >= 4:
 
             print('Training model')
             # Start the learning process on the ns3 + SUMO environment
-            model_online.learn(total_timesteps=int(10))
+            model_online.learn(total_timesteps=int(128))
             print(' ** Done Training ** ')
         except KeyboardInterrupt:
             model_online.save(f'rsu_agents/{str(argumentList[agent_index])}_ns3_online')
@@ -216,7 +216,7 @@ elif argumentList.__len__() >= 4:
 
         finally:
             env.close()
-            print("Done")
+            print("Environment closed")
     elif sys.argv[1] in ['train'] and sys.argv[2] in ['offline']:
         # Train using the RSU custom gym environment
         # Create environment

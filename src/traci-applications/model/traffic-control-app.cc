@@ -71,7 +71,7 @@ RsuEnv::RsuEnv() {
 	desired_velocity_value = 90; // was 21
 	old_reward = 0.0;
 	current_reward = 0.0;
-	current_step = 0;
+	current_step = 1;
 	horizon = 128;
 	epsilon_threshold = 1e-4;
 	max_delta = 10.0;

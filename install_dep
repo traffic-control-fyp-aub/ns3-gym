@@ -75,7 +75,7 @@ echo "Configuring and building ns3-gym"
 echo "** Done **"
 echo "Installing gym add on"
 
-pip3 install install ./src/opengym/model/ns3gym
+pip3 install ./src/opengym/model/ns3gym
 
 echo "Installing SUMO and dependencies"
 sudo apt-get update
