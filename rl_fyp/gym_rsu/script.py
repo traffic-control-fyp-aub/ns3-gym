@@ -157,7 +157,7 @@ elif argumentList.__len__() >= 4:
 
                 # Add a new entry into the dictionary with the key being the variable
                 # name and the value being the variable value
-                params_dict[params[0]] = params_dict[params[1]]
+                params_dict[params[0]] = params[1]
 
         # Train using the ns3 SUMO environment
         # Creating the ns3 environment that will act as a link
