@@ -43,7 +43,7 @@ main (int argc, char *argv[])
 		  break;
 	  case 3:							// Square scenario
 	  default:
-		  nodePool.Create (11);
+		  nodePool.Create (31);
 		  break;
   }
 
@@ -123,7 +123,7 @@ main (int argc, char *argv[])
   
 
   ApplicationContainer rsuSpeedControlApps = rsuSpeedControlHelper1.Install (nodePool.Get (0));
-  rsuSpeedControlApps.Start (Seconds (10.0));
+  rsuSpeedControlApps.Start (Seconds (1.0));
   rsuSpeedControlApps.Stop (simulationTime);
 
 
@@ -161,7 +161,7 @@ main (int argc, char *argv[])
 
       // Install Application
       ApplicationContainer vehicleSpeedControlApps = vehicleSpeedControlHelper.Install (includedNode);
-      vehicleSpeedControlApps.Start (Seconds (1.0));
+      vehicleSpeedControlApps.Start (Seconds (nodeCounter/nodePool.GetN()));
       vehicleSpeedControlApps.Stop (simulationTime);
 
       return includedNode;

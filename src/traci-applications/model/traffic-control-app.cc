@@ -690,14 +690,12 @@ VehicleSpeedControl::Send() {
 
 	// Get Headway Just before sending 
 	// Headway in seconds  = Headway in meters / velocity
-	if (last_velocity <= 0) {
-		last_headway = 0.0;
-		last_velocity = 0.0;
-	} else {
-		last_headway = m_client->TraCIAPI::vehicle.getLeader(m_client->GetVehicleId(this->GetNode()), 0).second / last_velocity;
-	}
-
-	if (last_headway <= 0) last_headway = 0.0;
+	
+	last_velocity = m_client->TraCIAPI::vehicle.getSpeed(m_client->GetVehicleId(this->GetNode()));
+	last_headway = m_client->TraCIAPI::vehicle.getLeader(m_client->GetVehicleId(this->GetNode()), 0).second / last_velocity;
+		
+	if (last_velocity <= 0) {last_velocity = 0.0;}
+	if (last_headway <= 0) {last_headway = 0.0;}
 
 	// ********************* Constructing message ********************* 
 

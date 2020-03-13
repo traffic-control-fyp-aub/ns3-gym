@@ -95,7 +95,7 @@ elif argumentList.__len__() is 2:
         stepIdx, currIt = 0, 0
 
         try:
-            model = PPO2.load(f'rsu_agents/ppo_ns3_online_old')
+            model = PPO2.load(f'rsu_agents/PPO2_ns3_online_open')
             while True:
                 print("Start iteration: ", currIt)
                 obs = env.reset()
