@@ -62,19 +62,19 @@ RsuEnv::RsuEnv() {
 	this->SetOpenGymInterface(OpenGymInterface::Get());
 	// Setting default values fot params
 	m_vehicles = 0;
-	m_max_vehicles = 50;
+	m_max_vehicles = 30;
 	m_alpha = 0.9;
 	m_beta = 0.99;
 	max_headway_time = 2.0;
-	max_velocity_value = 100; // was 25
+	max_velocity_value = 80; // was 25
 	// Look into this
-	desired_velocity_value = 90; // was 21
+	desired_velocity_value = 60; // was 21
 	old_reward = 0.0;
 	current_reward = 0.0;
 	current_step = 1;
 	horizon = 128;
 	epsilon_threshold = 1e-4;
-	max_delta = 10.0;
+	max_delta = 15.0;
 
 	NS_LOG_INFO("Set Up Interface : " << OpenGymInterface::Get() << "\n");
 }
@@ -694,8 +694,8 @@ VehicleSpeedControl::Send() {
 	last_velocity = m_client->TraCIAPI::vehicle.getSpeed(m_client->GetVehicleId(this->GetNode()));
 	last_headway = m_client->TraCIAPI::vehicle.getLeader(m_client->GetVehicleId(this->GetNode()), 0).second / last_velocity;
 		
-	if (last_velocity <= 0) {last_velocity = 0.0;}
-	if (last_headway <= 0) {last_headway = 0.0;}
+	if (last_velocity <= 0.0 || last_velocity == 1/0.0) {last_velocity = 0.0;}
+	if (last_headway <= 0.0 || last_headway == 1/0.0) {last_headway = 0.0;}
 
 	// ********************* Constructing message ********************* 
 
