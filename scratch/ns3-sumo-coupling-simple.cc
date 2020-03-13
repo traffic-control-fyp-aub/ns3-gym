@@ -39,7 +39,7 @@ main (int argc, char *argv[])
 		  nodePool.Create (11);
 		  break;
 	  case 2:							// Merge scenario
-		  nodePool.Create (2000);
+		  nodePool.Create (51);
 		  break;
 	  case 3:							// Square scenario
 	  default:
@@ -133,7 +133,7 @@ main (int argc, char *argv[])
 		  mobilityRsuNode1->SetPosition (Vector (70.0, 70.0, 3.0)); // set RSU to fixed position
 		  break;
 	  case 2:							// Merge scenario
-		  mobilityRsuNode1->SetPosition (Vector (125.0, 125.0, 3.0)); // set RSU to fixed position
+		  mobilityRsuNode1->SetPosition (Vector (450.0, 125.0, 3.0)); // set RSU to fixed position
 		  break;
 	  case 3:							// Square scenario
 	  default:
@@ -150,8 +150,10 @@ main (int argc, char *argv[])
   // callback function for node creation
   std::function<Ptr<Node> ()> setupNewWifiNode = [&] () -> Ptr<Node>
     {
-      if (nodeCounter >= nodePool.GetN())
-        NS_FATAL_ERROR("Node Pool empty!: " << nodeCounter << " nodes created.");
+      if (nodeCounter >= nodePool.GetN()){
+//		  NS_FATAL_ERROR("Node Pool empty!: " << nodeCounter << " nodes created.");
+		  nodeCounter = 1;
+	  }
 
       // don't create and install the protocol stack of the node at simulation time -> take from "node pool"
       Ptr<Node> includedNode = nodePool.Get(nodeCounter);
@@ -170,8 +172,9 @@ main (int argc, char *argv[])
     {
       // stop all applications
       Ptr<VehicleSpeedControl> vehicleSpeedControl = exNode->GetApplication(0)->GetObject<VehicleSpeedControl>();
-      if(vehicleSpeedControl)
+      if(vehicleSpeedControl){
         vehicleSpeedControl->StopApplicationNow();
+	  }
 
       // set position outside communication range
       Ptr<ConstantPositionMobilityModel> mob = exNode->GetObject<ConstantPositionMobilityModel>();

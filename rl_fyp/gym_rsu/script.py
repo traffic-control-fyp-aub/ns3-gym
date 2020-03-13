@@ -210,12 +210,11 @@ elif argumentList.__len__() >= 4:
             model_online.learn(total_timesteps=int(128*300000))
             print(' ** Done Training ** ')
         except KeyboardInterrupt:
-            model_online.save(f'rsu_agents/{str(argumentList[agent_index])}_ns3_online')
+            model_online.save(f'rsu_agents/{str(argumentList[agent_index])}_ns3_online_open')
             env.close()
             print("Ctrl-C -> Exit")
 
         finally:
-            model_online.save(f'rsu_agents/{str(argumentList[agent_index])}_ns3_online')
             env.close()
             print("Environment closed")
     elif sys.argv[1] in ['train'] and sys.argv[2] in ['offline']:

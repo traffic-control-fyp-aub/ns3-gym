@@ -17,12 +17,21 @@ rewards = {}
 with open(rsu_data_file,'r') as f1,  open(rewards_file, 'r') as f2:
     line = f1.readline()
     time = 0
+    num = 0
     # max_time = 9000
     speeds = []
     headways = []
     try:
         while line:
             if "time" in line:
+                if time > 0:
+                    speeds_avg[time] = 0 if len(speeds)<1 else statistics.mean(speeds)
+                    speeds_std[time] = 0 if len(speeds)<2 else statistics.stdev(speeds)
+                    headways_avg[time] = 0 if len(headways)<1 else statistics.mean(headways)
+                    headways_std[time] = 0 if len(headways)<2 else statistics.stdev(headways)
+                    speeds = []
+                    headways = []
+
                 time = float(line[line.find("=")+1 : line.find(":")].strip())
                 reward = float(f2.readline().split(':')[1].strip())
                 rewards[time] = reward
@@ -30,25 +39,25 @@ with open(rsu_data_file,'r') as f1,  open(rewards_file, 'r') as f2:
                 # if (time>max_time):
                 #     break
 
-            line = f1.readline()
-
-            while "time" not in line:
+            elif "time" not in line:
                 vals = line.split("::")
                 if len(vals) > 1:
                     speeds.append(float(vals[1].strip()))
                     headways.append(float(vals[2].strip()))
-                line = f1.readline()
 
-            speeds_avg[time] = statistics.mean(speeds)
-            speeds_std[time] = statistics.stdev(speeds)
-            headways_avg[time] = statistics.mean(headways)
-            headways_std[time] = statistics.stdev(headways)
-            speeds = []
-            headways = []
+            line = f1.readline()     
+            num = num+1
+            print(num)           
 
     except StopIteration:
         print('EOF!')
     finally:
+
+        print(speeds_avg)
+        print(speeds_std)
+        print(headways_avg)
+        print(headways_std)
+        print(rewards)
       
         lists = sorted(speeds_avg.items())
         t, avg = zip(*lists)
@@ -62,7 +71,6 @@ with open(rsu_data_file,'r') as f1,  open(rewards_file, 'r') as f2:
         plt.plot(t, std,'r--', label="Standard Deviation")
 
         plt.legend()
-        # plt.show()
 
         fig = plt.figure(2)
         fig.suptitle('Headways', fontsize=16)
