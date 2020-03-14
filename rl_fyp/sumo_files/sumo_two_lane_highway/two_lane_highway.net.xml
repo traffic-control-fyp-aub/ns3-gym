@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 14 آذار, 2020 EET 11:55:46 ص by Eclipse SUMO netedit Version v1_1_0+0000-2147d155b1
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
+
+    <output>
+        <output-file value="/home/rayyan/Desktop/FYP/repos/ns3-gym/rl_fyp/sumo_files/sumo_two_lane_highway/two_lane_highway.net.xml"/>
+    </output>
+
+    <processing>
+        <offset.disable-normalization value="true"/>
+    </processing>
+
+    <junctions>
+        <no-turnarounds value="true"/>
+    </junctions>
+
+</configuration>
+-->
+
+<net version="1.1" junctionCornerDetail="5" limitTurnSpeed="5.50" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
+
+    <location netOffset="0.00,0.00" convBoundary="0.00,0.00,250.00,0.00" origBoundary="10000000000.00,10000000000.00,-10000000000.00,-10000000000.00" projParameter="!"/>
+
+    <edge id="gneE0" from="gneJ0" to="gneJ1" priority="-1" length="250.00">
+        <lane id="gneE0_0" index="0" speed="13.89" length="250.00" shape="0.00,-4.80 250.00,-4.80"/>
+        <lane id="gneE0_1" index="1" speed="13.89" length="250.00" shape="0.00,-1.60 250.00,-1.60"/>
+    </edge>
+
+    <junction id="gneJ0" type="dead_end" x="0.00" y="0.00" incLanes="" intLanes="" shape="0.00,0.00 0.00,-6.40"/>
+    <junction id="gneJ1" type="dead_end" x="250.00" y="0.00" incLanes="gneE0_0 gneE0_1" intLanes="" shape="250.00,-6.40 250.00,0.00"/>
+
+</net>
