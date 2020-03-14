@@ -215,7 +215,8 @@ elif argumentList.__len__() >= 5:
             print(' ** Done Training ** ')
         except KeyboardInterrupt:
             model_online.save(f'rsu_agents/square_agents/'
-                              f'{str(argumentList[agent_index])}_ns3_{traffic_scenario_name}_{ac_space[1:3]}')
+                              f'{str(argumentList[agent_index])}_ns3_'
+                              f'{traffic_scenario_name}_cars={str(ac_space.shape)[1:3]}')
             env.close()
             print("Ctrl-C -> Exit")
 
