@@ -1,7 +1,7 @@
 """
     Usage:
     ------
-    >> python3 script.py [ test | train ] [ online | offline ] [ algorithm name ] [ algorithm_params ]
+    >> python3 script.py [ test | train ] [ online | offline ] [ algorithm name ] [scenario_name] [ algorithm_params ]
         + test: Load and test the performance of a previously trained algorithm into
             `   the ns3-SUMO simulator.
         + train: Train an agent from scratch either directly on the ns3-SUMO simulator
@@ -19,7 +19,7 @@
 
     *Note that model naming convention whenever training and then saving will
     always be:
-                    rsu_agents/[algorithm_name]_ns3_[online | offline].zip
+                    rsu_agents/[scenario_name]_agents/[algorithm]_ns3_[scenario_name]_[num_of_cars]
 
     This will later be used to help facilitate testing the agents directly from
     the CLI instead of having to edit this script file every time.
@@ -130,11 +130,19 @@ elif argumentList.__len__() is 2:
         # gym environment.
         print("Please specify one of the following training methods: [ online | offline ]")
         exit(0)
-elif argumentList.__len__() >= 4:
+elif argumentList.__len__() >= 5:
     if sys.argv[1] in ['train'] and sys.argv[2] in ['online']:
 
         # Find the index of the agent name parameter
         agent_index = argumentList.index("online") + 1
+
+        # Find the index of the traffic scenario specified
+        traffic_scenario_index = agent_index + 1
+
+        # Extracting the name of the traffic scenario to use for saving
+        # the name of the agent
+        traffic_scenario_name = argumentList[traffic_scenario_index].split("=")
+        traffic_scenario_name = traffic_scenario_name[1]
 
         # Temp list of user specified parameters through the CLI
         params = None
@@ -181,14 +189,6 @@ elif argumentList.__len__() >= 4:
 
         try:
             print('Setting up the model')
-            # Use the stable-baseline PPO policy to train
-            # model_online = PPO2('MlpPolicy',
-            #                     env=env,
-            #                     learning_rate=3e-4,
-            #                     verbose=1,
-            #                     ent_coef=0.0,
-            #                     lam=0.94,
-            #                     gamma=0.99)
 
             if entered_cli:
                 # Case where user has specified some CLI arguments for the agent
@@ -210,7 +210,8 @@ elif argumentList.__len__() >= 4:
             model_online.learn(total_timesteps=int(128*300000))
             print(' ** Done Training ** ')
         except KeyboardInterrupt:
-            model_online.save(f'rsu_agents/{str(argumentList[agent_index])}_ns3_online_open')
+            model_online.save(f'rsu_agents/square_agents/'
+                              f'{str(argumentList[agent_index])}_ns3_{traffic_scenario_name}_{ac_space[1:3]}')
             env.close()
             print("Ctrl-C -> Exit")
 
