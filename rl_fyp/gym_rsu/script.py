@@ -23,6 +23,10 @@
 
     This will later be used to help facilitate testing the agents directly from
     the CLI instead of having to edit this script file every time.
+
+    e.g.:
+    -----
+    python3 script.py train online PPO2 scenario=square lr=2.5e-4 v=1 ent=0.0 lbd=0.95 g=0.99
 """
 import sys
 from agent_utils.model_setup import model_setup
