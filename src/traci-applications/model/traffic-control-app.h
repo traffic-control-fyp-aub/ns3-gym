@@ -139,11 +139,13 @@ namespace ns3 {
 		 */
 		void Send(void);
 		void ChangeSpeed(void);
+		void ClearDataTable(void);
 		void HandleRead(Ptr<Socket> socket);
 		
 
 		uint16_t m_port; //!< Port on which traffic information is sent
 		Time m_interval; //!< Packet inter-send time
+		Time m_clear_interval; //!< Packet inter-send time
 		uint32_t m_count; //!< Maximum number of packets the application will send
 		Ptr<Socket> tx_socket; //!< IPv4 Socket
 		Ptr<Socket> rx_socket; //!< IPv4 Socket

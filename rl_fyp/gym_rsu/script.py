@@ -99,7 +99,7 @@ elif argumentList.__len__() is 2:
         stepIdx, currIt = 0, 0
 
         try:
-            model = PPO2.load(f'rsu_agents/PPO2_ns3_online_open')
+            model = PPO2.load(f'rsu_agents/square_agents/PPO2_ns3_square_cars=30')
             while True:
                 print("Start iteration: ", currIt)
                 obs = env.reset()
