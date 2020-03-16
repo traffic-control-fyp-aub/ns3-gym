@@ -226,7 +226,7 @@ elif argumentList.__len__() >= 5:
             model_online.learn(total_timesteps=int(128*60000))
             print(' ** Done Training ** ')
         except KeyboardInterrupt:
-            model_online.save(f'rsu_agents/square_agents/'
+            model_online.save(f'rsu_agents/square_agents/{str(argumentList[agent_index])}_algorithm/'
                               f'{str(argumentList[agent_index])}_ns3_'
                               f'{traffic_scenario_name}_cars={str(ac_space.shape)[1:3]}')
             env.close()

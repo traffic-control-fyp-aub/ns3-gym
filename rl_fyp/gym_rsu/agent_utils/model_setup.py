@@ -11,7 +11,7 @@ list_of_algorithms = ['TD3', 'DDPG', 'PPO2', 'PPO1',
                       'GAIL', 'HER', 'SAC', 'TRPO']
 
 
-def model_setup(algorithm_name, env, policy='MlpPolicy', **kwargs):
+def model_setup(algorithm_name, env, policy, **kwargs):
     """
         This function takes in the algorithm name specified by the
         user in the CLI, the environment to train on, the policy, and
@@ -87,7 +87,23 @@ def model_setup(algorithm_name, env, policy='MlpPolicy', **kwargs):
         pass
     elif algorithm_name in [list_of_algorithms[10]]:
         # SAC algorithm
-        pass
+        # Get the default values in case no user specifications
+        signature = inspect.signature(SAC.__init__)
+
+        lr = kwargs.pop('lr', signature.parameters['learning_rate'].default)
+        v = kwargs.pop('v', signature.parameters['verbose'].default)
+        ent = kwargs.pop('ent', signature.parameters['ent_coef'].default)
+        lbd = kwargs.pop('lbd', signature.parameters['lam'].default)
+        g = kwargs.pop('g', signature.parameters['gamma'].default)
+
+        model = PPO2(policy=policy,
+                     env=env,
+                     learning_rate=lr,
+                     verbose=v,
+                     ent_coef=ent,
+                     lam=lbd,
+                     gamma=g)
+
     elif algorithm_name in [list_of_algorithms[11]]:
         # TRPO algorithm
         pass
