@@ -30,7 +30,7 @@ main (int argc, char *argv[])
   cmd.Parse (argc, argv);
 
   /*** 1. Create node pool and counter; large enough to cover all sumo vehicles ***/
-  ns3::Time simulationTime (ns3::Seconds (300000));
+  ns3::Time simulationTime (ns3::Seconds (30000));
   NodeContainer nodePool;
 
   switch (scenario)
@@ -43,7 +43,7 @@ main (int argc, char *argv[])
       break;
     case 3: // Square scenario
     default:
-      nodePool.Create (31);
+      nodePool.Create (11);
       break;
     }
 

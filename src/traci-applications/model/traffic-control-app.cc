@@ -65,13 +65,12 @@ RsuEnv::RsuEnv ()
   this->SetOpenGymInterface (OpenGymInterface::Get ());
   // Setting default values fot params
   m_vehicles = 0;
-  m_max_vehicles = 30;
+  m_max_vehicles = 10;
   m_alpha = 0.9;
   m_beta = 0.99;
   max_headway_time = 2.0;
-  max_velocity_value = 50; // was 25
-  // Look into this
-  desired_velocity_value = 47; // was 21
+  max_velocity_value = 100; // was 50
+  desired_velocity_value = 90; // was 47
   old_reward = 0.0;
   current_reward = 0.0;
   current_step = 1;

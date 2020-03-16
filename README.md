@@ -27,7 +27,7 @@ The above command must be run the working directory of ns3-gym.
 ./waf build
 # ------------------------------------------
 # 1 = circle traffic scenario
-# 2 = single lane highway merge scenario
+# 2 = two lane highway merge scenario
 # 3 = square traffic scenario
 ./waf --run "scratch/ns3-sumo-coupling-simple scenario= [ 1 | 2 | 3 ]"
 ```

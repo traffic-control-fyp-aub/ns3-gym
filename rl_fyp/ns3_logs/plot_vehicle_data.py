@@ -1,3 +1,16 @@
+"""
+    Usage:
+    ------
+    To be able to use this file to collect ns3 logs you need two terminal windows and need to run the following
+    commands in each window
+
+    Terminal 1 (ns3 side):
+    >> ./waf --run "scratch/ns3-sumo-coupling-simple --scenario=[1 | 2 | 3]" 2>&1 | awk '{print > "rl_fyp/ns3_logs/logs.log"}/RSU0 table/{print > "rl_fyp/ns3_logs/rsu_0.log"}/MyGetReward/{print > "rl_fyp/ns3_logs/rewards.log"}'
+
+    Terminal 2 (Gym side):
+    >> python3 script.py test scenario=[ scenario_name ] cars=[ number of cars previously trained on ]
+"""
+
 import sys
 import statistics
 import matplotlib.pylab as plt
