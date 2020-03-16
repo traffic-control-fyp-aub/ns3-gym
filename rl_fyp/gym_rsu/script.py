@@ -26,7 +26,11 @@
 
     e.g.: (training)
     -----
+    - PPO2
     >> python3 script.py train online PPO2 scenario=square lr=2.5e-4 v=1 ent=0.0 lbd=0.95 g=0.99
+
+    - SAC
+    >> python3 script.py train online SAC scenario=square
 
     e.g.: (testing)
     >> python3 script.py test scenario=square cars=10
@@ -50,7 +54,7 @@ import gym_rsu
 # ---------------------------------------------------------------
 from ns3gym import ns3env
 
-from stable_baselines import PPO2
+from stable_baselines import PPO2, SAC
 from stable_baselines.common.evaluation import evaluate_policy
 from stable_baselines.common.vec_env import DummyVecEnv
 
@@ -110,8 +114,13 @@ elif argumentList.__len__() is 4:
         stepIdx, currIt = 0, 0
 
         try:
-            model = PPO2.load(f'rsu_agents/{scenario_name}_agents/'
-                              f'PPO2_ns3_online_{scenario_name}_cars={num_of_vehicles}')
+
+            # model = PPO2.load(f'rsu_agents/{scenario_name}_agents/'
+            #                   f'PPO2_ns3_online_{scenario_name}_cars={num_of_vehicles}')
+
+            model = SAC.load((f'rsu_agents/square_agents/SAC_algorithm/'
+                              f'SAC_ns3_'
+                              f'SAC_cars=25'))
             while True:
                 print("Start iteration: ", currIt)
                 obs = env.reset()
