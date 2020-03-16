@@ -212,10 +212,13 @@ elif argumentList.__len__() >= 5:
                                            env,
                                            'MlpPolicy',
                                            lr=float(params_dict["lr"]),
+                                           bf=int(params_dict["bf"]),
+                                           bch=int(params_dict["bch"]),
+                                           tf=int(params_dict["tf"]),
+                                           grad=int(params_dict["grad"]),
+                                           lst=int(params_dict["lst"]),
                                            v=int(params_dict["v"]),
-                                           ent=float(params_dict["ent"]),
-                                           lbd=float(params_dict["lbd"]),
-                                           g=float(params_dict["g"]))
+                                           ent=str(params_dict["ent"]))
             else:
                 print(f'Setting up default {str(argumentList[agent_index])} parameters')
                 # Otherwise just set up the model and use the default values
@@ -223,7 +226,7 @@ elif argumentList.__len__() >= 5:
 
             print('Training model')
             # Start the learning process on the ns3 + SUMO environment
-            model_online.learn(total_timesteps=int(128*60000))
+            model_online.learn(total_timesteps=30000)   # int(128*60000)) < -- PPO2
             print(' ** Done Training ** ')
         except KeyboardInterrupt:
             model_online.save(f'rsu_agents/square_agents/{str(argumentList[agent_index])}_algorithm/'
