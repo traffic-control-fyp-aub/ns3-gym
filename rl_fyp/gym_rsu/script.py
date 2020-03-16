@@ -223,7 +223,7 @@ elif argumentList.__len__() >= 5:
 
             print('Training model')
             # Start the learning process on the ns3 + SUMO environment
-            model_online.learn(total_timesteps=int(128*30000))
+            model_online.learn(total_timesteps=int(128*60000))
             print(' ** Done Training ** ')
         except KeyboardInterrupt:
             model_online.save(f'rsu_agents/square_agents/'
