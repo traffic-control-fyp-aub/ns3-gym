@@ -91,18 +91,24 @@ def model_setup(algorithm_name, env, policy, **kwargs):
         signature = inspect.signature(SAC.__init__)
 
         lr = kwargs.pop('lr', signature.parameters['learning_rate'].default)
-        v = kwargs.pop('v', signature.parameters['verbose'].default)
+        bf = kwargs.pop('bf', signature.parameters['buffer_size'].default)
+        bch = kwargs.pop('bch', signature.parameters['batch_size'].default)
         ent = kwargs.pop('ent', signature.parameters['ent_coef'].default)
-        lbd = kwargs.pop('lbd', signature.parameters['lam'].default)
-        g = kwargs.pop('g', signature.parameters['gamma'].default)
+        tf = kwargs.pop('tf', signature.parameters['train_freq'].default)
+        grad = kwargs.pop('grad', signature.parameters['gradient_steps'].default)
+        lst = kwargs.pop('lst', signature.parameters['learning_starts'].default)
+        v = kwargs.pop('v', signature.parameters['verbose'].default)
 
-        model = PPO2(policy=policy,
-                     env=env,
-                     learning_rate=lr,
-                     verbose=v,
-                     ent_coef=ent,
-                     lam=lbd,
-                     gamma=g)
+        model = SAC(policy=policy,
+                    env=env,
+                    learning_rate=lr,
+                    buffer_size=bf,
+                    batch_size=bch,
+                    ent_coef=ent,
+                    train_freq=tf,
+                    gradient_steps=grad,
+                    learning_starts=lst,
+                    verbose=v)
 
     elif algorithm_name in [list_of_algorithms[11]]:
         # TRPO algorithm
