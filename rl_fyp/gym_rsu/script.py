@@ -24,9 +24,13 @@
     This will later be used to help facilitate testing the agents directly from
     the CLI instead of having to edit this script file every time.
 
-    e.g.:
+    e.g.: (training)
     -----
-    python3 script.py train online PPO2 scenario=square lr=2.5e-4 v=1 ent=0.0 lbd=0.95 g=0.99
+    >> python3 script.py train online PPO2 scenario=square lr=2.5e-4 v=1 ent=0.0 lbd=0.95 g=0.99
+
+    e.g.: (testing)
+    >> python3 script.py test scenario=square cars=10
+
 """
 import sys
 from agent_utils.model_setup import model_setup
@@ -78,8 +82,15 @@ if argumentList.__len__() == 1:
     print("Please specify one of the following: [ test | train ]"
           " and if you specified to train then [ --online | --offline ]")
     exit(0)
-elif argumentList.__len__() is 2:
+elif argumentList.__len__() is 4:
     if sys.argv[1] in ['test']:
+
+        # Collect from the CLI the name of the traffic scenario
+        scenario_name = sys.argv[2].split("=")[1]
+
+        # Collect from the CLI the number of cars that the agent was trained on
+        num_of_vehicles = sys.argv[3].split("=")[1]
+
         # Load the previously trained agent parameters and start
         # running the traffic simulation
         # Creating the ns3 environment that will act as a link
@@ -99,7 +110,8 @@ elif argumentList.__len__() is 2:
         stepIdx, currIt = 0, 0
 
         try:
-            model = PPO2.load(f'rsu_agents/square_agents/PPO2_ns3_square_cars=30')
+            model = PPO2.load(f'rsu_agents/{scenario_name}_agents/'
+                              f'PPO2_ns3_online_{scenario_name}_cars={num_of_vehicles}')
             while True:
                 print("Start iteration: ", currIt)
                 obs = env.reset()

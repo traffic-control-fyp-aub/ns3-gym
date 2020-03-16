@@ -1,5 +1,3 @@
-
-
 import sys
 import statistics
 import matplotlib.pylab as plt
@@ -35,9 +33,6 @@ with open(rsu_data_file,'r') as f1,  open(rewards_file, 'r') as f2:
                 time = float(line[line.find("=")+1 : line.find(":")].strip())
                 reward = float(f2.readline().split(':')[1].strip())
                 rewards[time] = reward
-
-                # if (time>max_time):
-                #     break
 
             elif "time" not in line:
                 vals = line.split("::")
@@ -94,5 +89,3 @@ with open(rsu_data_file,'r') as f1,  open(rewards_file, 'r') as f2:
         plt.legend()
 
         plt.show()
-
-
