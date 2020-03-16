@@ -11,7 +11,7 @@ list_of_algorithms = ['TD3', 'DDPG', 'PPO2', 'PPO1',
                       'GAIL', 'HER', 'SAC', 'TRPO']
 
 
-def model_setup(algorithm_name, env, policy='MlpPolicy', **kwargs):
+def model_setup(algorithm_name, env, policy, **kwargs):
     """
         This function takes in the algorithm name specified by the
         user in the CLI, the environment to train on, the policy, and
@@ -87,7 +87,29 @@ def model_setup(algorithm_name, env, policy='MlpPolicy', **kwargs):
         pass
     elif algorithm_name in [list_of_algorithms[10]]:
         # SAC algorithm
-        pass
+        # Get the default values in case no user specifications
+        signature = inspect.signature(SAC.__init__)
+
+        lr = kwargs.pop('lr', signature.parameters['learning_rate'].default)
+        bf = kwargs.pop('bf', signature.parameters['buffer_size'].default)
+        bch = kwargs.pop('bch', signature.parameters['batch_size'].default)
+        ent = kwargs.pop('ent', signature.parameters['ent_coef'].default)
+        tf = kwargs.pop('tf', signature.parameters['train_freq'].default)
+        grad = kwargs.pop('grad', signature.parameters['gradient_steps'].default)
+        lst = kwargs.pop('lst', signature.parameters['learning_starts'].default)
+        v = kwargs.pop('v', signature.parameters['verbose'].default)
+
+        model = SAC(policy=policy,
+                    env=env,
+                    learning_rate=lr,
+                    buffer_size=bf,
+                    batch_size=bch,
+                    ent_coef=ent,
+                    train_freq=tf,
+                    gradient_steps=grad,
+                    learning_starts=lst,
+                    verbose=v)
+
     elif algorithm_name in [list_of_algorithms[11]]:
         # TRPO algorithm
         pass

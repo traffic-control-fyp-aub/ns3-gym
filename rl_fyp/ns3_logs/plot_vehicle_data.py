@@ -1,4 +1,15 @@
+"""
+    Usage:
+    ------
+    To be able to use this file to collect ns3 logs you need two terminal windows and need to run the following
+    commands in each window
 
+    Terminal 1 (ns3 side):
+    >> ./waf --run "scratch/ns3-sumo-coupling-simple --scenario=[1 | 2 | 3]" 2>&1 | awk '{print > "rl_fyp/ns3_logs/logs.log"}/RSU0 table/{print > "rl_fyp/ns3_logs/rsu_0.log"}/MyGetReward/{print > "rl_fyp/ns3_logs/rewards.log"}'
+
+    Terminal 2 (Gym side):
+    >> python3 script.py test scenario=[ scenario_name ] cars=[ number of cars previously trained on ]
+"""
 
 import sys
 import statistics
@@ -35,9 +46,6 @@ with open(rsu_data_file,'r') as f1,  open(rewards_file, 'r') as f2:
                 time = float(line[line.find("=")+1 : line.find(":")].strip())
                 reward = float(f2.readline().split(':')[1].strip())
                 rewards[time] = reward
-
-                # if (time>max_time):
-                #     break
 
             elif "time" not in line:
                 vals = line.split("::")
@@ -94,5 +102,3 @@ with open(rsu_data_file,'r') as f1,  open(rewards_file, 'r') as f2:
         plt.legend()
 
         plt.show()
-
-

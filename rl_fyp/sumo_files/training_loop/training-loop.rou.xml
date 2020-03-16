@@ -1,5 +1,5 @@
 <routes>
 	<vType id="car" type="passenger" length="5" accel="2" decel="4.5" sigma="0.5" carFollowModel="IDM" impatience="0.5" minGap="0" tau="2.5" probability="0.5" color="yellow"/>
 
-	<flow id="carflow" type="car" beg="0" end="0" number="30" from="gneE9" to="gneE8" />
+	<flow id="carflow" type="car" beg="0" end="0" number="20" from="gneE9" to="gneE8" />
 </routes>	
