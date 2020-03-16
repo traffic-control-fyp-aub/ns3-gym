@@ -39,7 +39,7 @@ main (int argc, char *argv[])
       nodePool.Create (11);
       break;
     case 2: // Highway scenario
-      nodePool.Create (51);
+      nodePool.Create (1001);
       break;
     case 3: // Square scenario
     default:
@@ -99,7 +99,8 @@ main (int argc, char *argv[])
     case 2: // Square scenario
       sumoClient->SetAttribute (
           "SumoConfigPath",
-          StringValue ("rl_fyp/sumo_files/sumo_two_lane_highway/two_lane_highway.sumo.cfg"));
+          StringValue ("rl_fyp/sumo_files/sumo-highway-merge/"
+                       "merge-baseline_20191204-1224431575455083.45716.sumo.cfg"));
       break;
     case 3: // Square scenario
     default:
@@ -132,7 +133,7 @@ main (int argc, char *argv[])
       (PointerValue) (sumoClient)); // pass TraciClient object for accessing sumo in application
 
   ApplicationContainer rsuSpeedControlApps = rsuSpeedControlHelper1.Install (nodePool.Get (0));
-  rsuSpeedControlApps.Start (Seconds (0.0));
+  rsuSpeedControlApps.Start (Seconds (nodeCounter / nodePool.GetN ()));
   rsuSpeedControlApps.Stop (simulationTime);
 
   Ptr<MobilityModel> mobilityRsuNode1 = nodePool.Get (0)->GetObject<MobilityModel> ();
@@ -142,7 +143,7 @@ main (int argc, char *argv[])
       mobilityRsuNode1->SetPosition (Vector (70.0, 70.0, 3.0)); // set RSU to fixed position
       break;
     case 2: // Merge scenario
-      mobilityRsuNode1->SetPosition (Vector (100.0, 0.0, 3.0)); // set RSU to fixed position
+      mobilityRsuNode1->SetPosition (Vector (300.0, 140.0, 3.0)); // set RSU to fixed position
       break;
     case 3: // Square scenario
     default:
@@ -157,24 +158,25 @@ main (int argc, char *argv[])
       "Client",
       (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
 
+  // uint32_t number_of_vehicles = nodePool.GetN () - nodeCounter;
   // callback function for node creation
   std::function<Ptr<Node> ()> setupNewWifiNode = [&]() -> Ptr<Node> {
     if (nodeCounter >= nodePool.GetN ())
       {
-        NS_FATAL_ERROR("Node Pool empty!: " << nodeCounter << " nodes created.");
+        NS_FATAL_ERROR ("Node Pool empty!: " << nodeCounter << " nodes created.");
         // nodeCounter = 1;
       }
 
     // don't create and install the protocol stack of the node at simulation time -> take from "node pool"
     Ptr<Node> includedNode = nodePool.Get (nodeCounter);
-    ++nodeCounter; // increment counter for next node
 
     // Install Application
     ApplicationContainer vehicleSpeedControlApps = vehicleSpeedControlHelper.Install (includedNode);
 
-    double start = (nodeCounter / nodePool.GetN ());
-    vehicleSpeedControlApps.Start (Seconds (start));
+    // double start = (nodeCounter / number_of_vehicles);
+    vehicleSpeedControlApps.Start (Seconds (0.00001));
     vehicleSpeedControlApps.Stop (simulationTime);
+    nodeCounter++; // increment counter for next node
 
     return includedNode;
   };
@@ -207,7 +209,7 @@ main (int argc, char *argv[])
 
   Simulator::Run ();
   openGymInterface->NotifySimulationEnd ();
-  Simulator::Destroy ();
+  // Simulator::Destroy ();
 
   return 0;
 }

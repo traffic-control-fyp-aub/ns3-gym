@@ -69,15 +69,15 @@ RsuEnv::RsuEnv ()
   m_alpha = 0.9;
   m_beta = 0.99;
   max_headway_time = 2.0;
-  max_velocity_value = 50; // was 25
+  max_velocity_value = 100; // was 25
   // Look into this
-  desired_velocity_value = 47; // was 21
+  desired_velocity_value = 80; // was 21
   old_reward = 0.0;
   current_reward = 0.0;
   current_step = 1;
   horizon = 128;
   epsilon_threshold = 1e-4;
-  max_delta = 5.0;
+  max_delta = 10.0;
 
   NS_LOG_INFO ("Set Up Interface : " << OpenGymInterface::Get () << "\n");
 }
@@ -262,6 +262,8 @@ RsuEnv::ExportNewSpeeds ()
     {
       new_speeds_no_paddings.push_back (new_speeds[i]);
     }
+  NS_LOG_INFO ("###################################################################################"
+               "########################\n");
   return new_speeds_no_paddings;
 }
 
@@ -269,6 +271,8 @@ void
 RsuEnv::ImportSpeedsAndHeadWays (std::vector<double> RSU_headways, std::vector<double> RSU_speeds)
 {
   NS_LOG_FUNCTION (this);
+  NS_LOG_INFO ("###################################################################################"
+               "########################\n");
 
   // remove old headway and speed values
   actual_headways.clear ();
@@ -304,7 +308,7 @@ RsuSpeedControl::GetTypeId (void)
           .AddAttribute ("Port", "Port on which we send packets.", UintegerValue (9),
                          MakeUintegerAccessor (&RsuSpeedControl::m_port),
                          MakeUintegerChecker<uint16_t> ())
-          .AddAttribute ("Interval", "The time to wait between packets", TimeValue (Seconds (3.0)),
+          .AddAttribute ("Interval", "The time to wait between packets", TimeValue (Seconds (30.0)),
                          MakeTimeAccessor (&RsuSpeedControl::m_interval), MakeTimeChecker ())
           .AddAttribute ("MaxPackets", "The maximum number of packets the application will send",
                          UintegerValue (100), MakeUintegerAccessor (&RsuSpeedControl::m_count),
@@ -368,11 +372,11 @@ RsuSpeedControl::StartApplication (void)
       tx_socket->SetAllowBroadcast (true);
       tx_socket->Connect (remote);
 
-      m_clear_interval = Seconds(6.0); // clear table after 3 episodes of speed collection
+      m_clear_interval = Seconds (6.0); // clear table after 3 episodes of speed collection
       // start transmitting messages after 0 seconds and update speed values after m_interval seconds
-      ScheduleTransmit (m_interval);
       Simulator::Schedule (m_interval, &RsuSpeedControl::ChangeSpeed, this);
-    //   Simulator::Schedule (m_clear_interval, &RsuSpeedControl::ClearDataTable, this);
+      ScheduleTransmit (m_interval);
+      Simulator::Schedule (m_clear_interval, &RsuSpeedControl::ClearDataTable, this);
     }
 
   // set up socket used to receive packets
@@ -432,12 +436,16 @@ RsuSpeedControl::Send ()
 
   // append 0 which is used to identify an RSU
   msg << "0*";
-
+  // Log speeds while constructing message
+  NS_LOG_INFO ("\nRSU" << this->GetNode ()->GetId () << " new entries based on agent actions: \n");
   // The message will be of form: "0*id1:velocity1|id2:velocity2|...."
 
   std::map<std::string, std::pair<double, double>>::iterator it = m_vehicles_data.begin ();
   while (it != m_vehicles_data.end ())
     {
+      // Log new speeds
+      NS_LOG_INFO ("RSU" << this->GetNode ()->GetId () << "new data = " << it->first
+                         << " :: " << (it->second).first);
 
       // append vehicle id then new speed respectively
       msg << "|" << it->first << ":" << std::to_string ((it->second).first);
@@ -461,8 +469,7 @@ RsuSpeedControl::Send ()
   tx_socket->Send (packet);
 
   NS_LOG_INFO ("0 TX ##### RSU->vehicle at time " << Simulator::Now ().GetSeconds ()
-                                                << "s - [RSU ip:" << ipAddr << "]\n");
-
+                                                  << "s - [RSU ip:" << ipAddr << "]\n");
   ScheduleTransmit (m_interval);
 }
 
@@ -491,8 +498,8 @@ RsuSpeedControl::ChangeSpeed ()
                          << " :: " << (it->second).first << " :: " << (it->second).second);
 
       // store speed and headway for each vehicle
-    //   if ((it->second).first < 0)
-    //     (it->second).first = 0;
+      //   if ((it->second).first < 0)
+      //     (it->second).first = 0;
       speeds.push_back ((it->second).first);
       headways.push_back ((it->second).second);
       i++;
@@ -505,7 +512,6 @@ RsuSpeedControl::ChangeSpeed ()
 
   // after sending current speeds and headways, get new speeds as per RL agent actions
   std::vector<float> new_speeds = m_rsuGymEnv->ExportNewSpeeds ();
-  NS_LOG_LOGIC ("\nNew Entries based on agent actions: \n");
 
   // loop again over map entries and update speed values for each vehicle
   it = m_vehicles_data.begin ();
@@ -513,15 +519,11 @@ RsuSpeedControl::ChangeSpeed ()
   while (it != m_vehicles_data.end ())
     {
       (it->second).first += static_cast<double> (new_speeds[i]);
-    //   if ((it->second).first < 0)
-    //     (it->second).first = 0;
+      //   if ((it->second).first < 0)
+      //     (it->second).first = 0;
       i++;
       it++;
-      NS_LOG_LOGIC (it->first << " :: " << (it->second).first << " :: " << (it->second).second);
     }
-
-  NS_LOG_LOGIC ("\n");
-
   Simulator::Schedule (m_interval, &RsuSpeedControl::ChangeSpeed, this);
 }
 
@@ -530,7 +532,7 @@ RsuSpeedControl::ClearDataTable ()
 {
   m_vehicles_data.clear ();
 
-  Simulator::Schedule (m_clear_interval, &RsuSpeedControl::ChangeSpeed, this);
+  Simulator::Schedule (m_clear_interval, &RsuSpeedControl::ClearDataTable, this);
 }
 
 void
@@ -586,10 +588,10 @@ RsuSpeedControl::HandleRead (Ptr<Socket> socket)
   Ipv4Address ipAddr = iaddr.GetLocal ();
 
   NS_LOG_INFO ("3 RX ##### vehicle->RSU at time " << Simulator::Now ().GetSeconds ()
-                                                << "s - [RSU ip:" << ipAddr << "]"
-                                                << "[from vehicle:" << receivedID << "]"
-                                                << "[rx vel:" << velocity << "m/s]"
-                                                << "[rx headway:" << headway << "]\n");
+                                                  << "s - [RSU ip:" << ipAddr << "]"
+                                                  << "[from vehicle:" << receivedID << "]"
+                                                  << "[rx vel:" << velocity << "m/s]"
+                                                  << "[rx headway:" << headway << "]\n");
 }
 
 TypeId
@@ -603,7 +605,7 @@ VehicleSpeedControl::GetTypeId (void)
           .AddAttribute ("Port", "The port on which the client will listen for incoming packets.",
                          UintegerValue (0), MakeUintegerAccessor (&VehicleSpeedControl::m_port),
                          MakeUintegerChecker<uint16_t> ())
-          .AddAttribute ("Interval", "The time to wait between packets", TimeValue (Seconds (7.0)),
+          .AddAttribute ("Interval", "The time to wait between packets", TimeValue (Seconds (30.0)),
                          MakeTimeAccessor (&VehicleSpeedControl::m_interval), MakeTimeChecker ())
           .AddAttribute ("Client", "TraCI client for SUMO", PointerValue (0),
                          MakePointerAccessor (&VehicleSpeedControl::m_client),
@@ -745,11 +747,8 @@ VehicleSpeedControl::HandleRead (Ptr<Socket> socket)
                << "m/s]"
                << "[rx vel:" << velocity << "m/s]\n");
 
-  if (velocity != last_velocity)
-    {
-      m_client->TraCIAPI::vehicle.setSpeed (m_client->GetVehicleId (this->GetNode ()), velocity);
-      last_velocity = velocity;
-    }
+  m_client->TraCIAPI::vehicle.setSpeed (m_client->GetVehicleId (this->GetNode ()), velocity);
+  last_velocity = velocity;
 }
 
 void
