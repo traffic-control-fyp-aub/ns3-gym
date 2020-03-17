@@ -29,7 +29,7 @@
     - PPO2
     >> python3 script.py train online PPO2 scenario=square lr=2.5e-4 v=1 ent=0.0 lbd=0.95 g=0.99
 
-    - SAC
+    - SAC ( we automatically fetch the algorithm's default parameters )
     >> python3 script.py train online SAC scenario=square
 
     e.g.: (testing)
@@ -120,7 +120,7 @@ elif argumentList.__len__() is 4:
 
             model = SAC.load((f'rsu_agents/square_agents/SAC_algorithm/'
                               f'SAC_ns3_'
-                              f'SAC_cars=25'))
+                              f'square_cars=25'))
             while True:
                 print("Start iteration: ", currIt)
                 obs = env.reset()
