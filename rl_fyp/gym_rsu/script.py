@@ -184,7 +184,7 @@ elif argumentList.__len__() >= 5:
             # Get the rest of the parameters specified by the user in the CLI
             # only if the user actually specified any. Otherwise no point in doing
             # so and use the default parameters
-            for list_index in range(agent_index+1, argumentList.__len__()):
+            for list_index in range(traffic_scenario_index+1, argumentList.__len__()):
                 # Split the string into the variable name and the variable value
                 params = argumentList[list_index].split("=")
 
@@ -220,14 +220,17 @@ elif argumentList.__len__() >= 5:
                 model_online = model_setup(str(argumentList[agent_index]),
                                            env,
                                            'MlpPolicy',
-                                           lr=float(params_dict["lr"]),
+                                           g=float(params_dict["g"]),
                                            bf=int(params_dict["bf"]),
+                                           nstd=float(params_dict["nstd"]),
+                                           lst=int(params_dict["lst"]),
                                            bch=int(params_dict["bch"]),
+                                           lr=float(params_dict["lr"]),
                                            tf=int(params_dict["tf"]),
                                            grad=int(params_dict["grad"]),
-                                           lst=int(params_dict["lst"]),
                                            v=int(params_dict["v"]),
-                                           ent=str(params_dict["ent"]))
+                                           pkwargs={"layers": [int(params_dict["pkwargs"].split(",")[0]),
+                                                               int(params_dict["pkwargs"].split(",")[1])]})
             else:
                 print(f'Setting up default {str(argumentList[agent_index])} parameters')
                 # Otherwise just set up the model and use the default values
@@ -238,7 +241,7 @@ elif argumentList.__len__() >= 5:
             model_online.learn(total_timesteps=30000)   # int(128*60000)) < -- PPO2
             print(' ** Done Training ** ')
         except KeyboardInterrupt:
-            model_online.save(f'rsu_agents/square_agents/{str(argumentList[agent_index])}_algorithm/'
+            model_online.save(f'rsu_agents/{traffic_scenario_name}_agents/{str(argumentList[agent_index])}_algorithm/'
                               f'{str(argumentList[agent_index])}_ns3_'
                               f'{traffic_scenario_name}_cars={str(ac_space.shape)[1:3]}')
             env.close()

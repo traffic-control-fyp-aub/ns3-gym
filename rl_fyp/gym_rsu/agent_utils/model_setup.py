@@ -45,8 +45,7 @@ def model_setup(algorithm_name, env, policy, **kwargs):
 
         g = kwargs.pop('g', signature.parameters['gamma'].default)
         bf = kwargs.pop('bf', signature.parameters['buffer_size'].default)
-        nt = kwargs.pop('nt', signature.parameters['noise_type'].default)
-        nstd = kwargs.pop('nstd', signature.parameters['noise_std'].default)
+        nstd = kwargs.pop('nstd', signature.parameters['target_policy_noise'].default)
         lst = kwargs.pop('lst', signature.parameters['learning_starts'].default)
         bch = kwargs.pop('bch', signature.parameters['batch_size'].default)
         lr = kwargs.pop('lr', signature.parameters['learning_rate'].default)
@@ -59,7 +58,6 @@ def model_setup(algorithm_name, env, policy, **kwargs):
                     env=env,
                     gamma=g,
                     buffer_size=bf,
-                    action_noise=nt,
                     target_policy_noise=nstd,
                     learning_starts=lst,
                     batch_size=bch,
