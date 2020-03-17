@@ -40,13 +40,40 @@ def model_setup(algorithm_name, env, policy, **kwargs):
 
     if algorithm_name in [list_of_algorithms[0]]:
         # TD3 algorithm
-        pass
+        # Get the default values in case no user specifications
+        signature = inspect.signature(TD3.__init__)
+
+        g = kwargs.pop('g', signature.parameters['gamma'].default)
+        bf = kwargs.pop('bf', signature.parameters['buffer_size'].default)
+        nt = kwargs.pop('nt', signature.parameters['noise_type'].default)
+        nstd = kwargs.pop('nstd', signature.parameters['noise_std'].default)
+        lst = kwargs.pop('lst', signature.parameters['learning_starts'].default)
+        bch = kwargs.pop('bch', signature.parameters['batch_size'].default)
+        lr = kwargs.pop('lr', signature.parameters['learning_rate'].default)
+        tf = kwargs.pop('tf', signature.parameters['train_freq'].default)
+        grad = kwargs.pop('grad', signature.parameters['gradient_steps'].default)
+        pkwargs = kwargs.pop('pkwargs', signature.parameters['policy_kwargs'].default)
+        v = kwargs.pop('v', signature.parameters['verbose'].default)
+
+        model = TD3(policy=policy,
+                    env=env,
+                    gamma=g,
+                    buffer_size=bf,
+                    action_noise=nt,
+                    target_policy_noise=nstd,
+                    learning_starts=lst,
+                    batch_size=bch,
+                    learning_rate=lr,
+                    train_freq=tf,
+                    gradient_steps=grad,
+                    verbose=v,
+                    policy_kwargs=pkwargs)
+
     elif algorithm_name in [list_of_algorithms[1]]:
         # DDPG algorithm
         pass
     elif algorithm_name in [list_of_algorithms[2]]:
         # PPO2 algorithm
-
         # Get the default values in case no user specifications
         signature = inspect.signature(PPO2.__init__)
 

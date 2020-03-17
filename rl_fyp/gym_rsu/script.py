@@ -54,7 +54,7 @@ import gym_rsu
 # ---------------------------------------------------------------
 from ns3gym import ns3env
 
-from stable_baselines import PPO2, SAC
+from stable_baselines import PPO2, SAC, TD3
 from stable_baselines.common.evaluation import evaluate_policy
 from stable_baselines.common.vec_env import DummyVecEnv
 
