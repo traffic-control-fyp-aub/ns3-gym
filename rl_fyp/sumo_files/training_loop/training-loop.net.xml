@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on Sun 15 Mar 2020 12:52:37 AM EET by Eclipse SUMO netedit Version v1_1_0+0000-2147d155b1
+<!-- generated on Fri 20 Mar 2020 10:05:08 PM EET by Eclipse SUMO netedit Version v1_1_0+0000-2147d155b1
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
 
     <input>
@@ -61,10 +61,16 @@
         <lane id="gneE9_0" index="0" speed="50.00" length="200.00" shape="-1.60,200.00 -1.60,0.00"/>
     </edge>
 
+    <tlLogic id="gneJ16" type="static" programID="0" offset="0">
+        <phase duration="350" state="G"/>
+        <phase duration="25" state="y"/>
+        <phase duration="125" state="r"/>
+    </tlLogic>
+
     <junction id="gneJ15" type="priority" x="200.00" y="200.00" incLanes="gneE7_0" intLanes=":gneJ15_0_0" shape="203.20,200.00 200.00,200.00 200.00,203.20 201.78,202.84 202.40,202.40 202.84,201.78 203.11,200.98" rightOfWay="edgePriority">
         <request index="0" response="0" foes="0" cont="0"/>
     </junction>
-    <junction id="gneJ16" type="priority" x="0.00" y="200.00" incLanes="gneE8_0" intLanes=":gneJ16_0_0" shape="0.00,203.20 0.00,200.00 -3.20,200.00 -2.84,201.78 -2.40,202.40 -1.78,202.84 -0.98,203.11">
+    <junction id="gneJ16" type="traffic_light" x="0.00" y="200.00" incLanes="gneE8_0" intLanes=":gneJ16_0_0" shape="0.00,203.20 0.00,200.00 -3.20,200.00 -2.84,201.78 -2.40,202.40 -1.78,202.84 -0.98,203.11">
         <request index="0" response="0" foes="0" cont="0"/>
     </junction>
     <junction id="gneJ6" type="priority" x="0.00" y="0.00" incLanes="gneE9_0" intLanes=":gneJ6_0_0" shape="-3.20,0.00 0.00,0.00 0.00,-3.20 -1.78,-2.84 -2.40,-2.40 -2.84,-1.78 -3.11,-0.98">
@@ -76,7 +82,7 @@
 
     <connection from="gneE3" to="gneE7" fromLane="0" toLane="0" via=":gneJ7_0_0" dir="l" state="M"/>
     <connection from="gneE7" to="gneE8" fromLane="0" toLane="0" via=":gneJ15_0_0" dir="l" state="M"/>
-    <connection from="gneE8" to="gneE9" fromLane="0" toLane="0" via=":gneJ16_0_0" dir="l" state="M"/>
+    <connection from="gneE8" to="gneE9" fromLane="0" toLane="0" via=":gneJ16_0_0" tl="gneJ16" linkIndex="0" dir="l" state="O"/>
     <connection from="gneE9" to="gneE3" fromLane="0" toLane="0" via=":gneJ6_0_0" dir="l" state="M"/>
 
     <connection from=":gneJ15_0" to="gneE8" fromLane="0" toLane="0" dir="l" state="M"/>

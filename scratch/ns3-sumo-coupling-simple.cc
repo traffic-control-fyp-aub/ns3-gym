@@ -133,7 +133,7 @@ main (int argc, char *argv[])
       (PointerValue) (sumoClient)); // pass TraciClient object for accessing sumo in application
 
   ApplicationContainer rsuSpeedControlApps = rsuSpeedControlHelper1.Install (nodePool.Get (0));
-  rsuSpeedControlApps.Start (Seconds (nodeCounter / nodePool.GetN ()));
+  rsuSpeedControlApps.Start (Seconds (0.0));
   rsuSpeedControlApps.Stop (simulationTime);
 
   Ptr<MobilityModel> mobilityRsuNode1 = nodePool.Get (0)->GetObject<MobilityModel> ();
