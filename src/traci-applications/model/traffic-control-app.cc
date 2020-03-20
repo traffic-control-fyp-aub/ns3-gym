@@ -682,6 +682,7 @@ VehicleSpeedControl::StopApplication ()
       rx_socket->SetRecvCallback (MakeNullCallback<void, Ptr<Socket>> ());
       rx_socket = 0;
     }
+    Simulator::Cancel (m_sendEvent);
 }
 
 void

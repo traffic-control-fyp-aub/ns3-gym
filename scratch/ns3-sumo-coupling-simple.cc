@@ -39,7 +39,7 @@ main (int argc, char *argv[])
       nodePool.Create (11);
       break;
     case 2: // Highway scenario
-      nodePool.Create (1001);
+      nodePool.Create (255);
       break;
     case 3: // Square scenario
     default:
@@ -92,15 +92,15 @@ main (int argc, char *argv[])
 
   switch (scenario)
     {
-    case 1: // Square scenario
+    case 1: // Circle scenario
       sumoClient->SetAttribute ("SumoConfigPath",
                                 StringValue ("rl_fyp/sumo_files/circle-simple/circle.sumo.cfg"));
       break;
-    case 2: // Square scenario
+    case 2: // Highway scenario
       sumoClient->SetAttribute (
           "SumoConfigPath",
-          StringValue ("rl_fyp/sumo_files/sumo-highway-merge/"
-                       "merge-baseline_20191204-1224431575455083.45716.sumo.cfg"));
+          StringValue ("rl_fyp/sumo_files/sumo_two_lane_highway/"
+                       "two_lane_highway.sumo.cfg"));
       break;
     case 3: // Square scenario
     default:
@@ -143,7 +143,7 @@ main (int argc, char *argv[])
       mobilityRsuNode1->SetPosition (Vector (70.0, 70.0, 3.0)); // set RSU to fixed position
       break;
     case 2: // Merge scenario
-      mobilityRsuNode1->SetPosition (Vector (300.0, 140.0, 3.0)); // set RSU to fixed position
+      mobilityRsuNode1->SetPosition (Vector (100.0, 20.0, 3.0)); // set RSU to fixed position
       break;
     case 3: // Square scenario
     default:
@@ -163,8 +163,8 @@ main (int argc, char *argv[])
   std::function<Ptr<Node> ()> setupNewWifiNode = [&]() -> Ptr<Node> {
     if (nodeCounter >= nodePool.GetN ())
       {
-        NS_FATAL_ERROR ("Node Pool empty!: " << nodeCounter << " nodes created.");
-        // nodeCounter = 1;
+        // NS_FATAL_ERROR ("Node Pool empty!: " << nodeCounter << " nodes created.");
+        nodeCounter = 1;
       }
 
     // don't create and install the protocol stack of the node at simulation time -> take from "node pool"

@@ -118,17 +118,17 @@ elif argumentList.__len__() is 4:
             # model = PPO2.load(f'rsu_agents/{scenario_name}_agents/'
             #                   f'PPO2_ns3_online_{scenario_name}_cars={num_of_vehicles}')
 
-            model = PPO2.load((f'rsu_agents/square_agents/PPO2_algorithm/'
-                              f'PPO2_ns3_'
-                              f'square_cars=25'))
+            # model = PPO2.load((f'rsu_agents/square_agents/PPO2_algorithm/'
+            #                   f'PPO2_ns3_'
+            #                   f'square_cars=25'))
 
             # model = SAC.load((f'rsu_agents/square_agents/SAC_algorithm/'
             #                   f'SAC_ns3_'
             #                   f'square_cars=25'))
 
-            # model = TD3.load((f'rsu_agents/square_agents/TD3_algorithm/'
-            #                   f'TD3_ns3_'
-            #                   f'square_cars=25'))
+            model = TD3.load((f'rsu_agents/square_agents/TD3_algorithm/'
+                              f'TD3_ns3_'
+                              f'square_cars=25'))
 
             while True:
                 print("Start iteration: ", currIt)
