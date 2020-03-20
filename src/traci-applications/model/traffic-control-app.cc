@@ -307,7 +307,7 @@ RsuSpeedControl::GetTypeId (void)
           .AddAttribute ("Port", "Port on which we send packets.", UintegerValue (9),
                          MakeUintegerAccessor (&RsuSpeedControl::m_port),
                          MakeUintegerChecker<uint16_t> ())
-          .AddAttribute ("Interval", "The time to wait between packets", TimeValue (Seconds (30.0)),
+          .AddAttribute ("Interval", "The time to wait between packets", TimeValue (Seconds (25.0)),
                          MakeTimeAccessor (&RsuSpeedControl::m_interval), MakeTimeChecker ())
           .AddAttribute ("MaxPackets", "The maximum number of packets the application will send",
                          UintegerValue (100), MakeUintegerAccessor (&RsuSpeedControl::m_count),
@@ -371,7 +371,7 @@ RsuSpeedControl::StartApplication (void)
       tx_socket->SetAllowBroadcast (true);
       tx_socket->Connect (remote);
 
-      m_clear_interval = Seconds (6.0); // clear table after 3 episodes of speed collection
+      m_clear_interval = m_interval;
       // start transmitting messages after 0 seconds and update speed values after m_interval seconds
       Simulator::Schedule (m_interval, &RsuSpeedControl::ChangeSpeed, this);
       ScheduleTransmit (m_interval);
@@ -497,8 +497,8 @@ RsuSpeedControl::ChangeSpeed ()
                          << " :: " << (it->second).first << " :: " << (it->second).second);
 
       // store speed and headway for each vehicle
-      //   if ((it->second).first < 0)
-      //     (it->second).first = 0;
+      // if ((it->second).first < 0)
+      //   (it->second).first = abs ((it->second).first);
       speeds.push_back ((it->second).first);
       headways.push_back ((it->second).second);
       i++;
@@ -517,9 +517,9 @@ RsuSpeedControl::ChangeSpeed ()
   i = 0;
   while (it != m_vehicles_data.end ())
     {
+      // if (static_cast<double> (new_speeds[i]) + (it->second).first > 0)
       (it->second).first += static_cast<double> (new_speeds[i]);
-      //   if ((it->second).first < 0)
-      //     (it->second).first = 0;
+
       i++;
       it++;
     }
@@ -604,7 +604,7 @@ VehicleSpeedControl::GetTypeId (void)
           .AddAttribute ("Port", "The port on which the client will listen for incoming packets.",
                          UintegerValue (0), MakeUintegerAccessor (&VehicleSpeedControl::m_port),
                          MakeUintegerChecker<uint16_t> ())
-          .AddAttribute ("Interval", "The time to wait between packets", TimeValue (Seconds (30.0)),
+          .AddAttribute ("Interval", "The time to wait between packets", TimeValue (Seconds (25.0)),
                          MakeTimeAccessor (&VehicleSpeedControl::m_interval), MakeTimeChecker ())
           .AddAttribute ("Client", "TraCI client for SUMO", PointerValue (0),
                          MakePointerAccessor (&VehicleSpeedControl::m_client),
