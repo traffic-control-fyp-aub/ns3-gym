@@ -39,6 +39,7 @@
 import sys
 from agent_utils.model_setup import model_setup
 
+
 import gym
 
 # ---------------------------------------------------
@@ -226,23 +227,23 @@ elif argumentList.__len__() >= 5:
 
             if entered_cli:
                 # Case where user has specified some CLI arguments for the agent
-                model_online = model_setup(str(argumentList[agent_index]),
-                                           env,
-                                           'MlpPolicy',
-                                           lr=float(params_dict["lr"]),
-                                           nsteps=int(params_dict["nsteps"]),
-                                           nbtch=int(params_dict["nbtch"]),
-                                           lbd=float(params_dict["lbd"]),
-                                           g=float(params_dict["g"]),
-                                           nep=int(params_dict["nep"]),
-                                           ent=float(params_dict["ent"]),
-                                           cl=float(params_dict["cl"]),
-                                           v=int(params_dict["v"]))
+                # model_online = model_setup(str(argumentList[agent_index]),
+                #                            env,
+                #                            'MlpPolicy',
+                #                            lr=float(params_dict["lr"]),
+                #                            nsteps=int(params_dict["nsteps"]),
+                #                            nbtch=int(params_dict["nbtch"]),
+                #                            lbd=float(params_dict["lbd"]),
+                #                            g=float(params_dict["g"]),
+                #                            nep=int(params_dict["nep"]),
+                #                            ent=float(params_dict["ent"]),
+                #                            cl=float(params_dict["cl"]),
+                #                            v=int(params_dict["v"]))
 
-                # print(f'Loading {str(argumentList[agent_index])} agent with cars={params_dict["cars"]}')
-                # model_online = PPO2.load(f'rsu_agents/{traffic_scenario_name}_agents/base_learning_no_traffic_light/'
-                #                         f'{str(argumentList[agent_index])}_algorithm/{str(argumentList[agent_index])}'
-                #                         f'_ns3_{traffic_scenario_name}_cars={params_dict["cars"]}')
+                print(f'Loading {str(argumentList[agent_index])} agent with cars={params_dict["cars"]}')
+                model_online = PPO2.load(f'rsu_agents/{traffic_scenario_name}_agents/base_learning_no_traffic_light/'
+                                        f'{str(argumentList[agent_index])}_algorithm/{str(argumentList[agent_index])}'
+                                        f'_ns3_{traffic_scenario_name}_cars={params_dict["cars"]}')
 
                 # Setting the environment to allow the loaded agent to train
                 model_online.set_env(env=env)
@@ -256,10 +257,10 @@ elif argumentList.__len__() >= 5:
             model_online.learn(total_timesteps=30000)   # int(128*60000)) < -- PPO2
             print(' ** Done Training ** ')
         except KeyboardInterrupt:
-            model_online.save(f'rsu_agents/{traffic_scenario_name}_agents/continuous_learning_traffic_light/'
-                              f'{str(argumentList[agent_index])}_cl/'
+            model_online.save(f'rsu_agents/{traffic_scenario_name}_agents/hierarchical_models/'
+                              f'{str(argumentList[agent_index])}_algorithm/'
                               f'{str(argumentList[agent_index])}_ns3_'
-                              f'{traffic_scenario_name}_cars={str(ac_space.shape)[1:3]}_CL')
+                              f'{traffic_scenario_name}_cars={str(ac_space.shape)[1:3]}_HRL')
             env.close()
             print("Ctrl-C -> Exit")
 
