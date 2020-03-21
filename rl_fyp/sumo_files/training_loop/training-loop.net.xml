@@ -63,8 +63,8 @@
 
     <tlLogic id="gneJ16" type="static" programID="0" offset="0">
         <phase duration="350" state="G"/>
-        <phase duration="25" state="y"/>
-        <phase duration="125" state="r"/>
+        <phase duration="35" state="y"/>
+        <phase duration="15" state="r"/>
     </tlLogic>
 
     <junction id="gneJ15" type="priority" x="200.00" y="200.00" incLanes="gneE7_0" intLanes=":gneJ15_0_0" shape="203.20,200.00 200.00,200.00 200.00,203.20 201.78,202.84 202.40,202.40 202.84,201.78 203.11,200.98" rightOfWay="edgePriority">

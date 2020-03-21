@@ -241,7 +241,8 @@ elif argumentList.__len__() >= 5:
                 #                            pkwargs={"layers": [int(params_dict["pkwargs"].split(",")[0]),
                 #                                                int(params_dict["pkwargs"].split(",")[1])]})
 
-                model_online = TD3.load(f'rsu_agents/square_agents/continuous_learning_traffic_light/'
+                print(f'Loading {str(argumentList[agent_index])} agent with cars={params_dict["cars"]}')
+                model_online = TD3.load(f'rsu_agents/{traffic_scenario_name}_agents/base_learning_no_traffic_light/'
                                         f'{str(argumentList[agent_index])}_algorithm/{str(argumentList[agent_index])}'
                                         f'_ns3_square_cars={params_dict["cars"]}')
 
@@ -258,9 +259,9 @@ elif argumentList.__len__() >= 5:
             print(' ** Done Training ** ')
         except KeyboardInterrupt:
             model_online.save(f'rsu_agents/{traffic_scenario_name}_agents/continuous_learning_traffic_light/'
-                              f'{str(argumentList[agent_index])}_algorithm/'
+                              f'{str(argumentList[agent_index])}_cl/'
                               f'{str(argumentList[agent_index])}_ns3_'
-                              f'{traffic_scenario_name}_cars={str(ac_space.shape)[1:3]}')
+                              f'{traffic_scenario_name}_cars={str(ac_space.shape)[1:3]}_CL')
             env.close()
             print("Ctrl-C -> Exit")
 
