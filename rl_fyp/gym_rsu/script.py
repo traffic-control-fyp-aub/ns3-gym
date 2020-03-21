@@ -226,25 +226,23 @@ elif argumentList.__len__() >= 5:
 
             if entered_cli:
                 # Case where user has specified some CLI arguments for the agent
-                # model_online = model_setup(str(argumentList[agent_index]),
-                #                            env,
-                #                            'MlpPolicy',
-                #                            g=float(params_dict["g"]),
-                #                            bf=int(params_dict["bf"]),
-                #                            nstd=float(params_dict["nstd"]),
-                #                            lst=int(params_dict["lst"]),
-                #                            bch=int(params_dict["bch"]),
-                #                            lr=float(params_dict["lr"]),
-                #                            tf=int(params_dict["tf"]),
-                #                            grad=int(params_dict["grad"]),
-                #                            v=int(params_dict["v"]),
-                #                            pkwargs={"layers": [int(params_dict["pkwargs"].split(",")[0]),
-                #                                                int(params_dict["pkwargs"].split(",")[1])]})
+                model_online = model_setup(str(argumentList[agent_index]),
+                                           env,
+                                           'MlpPolicy',
+                                           lr=float(params_dict["lr"]),
+                                           nsteps=int(params_dict["nsteps"]),
+                                           nbtch=int(params_dict["nbtch"]),
+                                           lbd=float(params_dict["lbd"]),
+                                           g=float(params_dict["g"]),
+                                           nep=int(params_dict["nep"]),
+                                           ent=float(params_dict["ent"]),
+                                           cl=float(params_dict["cl"]),
+                                           v=int(params_dict["v"]))
 
-                print(f'Loading {str(argumentList[agent_index])} agent with cars={params_dict["cars"]}')
-                model_online = SAC.load(f'rsu_agents/{traffic_scenario_name}_agents/base_learning_no_traffic_light/'
-                                        f'{str(argumentList[agent_index])}_algorithm/{str(argumentList[agent_index])}'
-                                        f'_ns3_{traffic_scenario_name}_cars={params_dict["cars"]}')
+                # print(f'Loading {str(argumentList[agent_index])} agent with cars={params_dict["cars"]}')
+                # model_online = PPO2.load(f'rsu_agents/{traffic_scenario_name}_agents/base_learning_no_traffic_light/'
+                #                         f'{str(argumentList[agent_index])}_algorithm/{str(argumentList[agent_index])}'
+                #                         f'_ns3_{traffic_scenario_name}_cars={params_dict["cars"]}')
 
                 # Setting the environment to allow the loaded agent to train
                 model_online.set_env(env=env)

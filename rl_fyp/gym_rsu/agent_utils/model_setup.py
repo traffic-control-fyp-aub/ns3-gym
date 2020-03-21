@@ -76,10 +76,14 @@ def model_setup(algorithm_name, env, policy, **kwargs):
         signature = inspect.signature(PPO2.__init__)
 
         lr = kwargs.pop('lr', signature.parameters['learning_rate'].default)
-        v = kwargs.pop('v', signature.parameters['verbose'].default)
-        ent = kwargs.pop('ent', signature.parameters['ent_coef'].default)
+        nsteps = kwargs.pop('nsteps', signature.parameters['n_steps'].default)
+        nbtch = kwargs.pop('nbtch', signature.parameters['nminibatches'].default)
         lbd = kwargs.pop('lbd', signature.parameters['lam'].default)
         g = kwargs.pop('g', signature.parameters['gamma'].default)
+        nep = kwargs.pop('nep', signature.parameters['noptepochs'].default)
+        ent = kwargs.pop('ent', signature.parameters['ent_coef'].default)
+        cl = kwargs.pop('cl', signature.parameters['cliprange'].default)
+        v = kwargs.pop('v', signature.parameters['verbose'].default)
 
         model = PPO2(policy=policy,
                      env=env,
@@ -87,7 +91,11 @@ def model_setup(algorithm_name, env, policy, **kwargs):
                      verbose=v,
                      ent_coef=ent,
                      lam=lbd,
-                     gamma=g)
+                     gamma=g,
+                     n_steps=nsteps,
+                     nminibatches=nbtch,
+                     noptepochs=nep,
+                     cliprange=cl)
 
     elif algorithm_name in [list_of_algorithms[3]]:
         # PPO1 algorithm
