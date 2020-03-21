@@ -226,20 +226,27 @@ elif argumentList.__len__() >= 5:
 
             if entered_cli:
                 # Case where user has specified some CLI arguments for the agent
-                model_online = model_setup(str(argumentList[agent_index]),
-                                           env,
-                                           'MlpPolicy',
-                                           g=float(params_dict["g"]),
-                                           bf=int(params_dict["bf"]),
-                                           nstd=float(params_dict["nstd"]),
-                                           lst=int(params_dict["lst"]),
-                                           bch=int(params_dict["bch"]),
-                                           lr=float(params_dict["lr"]),
-                                           tf=int(params_dict["tf"]),
-                                           grad=int(params_dict["grad"]),
-                                           v=int(params_dict["v"]),
-                                           pkwargs={"layers": [int(params_dict["pkwargs"].split(",")[0]),
-                                                               int(params_dict["pkwargs"].split(",")[1])]})
+                # model_online = model_setup(str(argumentList[agent_index]),
+                #                            env,
+                #                            'MlpPolicy',
+                #                            g=float(params_dict["g"]),
+                #                            bf=int(params_dict["bf"]),
+                #                            nstd=float(params_dict["nstd"]),
+                #                            lst=int(params_dict["lst"]),
+                #                            bch=int(params_dict["bch"]),
+                #                            lr=float(params_dict["lr"]),
+                #                            tf=int(params_dict["tf"]),
+                #                            grad=int(params_dict["grad"]),
+                #                            v=int(params_dict["v"]),
+                #                            pkwargs={"layers": [int(params_dict["pkwargs"].split(",")[0]),
+                #                                                int(params_dict["pkwargs"].split(",")[1])]})
+
+                model_online = TD3.load(f'rsu_agents/square_agents/continuous_learning_traffic_light/'
+                                        f'{str(argumentList[agent_index])}_algorithm/{str(argumentList[agent_index])}'
+                                        f'_ns3_square_cars={params_dict["cars"]}')
+
+                # Setting the environment to allow the loaded agent to train
+                model_online.set_env(env=env)
             else:
                 print(f'Setting up default {str(argumentList[agent_index])} parameters')
                 # Otherwise just set up the model and use the default values
@@ -250,7 +257,8 @@ elif argumentList.__len__() >= 5:
             model_online.learn(total_timesteps=30000)   # int(128*60000)) < -- PPO2
             print(' ** Done Training ** ')
         except KeyboardInterrupt:
-            model_online.save(f'rsu_agents/{traffic_scenario_name}_agents/{str(argumentList[agent_index])}_algorithm/'
+            model_online.save(f'rsu_agents/{traffic_scenario_name}_agents/continuous_learning_traffic_light/'
+                              f'{str(argumentList[agent_index])}_algorithm/'
                               f'{str(argumentList[agent_index])}_ns3_'
                               f'{traffic_scenario_name}_cars={str(ac_space.shape)[1:3]}')
             env.close()
