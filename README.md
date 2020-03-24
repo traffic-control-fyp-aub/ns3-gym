@@ -29,23 +29,22 @@ The above command must be run the working directory of ns3-gym.
 # 1 = circle traffic scenario
 # 2 = two lane highway merge scenario
 # 3 = square traffic scenario
-./waf --run "scratch/ns3-sumo-coupling-simple scenario= [ 1 | 2 | 3 ]"
+./launch_sumo scenario=[ 1 | 2 | 3 ]
 ```
 
-## Run our traffic agent
+## Train a traffic agent
 You must have two terminal windows open to perform the following:
 
 Terminal 1 (ns3 side): 
 ```bash
 # This should be run the main working directory
-./waf --run scratch/ns3-sumo-coupling-simple
+./launch_sumo scenario=[ 1 | 2 | 3 ]
 ```
 
 Terminal 2 (gym side):
 ```bash
 # This should be run under rl_fyp/gym_rsu
-# e.g.: python3 script.py test PPO2
-python3 script.py test [ algorithm_name ]
+python3 script.py train online [ alg_name ] scenario=[name] [ policy_kwargs ]
 ```
 
 # SUMO
