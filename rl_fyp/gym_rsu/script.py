@@ -241,8 +241,8 @@ elif argumentList.__len__() >= 5:
                 #                            v=int(params_dict["v"]))
 
                 print(f'Loading {str(argumentList[agent_index])} agent with cars={params_dict["cars"]}')
-                model_online = PPO2.load(f'rsu_agents/{traffic_scenario_name}_agents/base_learning_no_traffic_light/'
-                                        f'{str(argumentList[agent_index])}_algorithm/{str(argumentList[agent_index])}'
+                model_online = TD3.load(f'rsu_agents/{traffic_scenario_name}_agents/continuous_learning_traffic_light/'
+                                        f'{str(argumentList[agent_index])}_cl/{str(argumentList[agent_index])}'
                                         f'_ns3_{traffic_scenario_name}_cars={params_dict["cars"]}')
 
                 # Setting the environment to allow the loaded agent to train
@@ -257,10 +257,10 @@ elif argumentList.__len__() >= 5:
             model_online.learn(total_timesteps=30000)   # int(128*60000)) < -- PPO2
             print(' ** Done Training ** ')
         except KeyboardInterrupt:
-            model_online.save(f'rsu_agents/{traffic_scenario_name}_agents/hierarchical_models/'
-                              f'{str(argumentList[agent_index])}_algorithm/'
+            model_online.save(f'rsu_agents/multi_lane_merge_agents/continuous_learning/'
+                              f'{str(argumentList[agent_index])}_cl/'
                               f'{str(argumentList[agent_index])}_ns3_'
-                              f'{traffic_scenario_name}_cars={str(ac_space.shape)[1:3]}_HRL')
+                              f'two_lane_highway_cars={str(ac_space.shape)[1:3]}_CL')
             env.close()
             print("Ctrl-C -> Exit")
 
