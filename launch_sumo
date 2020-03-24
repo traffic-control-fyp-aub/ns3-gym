@@ -1,0 +1,16 @@
+#!/bin/bash
+# This bash script is to facilitate selecting which scenario
+# to launch in SUMO.
+# Usage:
+# ------
+#
+# >> ./launch_sumo scenario=[ 1 | 2 | 3 ]
+#	1 = circle scenario
+#	2 = two lane highway
+#	3 = square scenario
+
+
+
+IFS== read var1 var2 <<< $1
+
+./waf --run "scratch/ns3-sumo-coupling-simple --scenario=$var2" 2>&1 | awk '{print > "rl_fyp/ns3_logs/logs.log"}/RSU0 table/{print > "rl_fyp/ns3_logs/rsu_0.log"}/MyGetReward/{print > "rl_fyp/ns3_logs/rewards.log"}'
