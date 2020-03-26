@@ -4,7 +4,7 @@
 -->
 
 <routes>
-	<vType id="car" type="passenger" length="5" accel="2" decel="4.5" sigma="0.5" carFollowModel="IDM"
+	<vType id="car" type="passenger" length="5" accel="10" decel="10" sigma="0.5" carFollowModel="IDM"
 		   lcStrategic="0" lcCooperative="0" lcSpeedGain="0" lcKeepRight="0" lcOvertakeRight="0" lcSpeedGainRight="0.1"
 		   		lcSpeedGainLookahead="0" lcCooperativeSpeed="0.1" lcPushy="0" impatience="0.5" minGap="0" tau="2.5"
 		   			probability="0.5" color="yellow"/>

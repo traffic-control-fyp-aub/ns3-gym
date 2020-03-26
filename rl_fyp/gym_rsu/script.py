@@ -241,7 +241,7 @@ elif argumentList.__len__() >= 5:
                 #                            v=int(params_dict["v"]))
 
                 print(f'Loading {str(argumentList[agent_index])} agent with cars={params_dict["cars"]}')
-                model_online = TD3.load(f'rsu_agents/{traffic_scenario_name}_agents/continuous_learning_traffic_light/'
+                model_online = PPO2.load(f'rsu_agents/{traffic_scenario_name}_agents/continuous_learning_traffic_light/'
                                         f'{str(argumentList[agent_index])}_cl/{str(argumentList[agent_index])}'
                                         f'_ns3_{traffic_scenario_name}_cars={params_dict["cars"]}_CL')
 
