@@ -294,6 +294,12 @@ RsuEnv::ImportSpeedsAndHeadWays (std::vector<double> RSU_headways, std::vector<d
   Notify ();
 }
 
+uint32_t
+RsuEnv::GetActionSpaceSize ()
+{
+  return m_max_vehicles;
+}
+
 // ########################################################################################################
 
 TypeId
@@ -329,7 +335,7 @@ RsuSpeedControl::RsuSpeedControl ()
   rx_socket = 0;
   tx_socket = 0;
   m_count = 1e9;
-  m_rsuGymEnv = 0;
+  m_rsu_gym_env = 0;
 }
 
 RsuSpeedControl::~RsuSpeedControl ()
@@ -337,7 +343,7 @@ RsuSpeedControl::~RsuSpeedControl ()
   NS_LOG_FUNCTION (this);
   tx_socket = 0;
   rx_socket = 0;
-  m_rsuGymEnv = 0;
+  m_rsu_gym_env = 0;
 }
 
 void
@@ -351,7 +357,7 @@ Ptr<RsuEnv>
 RsuSpeedControl::GetEnv ()
 {
   NS_LOG_FUNCTION (this);
-  return m_rsuGymEnv;
+  return m_rsu_gym_env;
 }
 
 void
@@ -387,7 +393,7 @@ RsuSpeedControl::StartApplication (void)
 
   // set up RSU environment
   Ptr<RsuEnv> env = CreateObject<RsuEnv> ();
-  m_rsuGymEnv = env;
+  m_rsu_gym_env = env;
 
   NS_LOG_INFO ("New Gym Enviroment" << env << "\n");
 }
@@ -507,10 +513,10 @@ RsuSpeedControl::ChangeSpeed ()
 
   NS_LOG_INFO ("\n");
   // call import method to send speeds and headways to environment and notify state change
-  m_rsuGymEnv->ImportSpeedsAndHeadWays (headways, speeds);
+  m_rsu_gym_env->ImportSpeedsAndHeadWays (headways, speeds);
 
   // after sending current speeds and headways, get new speeds as per RL agent actions
-  std::vector<float> new_speeds = m_rsuGymEnv->ExportNewSpeeds ();
+  std::vector<float> new_speeds = m_rsu_gym_env->ExportNewSpeeds ();
 
   // loop again over map entries and update speed values for each vehicle
   it = m_vehicles_data.begin ();
@@ -577,8 +583,11 @@ RsuSpeedControl::HandleRead (Ptr<Socket> socket)
     }
   else
     {
-      // else insert a new entry as follows : <id>:<<speed>:<headway>>
-      m_vehicles_data.insert (std::make_pair (receivedID, std::make_pair (velocity, headway)));
+      if (m_vehicles_data.size () < m_rsu_gym_env->GetActionSpaceSize ())
+        {
+          // else insert a new entry as follows : <id>:<<speed>:<headway>>
+          m_vehicles_data.insert (std::make_pair (receivedID, std::make_pair (velocity, headway)));
+        }
     }
 
   // get ip of RSU for logging
@@ -682,7 +691,7 @@ VehicleSpeedControl::StopApplication ()
       rx_socket->SetRecvCallback (MakeNullCallback<void, Ptr<Socket>> ());
       rx_socket = 0;
     }
-    Simulator::Cancel (m_sendEvent);
+  Simulator::Cancel (m_sendEvent);
 }
 
 void
