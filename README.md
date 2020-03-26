@@ -178,8 +178,7 @@ Contact
 * American University of Beirut:
     * **Rayyan Nasr**: rrn13@mail.aub.edu
     * **Jihad Eddine Al Khurfan**: jia07@mail.aub.edu
-    * **Ahmad Abou Adla**: aka38@mail.aub.edu
-
+    
 How to reference the original ns3-gym?
 ============
 
