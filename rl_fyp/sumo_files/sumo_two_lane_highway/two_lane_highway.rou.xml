@@ -9,6 +9,6 @@
 		   		lcSpeedGainLookahead="0" lcCooperativeSpeed="0.1" lcPushy="0" impatience="0.5" minGap="0" tau="2.5"
 		   			probability="0.5" color="yellow"/>
 
-	<flow id="carflow" type="car" departLane="free" departSpeed="7.5" begin="1" end="30000" vehsPerHour="2000.0" from="gneE1" to="gneE3" />
+	<flow id="carflow" type="car" departLane="free" departSpeed="7.5" begin="1" end="30000" vehsPerHour="550.0" from="gneE1" to="gneE3" />
 
 </routes>
