@@ -120,6 +120,10 @@ private:
   Ptr<TraciClient> m_client;
   double last_velocity;
   double last_headway;
+
+  double m_desired_speed = 40;
+  double m_speed_delta = 15;
+  double m_desired_headway = 2.0;
 };
 
 } // namespace ns3

@@ -537,6 +537,11 @@ VehicleSpeedControl::Send ()
       last_headway = 0.0;
     }
 
+  // get vehicle ip for logging
+  Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
+  Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
+  Ipv4Address ipAddr = iaddr.GetLocal ();
+
   // ********************* Constructing message *********************
 
   // new message string
@@ -546,11 +551,6 @@ VehicleSpeedControl::Send ()
   msg << "1*" << m_client->GetVehicleId (this->GetNode ()) << "*" << std::to_string (last_velocity)
       << "*" << std::to_string (last_headway) << '\0';
   Ptr<Packet> packet = Create<Packet> ((uint8_t *) msg.str ().c_str (), msg.str ().length ());
-
-  // get vehicle ip for logging
-  Ptr<Ipv4> ipv4 = this->GetNode ()->GetObject<Ipv4> ();
-  Ipv4InterfaceAddress iaddr = ipv4->GetAddress (1, 0);
-  Ipv4Address ipAddr = iaddr.GetLocal ();
 
   // send packet
   tx_socket->Send (packet);

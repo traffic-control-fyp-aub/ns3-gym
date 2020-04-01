@@ -43,7 +43,7 @@ main (int argc, char *argv[])
       break;
     case 3: // Square scenario
     default:
-      nodePool.Create (26);
+      nodePool.Create (27);
       break;
     }
 
@@ -97,10 +97,9 @@ main (int argc, char *argv[])
                                 StringValue ("rl_fyp/sumo_files/circle-simple/circle.sumo.cfg"));
       break;
     case 2: // Highway scenario
-      sumoClient->SetAttribute (
-          "SumoConfigPath",
-          StringValue ("rl_fyp/sumo_files/sumo_two_lane_highway/"
-                       "two_lane_highway.sumo.cfg"));
+      sumoClient->SetAttribute ("SumoConfigPath",
+                                StringValue ("rl_fyp/sumo_files/sumo_two_lane_highway/"
+                                             "two_lane_highway.sumo.cfg"));
       break;
     case 3: // Square scenario
     default:
@@ -126,6 +125,7 @@ main (int argc, char *argv[])
   Ptr<OpenGymInterface> openGymInterface;
   openGymInterface = OpenGymInterface::Get (5555);
 
+  // ##################################################################################################3
   RsuSpeedControlHelper rsuSpeedControlHelper1 (9); // Port #9
   // rsuSpeedControlHelper1.SetAttribute ("Interval", TimeValue (Seconds (5.0))); // packet interval
   rsuSpeedControlHelper1.SetAttribute (
@@ -158,9 +158,8 @@ main (int argc, char *argv[])
       "Client",
       (PointerValue) sumoClient); // pass TraciClient object for accessing sumo in application
 
-  // uint32_t number_of_vehicles = nodePool.GetN () - nodeCounter;
   // callback function for node creation
-  std::function<Ptr<Node> ()> setupNewWifiNode = [&]() -> Ptr<Node> {
+  std::function<Ptr<Node> ()> setupNewWifiNode = [&] () -> Ptr<Node> {
     if (nodeCounter >= nodePool.GetN ())
       {
         // NS_FATAL_ERROR ("Node Pool empty!: " << nodeCounter << " nodes created.");
@@ -182,7 +181,7 @@ main (int argc, char *argv[])
   };
 
   // callback function for node shutdown
-  std::function<void(Ptr<Node>)> shutdownWifiNode = [](Ptr<Node> exNode) {
+  std::function<void (Ptr<Node>)> shutdownWifiNode = [] (Ptr<Node> exNode) {
     // stop all applications
     Ptr<VehicleSpeedControl> vehicleSpeedControl =
         exNode->GetApplication (0)->GetObject<VehicleSpeedControl> ();
