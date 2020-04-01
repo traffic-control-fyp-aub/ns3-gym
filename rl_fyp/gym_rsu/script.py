@@ -234,14 +234,17 @@ elif argumentList.__len__() >= 5:
                 model_online = model_setup(str(argumentList[agent_index]),
                                            env,
                                            'MlpPolicy',
-                                           lr=float(params_dict["lr"]),
+                                           g=float(params_dict["g"]),
                                            bf=int(params_dict["bf"]),
+                                           nstd=float(params_dict["nstd"]),
+                                           lst=int(params_dict["lst"]),
                                            bch=int(params_dict["bch"]),
-                                           ent=str(params_dict["ent"]),
+                                           lr=float(params_dict["lr"]),
                                            tf=int(params_dict["tf"]),
                                            grad=int(params_dict["grad"]),
-                                           lst=int(params_dict["lst"]),
-                                           v=int(params_dict["v"]))
+                                           v=int(params_dict["v"]),
+                                           pkwargs={"layers": [params_dict["pkwargs"].split(",")[0],
+                                                               params_dict["pkwargs"].split(",")[1]]})
 
                 # --------------------------------------------------------------
                 # Use the part below when looking to perform continuous learning
