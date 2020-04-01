@@ -68,7 +68,7 @@ RsuSpeedControl::GetTypeId (void)
           .AddAttribute ("Port", "Port on which we send packets.", UintegerValue (9),
                          MakeUintegerAccessor (&RsuSpeedControl::m_port),
                          MakeUintegerChecker<uint16_t> ())
-          .AddAttribute ("Interval", "The time to wait between packets", TimeValue (Seconds (25.0)),
+          .AddAttribute ("Interval", "The time to wait between packets", TimeValue (Seconds (2.5)),
                          MakeTimeAccessor (&RsuSpeedControl::m_interval), MakeTimeChecker ())
           .AddAttribute ("MaxPackets", "The maximum number of packets the application will send",
                          UintegerValue (100), MakeUintegerAccessor (&RsuSpeedControl::m_count),
@@ -135,7 +135,7 @@ RsuSpeedControl::StartApplication (void)
       m_clear_interval = m_interval;
       // start transmitting messages after 0 seconds and update speed values after m_interval seconds
       Simulator::Schedule (m_interval, &RsuSpeedControl::ChangeSpeed, this);
-      ScheduleTransmit (m_interval);
+      // ScheduleTransmit (m_interval);
       Simulator::Schedule (m_clear_interval, &RsuSpeedControl::ClearDataTable, this);
     }
 
@@ -368,7 +368,7 @@ VehicleSpeedControl::GetTypeId (void)
           .AddAttribute ("Port", "The port on which the client will listen for incoming packets.",
                          UintegerValue (0), MakeUintegerAccessor (&VehicleSpeedControl::m_port),
                          MakeUintegerChecker<uint16_t> ())
-          .AddAttribute ("Interval", "The time to wait between packets", TimeValue (Seconds (25.0)),
+          .AddAttribute ("Interval", "The time to wait between packets", TimeValue (Seconds (2.5)),
                          MakeTimeAccessor (&VehicleSpeedControl::m_interval), MakeTimeChecker ())
           .AddAttribute ("Client", "TraCI client for SUMO", PointerValue (0),
                          MakePointerAccessor (&VehicleSpeedControl::m_client),

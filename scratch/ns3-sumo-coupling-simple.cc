@@ -13,6 +13,7 @@
 #include "ns3/netanim-module.h"
 #include <functional>
 #include <stdlib.h>
+#include <cmath>
 
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE ("ns3-sumo-coupling-simple");
@@ -39,7 +40,7 @@ main (int argc, char *argv[])
       nodePool.Create (11);
       break;
     case 2: // Highway scenario
-      nodePool.Create (255);
+      nodePool.Create (2000);
       break;
     case 3: // Square scenario
     default:
@@ -172,8 +173,8 @@ main (int argc, char *argv[])
     // Install Application
     ApplicationContainer vehicleSpeedControlApps = vehicleSpeedControlHelper.Install (includedNode);
 
-    // double start = (nodeCounter / number_of_vehicles);
-    vehicleSpeedControlApps.Start (Seconds (0.00001));
+    srand (std::time (0));
+    vehicleSpeedControlApps.Start (Seconds (0.00001 * (rand () % 100000)));
     vehicleSpeedControlApps.Stop (simulationTime);
     nodeCounter++; // increment counter for next node
 
