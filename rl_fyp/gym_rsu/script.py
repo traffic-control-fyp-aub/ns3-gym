@@ -251,8 +251,8 @@ elif argumentList.__len__() >= 5:
                 # --------------------------------------------------------------
                 print(f'Loading {str(argumentList[agent_index])} agent with cars={params_dict["cars"]}')
                 model_online = SAC.load(f'rsu_agents/{traffic_scenario_name}_agents/optimized_interval/'
-                                         f'{str(argumentList[agent_index])}_ns3_{traffic_scenario_name}_cars='
-                                         f'{params_dict["cars"]}_optimized')
+                                        f'{str(argumentList[agent_index])}_ns3_{traffic_scenario_name}_cars='
+                                        f'{params_dict["cars"]}_optimized')
 
                 # Setting the environment to allow the loaded agent to train
                 model_online.set_env(env=env)
