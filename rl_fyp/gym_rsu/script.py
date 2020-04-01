@@ -235,14 +235,13 @@ elif argumentList.__len__() >= 5:
                                            env,
                                            'MlpPolicy',
                                            lr=float(params_dict["lr"]),
-                                           v=int(params_dict["v"]),
-                                           ent=float(params_dict["ent"]),
-                                           lbd=float(params_dict["lbd"]),
-                                           g=float(params_dict["g"]),
-                                           nsteps=int(params_dict["nsteps"]),
-                                           nbtch=int(params_dict["nbtch"]),
-                                           nep=int(params_dict["nep"]),
-                                           cl=float(params_dict["cl"]))
+                                           bf=int(params_dict["bf"]),
+                                           bch=int(params_dict["bch"]),
+                                           ent=str(params_dict["ent"]),
+                                           tf=int(params_dict["tf"]),
+                                           grad=int(params_dict["grad"]),
+                                           lst=int(params_dict["lst"]),
+                                           v=int(params_dict["v"]))
 
                 # --------------------------------------------------------------
                 # Use the part below when looking to perform continuous learning
