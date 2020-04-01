@@ -227,18 +227,22 @@ elif argumentList.__len__() >= 5:
 
             if entered_cli:
                 # Case where user has specified some CLI arguments for the agent
+
+                # --------------------------------------------------------------
+                # Use the part below when looking to perform base learning
+                # --------------------------------------------------------------
                 model_online = model_setup(str(argumentList[agent_index]),
                                            env,
                                            'MlpPolicy',
                                            lr=float(params_dict["lr"]),
-                                           nsteps=int(params_dict["nsteps"]),
-                                           nbtch=int(params_dict["nbtch"]),
+                                           v=int(params_dict["v"]),
+                                           ent=float(params_dict["ent"]),
                                            lbd=float(params_dict["lbd"]),
                                            g=float(params_dict["g"]),
+                                           nsteps=int(params_dict["nsteps"]),
+                                           nbtch=int(params_dict["nbtch"]),
                                            nep=int(params_dict["nep"]),
-                                           ent=float(params_dict["ent"]),
-                                           cl=float(params_dict["cl"]),
-                                           v=int(params_dict["v"]))
+                                           cl=float(params_dict["cl"]))
 
                 # --------------------------------------------------------------
                 # Use the part below when looking to perform continuous learning
@@ -260,10 +264,9 @@ elif argumentList.__len__() >= 5:
             model_online.learn(total_timesteps=30000)   # int(128*60000)) < -- PPO2
             print(' ** Done Training ** ')
         except KeyboardInterrupt:
-            model_online.save(f'rsu_agents/multi_lane_merge_agents/continuous_learning/'
-                              f'{str(argumentList[agent_index])}_cl/'
+            model_online.save(f'rsu_agents/{traffic_scenario_name}_agents/optimized_interval/'
                               f'{str(argumentList[agent_index])}_ns3_'
-                              f'two_lane_highway_cars={str(ac_space.shape)[1:3]}_CL')
+                              f'{traffic_scenario_name}_cars={str(ac_space.shape)[1:3]}_optimized')
             env.close()
             print("Ctrl-C -> Exit")
 
