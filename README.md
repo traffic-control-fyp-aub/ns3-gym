@@ -47,6 +47,13 @@ Terminal 2 (gym side):
 python3 script.py train online [ alg_name ] scenario=[name] [ policy_kwargs ]
 ```
 
+## NGS UML Diagram
+
+
+Below you can find a UML diagram giving a high level explanation of how NGS works:
+
+![UML Diagram](docs/uml.png)
+
 # SUMO
 
 ## What is SUMO
