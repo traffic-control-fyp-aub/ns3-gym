@@ -268,7 +268,7 @@ elif argumentList.__len__() >= 5:
         except KeyboardInterrupt:
             model_online.save(f'rsu_agents/single_lane_highway_agents/optimized_interval/'
                               f'{str(argumentList[agent_index])}_ns3_'
-                              f'single_lane_highway_cars={str(ac_space.shape)[1:3]}_optimized_flow_2000')
+                              f'single_lane_highway_cars={str(ac_space.shape)[1:3]}_optimized')
             env.close()
             print("Ctrl-C -> Exit")
 
