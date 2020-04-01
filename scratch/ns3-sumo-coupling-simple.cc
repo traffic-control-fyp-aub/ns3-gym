@@ -44,7 +44,7 @@ main (int argc, char *argv[])
       break;
     case 3: // Square scenario
     default:
-      nodePool.Create (27);
+      nodePool.Create (26);
       break;
     }
 

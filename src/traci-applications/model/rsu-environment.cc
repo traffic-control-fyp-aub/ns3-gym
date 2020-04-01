@@ -19,14 +19,14 @@ RsuEnv::RsuEnv ()
   m_alpha = 0.9;
   m_beta = 0.99;
   max_headway_time = 2.0;
-  max_velocity_value = 100; // was 50
-  desired_velocity_value = 90; // was 47
+  max_velocity_value = 50; // was 50
+  desired_velocity_value = 45; // was 47
   old_reward = 0.0;
   current_reward = 0.0;
   current_step = 1;
   horizon = 128;
   epsilon_threshold = 1e-4;
-  max_delta = 10.0;
+  max_delta = 6.0;
 
   NS_LOG_INFO ("Set Up Interface : " << OpenGymInterface::Get () << "\n");
 }
