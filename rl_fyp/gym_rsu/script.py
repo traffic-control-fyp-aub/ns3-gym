@@ -250,7 +250,7 @@ elif argumentList.__len__() >= 5:
                 # Use the part below when looking to perform continuous learning
                 # --------------------------------------------------------------
                 print(f'Loading {str(argumentList[agent_index])} agent with cars={params_dict["cars"]}')
-                model_online = SAC.load(f'rsu_agents/{traffic_scenario_name}_agents/optimized_interval/'
+                model_online = TD3.load(f'rsu_agents/{traffic_scenario_name}_agents/optimized_interval/'
                                         f'{str(argumentList[agent_index])}_ns3_{traffic_scenario_name}_cars='
                                         f'{params_dict["cars"]}_optimized')
 
@@ -268,7 +268,7 @@ elif argumentList.__len__() >= 5:
         except KeyboardInterrupt:
             model_online.save(f'rsu_agents/single_lane_highway_agents/optimized_interval/'
                               f'{str(argumentList[agent_index])}_ns3_'
-                              f'single_lane_highway_cars={str(ac_space.shape)[1:3]}_optimized')
+                              f'single_lane_highway_cars={str(ac_space.shape)[1:3]}_optimized_flow_2000')
             env.close()
             print("Ctrl-C -> Exit")
 
