@@ -231,29 +231,29 @@ elif argumentList.__len__() >= 5:
                 # --------------------------------------------------------------
                 # Use the part below when looking to perform base learning
                 # --------------------------------------------------------------
-                model_online = model_setup(str(argumentList[agent_index]),
-                                           env,
-                                           'MlpPolicy',
-                                           lr=float(params_dict["lr"]),
-                                           nsteps=int(params_dict["nsteps"]),
-                                           nbtch=int(params_dict["nbtch"]),
-                                           lbd=float(params_dict["lbd"]),
-                                           g=float(params_dict["g"]),
-                                           nep=int(params_dict["nep"]),
-                                           ent=float(params_dict["ent"]),
-                                           cl=float(params_dict["cl"]),
-                                           v=int(params_dict["v"]))
+                # model_online = model_setup(str(argumentList[agent_index]),
+                #                            env,
+                #                            'MlpPolicy',
+                #                            lr=float(params_dict["lr"]),
+                #                            nsteps=int(params_dict["nsteps"]),
+                #                            nbtch=int(params_dict["nbtch"]),
+                #                            lbd=float(params_dict["lbd"]),
+                #                            g=float(params_dict["g"]),
+                #                            nep=int(params_dict["nep"]),
+                #                            ent=float(params_dict["ent"]),
+                #                            cl=float(params_dict["cl"]),
+                #                            v=int(params_dict["v"]))
 
                 # --------------------------------------------------------------
                 # Use the part below when looking to perform continuous learning
                 # --------------------------------------------------------------
-                # print(f'Loading {str(argumentList[agent_index])} agent with cars={params_dict["cars"]}')
-                # model_online = TD3.load(f'rsu_agents/{traffic_scenario_name}_agents/optimized_interval/'
-                #                         f'{str(argumentList[agent_index])}_ns3_{traffic_scenario_name}_cars='
-                #                         f'{params_dict["cars"]}_optimized')
-                #
-                # # Setting the environment to allow the loaded agent to train
-                # model_online.set_env(env=env)
+                print(f'Loading {str(argumentList[agent_index])} agent with cars={params_dict["cars"]}')
+                model_online = TD3.load(f'rsu_agents/{traffic_scenario_name}_agents/optimized_interval/'
+                                        f'{str(argumentList[agent_index])}_ns3_{traffic_scenario_name}_cars='
+                                        f'{params_dict["cars"]}_optimized')
+
+                # Setting the environment to allow the loaded agent to train
+                model_online.set_env(env=env)
             else:
                 print(f'Setting up default {str(argumentList[agent_index])} parameters')
                 # Otherwise just set up the model and use the default values
