@@ -135,7 +135,7 @@ RsuSpeedControl::StartApplication (void)
       m_clear_interval = m_interval;
       // start transmitting messages after 0 seconds and update speed values after m_interval seconds
       Simulator::Schedule (m_interval, &RsuSpeedControl::ChangeSpeed, this);
-      // ScheduleTransmit (m_interval);
+      ScheduleTransmit (m_interval);
       Simulator::Schedule (m_clear_interval, &RsuSpeedControl::ClearDataTable, this);
     }
 
