@@ -119,17 +119,23 @@ elif argumentList.__len__() is 4:
             # model = PPO2.load(f'rsu_agents/{scenario_name}_agents/'
             #                   f'PPO2_ns3_online_{scenario_name}_cars={num_of_vehicles}')
 
-            # model = PPO2.load((f'rsu_agents/square_agents/base_learning_no_traffic_light/PPO2_algorithm/'
-            #                   f'PPO2_ns3_'
-            #                   f'square_cars=25'))
+            # model = PPO2.load(
+            #     (f'rsu_agents/single_lane_highway_agents/optimized_interval/PPO2_ns3_single_lane_highway_cars=25_optimized'))
 
-            # model = SAC.load((f'rsu_agents/square_agents/base_learning_no_traffic_light/SAC_algorithm/'
-            #                   f'SAC_ns3_'
-            #                   f'square_cars=25'))
+            # model = SAC.load(
+            #     (f'rsu_agents/single_lane_highway_agents/optimized_interval/SAC_ns3_single_lane_highway_cars=25_optimized'))
 
-            model = TD3.load((f'rsu_agents/square_agents/base_learning_no_traffic_light/TD3_algorithm/'
-                              f'TD3_ns3_'
-                              f'square_cars=25'))
+            model = TD3.load(
+                f'rsu_agents/single_lane_highway_agents/optimized_interval/TD3_ns3_single_lane_highway_cars=25_optimized')
+
+            # model = PPO2.load(
+            #     (f'rsu_agents/square_agents/optimized_interval/PPO2_ns3_square_cars=25_optimized'))
+
+            # model = SAC.load(
+            #     (f'rsu_agents/square_agents/optimized_interval/SAC_ns3_square_cars=25_optimized'))
+
+            # model = TD3.load(
+            #     f'rsu_agents/square_agents/optimized_interval/TD3_ns3_square_cars=25_optimized')
 
             while True:
                 print("Start iteration: ", currIt)
@@ -163,7 +169,8 @@ elif argumentList.__len__() is 4:
         # Online means running it directly in the ns3 environment
         # with SUMO and offline means running it with the RSU custom
         # gym environment.
-        print("Please specify one of the following training methods: [ online | offline ]")
+        print(
+            "Please specify one of the following training methods: [ online | offline ]")
         exit(0)
 elif argumentList.__len__() >= 5:
     if sys.argv[1] in ['train'] and sys.argv[2] in ['online']:
@@ -247,21 +254,25 @@ elif argumentList.__len__() >= 5:
                 # --------------------------------------------------------------
                 # Use the part below when looking to perform continuous learning
                 # --------------------------------------------------------------
-                print(f'Loading {str(argumentList[agent_index])} agent with cars={params_dict["cars"]}')
+                print(
+                    f'Loading {str(argumentList[agent_index])} agent with cars={params_dict["cars"]}')
                 model_online = PPO2.load(f'rsu_agents/{traffic_scenario_name}_agents/optimized_interval/'
-                                        f'{str(argumentList[agent_index])}_ns3_{traffic_scenario_name}_cars='
-                                        f'{params_dict["cars"]}_optimized')
+                                         f'{str(argumentList[agent_index])}_ns3_{traffic_scenario_name}_cars='
+                                         f'{params_dict["cars"]}_optimized')
 
                 # Setting the environment to allow the loaded agent to train
                 model_online.set_env(env=env)
             else:
-                print(f'Setting up default {str(argumentList[agent_index])} parameters')
+                print(
+                    f'Setting up default {str(argumentList[agent_index])} parameters')
                 # Otherwise just set up the model and use the default values
-                model_online = model_setup(str(argumentList[agent_index]), env, 'MlpPolicy')
+                model_online = model_setup(
+                    str(argumentList[agent_index]), env, 'MlpPolicy')
 
             print('Training model')
             # Start the learning process on the ns3 + SUMO environment
-            model_online.learn(total_timesteps=30000)   # int(128*60000)) < -- PPO2
+            # int(128*60000)) < -- PPO2
+            model_online.learn(total_timesteps=30000)
             print(' ** Done Training ** ')
         except KeyboardInterrupt:
             model_online.save(f'rsu_agents/{traffic_scenario_name}_agents/optimized_interval/'
