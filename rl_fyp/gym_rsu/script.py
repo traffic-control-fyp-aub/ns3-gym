@@ -231,31 +231,31 @@ elif argumentList.__len__() >= 5:
                 # --------------------------------------------------------------
                 # Use the part below when looking to perform base learning
                 # --------------------------------------------------------------
-                # model_online = model_setup(str(argumentList[agent_index]),
-                #                            env,
-                #                            'MlpPolicy',
-                #                            g=float(params_dict["g"]),
-                #                            bf=int(params_dict["bf"]),
-                #                            nstd=float(params_dict["nstd"]),
-                #                            lst=int(params_dict["lst"]),
-                #                            bch=int(params_dict["bch"]),
-                #                            lr=float(params_dict["lr"]),
-                #                            tf=int(params_dict["tf"]),
-                #                            grad=int(params_dict["grad"]),
-                #                            v=int(params_dict["v"]),
-                #                            pkwargs={"layers": [params_dict["pkwargs"].split(",")[0],
-                #                                                params_dict["pkwargs"].split(",")[1]]})
+                model_online = model_setup(str(argumentList[agent_index]),
+                                           env,
+                                           'MlpPolicy',
+                                           g=float(params_dict["g"]),
+                                           bf=int(params_dict["bf"]),
+                                           nstd=float(params_dict["nstd"]),
+                                           lst=int(params_dict["lst"]),
+                                           bch=int(params_dict["bch"]),
+                                           lr=float(params_dict["lr"]),
+                                           tf=int(params_dict["tf"]),
+                                           grad=int(params_dict["grad"]),
+                                           v=int(params_dict["v"]),
+                                           pkwargs={"layers": [params_dict["pkwargs"].split(",")[0],
+                                                               params_dict["pkwargs"].split(",")[1]]})
 
                 # --------------------------------------------------------------
                 # Use the part below when looking to perform continuous learning
                 # --------------------------------------------------------------
-                print(f'Loading {str(argumentList[agent_index])} agent with cars={params_dict["cars"]}')
-                model_online = TD3.load(f'rsu_agents/{traffic_scenario_name}_agents/optimized_interval/'
-                                        f'{str(argumentList[agent_index])}_ns3_{traffic_scenario_name}_cars='
-                                        f'{params_dict["cars"]}_optimized')
-
-                # Setting the environment to allow the loaded agent to train
-                model_online.set_env(env=env)
+                # print(f'Loading {str(argumentList[agent_index])} agent with cars={params_dict["cars"]}')
+                # model_online = TD3.load(f'rsu_agents/{traffic_scenario_name}_agents/optimized_interval/'
+                #                         f'{str(argumentList[agent_index])}_ns3_{traffic_scenario_name}_cars='
+                #                         f'{params_dict["cars"]}_optimized')
+                #
+                # # Setting the environment to allow the loaded agent to train
+                # model_online.set_env(env=env)
             else:
                 print(f'Setting up default {str(argumentList[agent_index])} parameters')
                 # Otherwise just set up the model and use the default values
@@ -266,9 +266,9 @@ elif argumentList.__len__() >= 5:
             model_online.learn(total_timesteps=30000)   # int(128*60000)) < -- PPO2
             print(' ** Done Training ** ')
         except KeyboardInterrupt:
-            model_online.save(f'rsu_agents/single_lane_highway_agents/optimized_interval/'
+            model_online.save(f'rsu_agents/{traffic_scenario_name}_agents/optimized_interval/'
                               f'{str(argumentList[agent_index])}_ns3_'
-                              f'single_lane_highway_cars={str(ac_space.shape)[1:3]}_optimized')
+                              f'{traffic_scenario_name}_cars={str(ac_space.shape)[1:3]}_optimized')
             env.close()
             print("Ctrl-C -> Exit")
 
