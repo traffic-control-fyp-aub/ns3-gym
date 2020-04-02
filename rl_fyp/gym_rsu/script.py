@@ -248,7 +248,7 @@ elif argumentList.__len__() >= 5:
                 # Use the part below when looking to perform continuous learning
                 # --------------------------------------------------------------
                 print(f'Loading {str(argumentList[agent_index])} agent with cars={params_dict["cars"]}')
-                model_online = TD3.load(f'rsu_agents/{traffic_scenario_name}_agents/optimized_interval/'
+                model_online = SAC.load(f'rsu_agents/{traffic_scenario_name}_agents/optimized_interval/'
                                         f'{str(argumentList[agent_index])}_ns3_{traffic_scenario_name}_cars='
                                         f'{params_dict["cars"]}_optimized')
 
