@@ -235,12 +235,13 @@ elif argumentList.__len__() >= 5:
                                            env,
                                            'MlpPolicy',
                                            lr=float(params_dict["lr"]),
-                                           bf=int(params_dict["bf"]),
-                                           bch=int(params_dict["bch"]),
-                                           ent=str(params_dict["ent"]),
-                                           tf=int(params_dict["tf"]),
-                                           grad=int(params_dict["grad"]),
-                                           lst=int(params_dict["lst"]),
+                                           nsteps=int(params_dict["nsteps"]),
+                                           nbtch=int(params_dict["nbtch"]),
+                                           lbd=float(params_dict["lbd"]),
+                                           g=float(params_dict["g"]),
+                                           nep=int(params_dict["nep"]),
+                                           ent=float(params_dict["ent"]),
+                                           cl=float(params_dict["cl"]),
                                            v=int(params_dict["v"]))
 
                 # --------------------------------------------------------------
