@@ -42,7 +42,10 @@ main (int argc, char *argv[])
     case 2: // Highway scenario
       nodePool.Create (2000);
       break;
-    case 3: // Square scenario
+    case 3: // OSM
+      nodePool.Create (2000);
+      break;
+    case 4: // Square scenario
     default:
       nodePool.Create (26);
       break;
@@ -102,7 +105,12 @@ main (int argc, char *argv[])
                                 StringValue ("rl_fyp/sumo_files/sumo_two_lane_highway/"
                                              "two_lane_highway.sumo.cfg"));
       break;
-    case 3: // Square scenario
+    case 3: // osm
+      sumoClient->SetAttribute ("SumoConfigPath",
+                                StringValue ("rl_fyp/sumo_files/aub-seaside/"
+                                             "osm.sumocfg"));
+      break;
+    case 4: // Square scenario
     default:
       sumoClient->SetAttribute (
           "SumoConfigPath", StringValue ("rl_fyp/sumo_files/training_loop/training-loop.sumo.cfg"));
@@ -146,7 +154,10 @@ main (int argc, char *argv[])
     case 2: // Merge scenario
       mobilityRsuNode1->SetPosition (Vector (100.0, 20.0, 3.0)); // set RSU to fixed position
       break;
-    case 3: // Square scenario
+    case 3: // osm
+      mobilityRsuNode1->SetPosition (Vector (1600.0, 700.0, 3.0)); // set RSU to fixed position
+      break;
+    case 4: // Square scenario
     default:
       mobilityRsuNode1->SetPosition (Vector (100.0, 100.0, 3.0)); // set RSU to fixed position
       break;
