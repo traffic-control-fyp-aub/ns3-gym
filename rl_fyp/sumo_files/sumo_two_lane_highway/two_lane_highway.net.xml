@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 02 نيسان, 2020 EEST 05:00:32 م by Eclipse SUMO netedit Version v1_1_0+0000-2147d155b1
+<!-- generated on Sun 05 Apr 2020 12:51:02 AM EEST by Eclipse SUMO netedit Version v1_1_0+0000-2147d155b1
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
 
     <input>
-        <sumo-net-file value="/home/rayyan/Desktop/FYP/repos/ns3-gym/rl_fyp/sumo_files/sumo_two_lane_highway/two_lane_highway.net.xml"/>
+        <sumo-net-file value="/home/jihad/Desktop/ns3-gym/rl_fyp/sumo_files/sumo_two_lane_highway/two_lane_highway.net.xml"/>
     </input>
 
     <output>
-        <output-file value="/home/rayyan/Desktop/FYP/repos/ns3-gym/rl_fyp/sumo_files/sumo_two_lane_highway/two_lane_highway.net.xml"/>
+        <output-file value="/home/jihad/Desktop/ns3-gym/rl_fyp/sumo_files/sumo_two_lane_highway/two_lane_highway.net.xml"/>
     </output>
 
     <processing>
@@ -47,9 +47,9 @@
     </edge>
 
     <tlLogic id="gneJ1" type="static" programID="0" offset="0">
-        <phase duration="150" state="G"/>
+        <phase duration="75" state="G"/>
         <phase duration="10" state="y"/>
-        <phase duration="10" state="r"/>
+        <phase duration="5"  state="r"/>
     </tlLogic>
 
     <junction id="gneJ0" type="priority" x="0.00" y="0.00" incLanes="gneE1_0" intLanes="" shape="0.00,0.00 0.00,-3.20 0.00,0.00">

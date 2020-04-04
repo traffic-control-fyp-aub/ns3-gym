@@ -559,7 +559,9 @@ VehicleSpeedControl::Send ()
                << "[vehicle ip:" << ipAddr << "]"
                << "[vehicle id:" << m_client->GetVehicleId (this->GetNode ()) << "]"
                << "[tx vel:" << last_velocity << "m/s]"
-               << "[tx headway:" << last_headway << "s]\n");
+               << "[tx headway:" << last_headway << "s]\n"
+               << "lane number: "  << m_client->TraCIAPI::vehicle.getRouteIndex(m_client->GetVehicleId (this->GetNode ()))
+               << m_client->TraCIAPI::vehicle.getLaneIndex(m_client->GetVehicleId (this->GetNode ())));
 
   ScheduleTransmit (m_interval);
 }
