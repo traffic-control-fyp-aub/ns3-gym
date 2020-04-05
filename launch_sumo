@@ -4,10 +4,12 @@
 # Usage:
 # ------
 #
-# >> ./launch_sumo scenario=[ 1 | 2 | 3 ]
-#	1 = circle scenario
+# >> ./launch_sumo scenario=[ 0 | 1 | 2 | 3 ]
+#	0 = osm scenario
+#	1 = one lane highway
 #	2 = two lane highway
 #	3 = square scenario
+
 
 
 
