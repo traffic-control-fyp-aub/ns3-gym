@@ -36,16 +36,16 @@ main (int argc, char *argv[])
 
   switch (scenario)
     {
-    case 1: // Circle scenario
-      nodePool.Create (11);
-      break;
-    case 2: // Highway scenario
+    case 0: // OSM
       nodePool.Create (2000);
       break;
-    case 3: // OSM
+    case 1: // 1-lane scenario
       nodePool.Create (2000);
       break;
-    case 4: // Square scenario
+    case 2: // 2-lane scenario
+      nodePool.Create (2000);
+      break;
+    case 3: // Square scenario
     default:
       nodePool.Create (26);
       break;
@@ -96,21 +96,22 @@ main (int argc, char *argv[])
 
   switch (scenario)
     {
-    case 1: // Circle scenario
-      sumoClient->SetAttribute ("SumoConfigPath",
-                                StringValue ("rl_fyp/sumo_files/circle-simple/circle.sumo.cfg"));
-      break;
-    case 2: // Highway scenario
-      sumoClient->SetAttribute ("SumoConfigPath",
-                                StringValue ("rl_fyp/sumo_files/sumo_two_lane_highway/"
-                                             "two_lane_highway.sumo.cfg"));
-      break;
-    case 3: // osm
+    case 0: // osm
       sumoClient->SetAttribute ("SumoConfigPath",
                                 StringValue ("rl_fyp/sumo_files/aub-seaside/"
                                              "osm.sumocfg"));
       break;
-    case 4: // Square scenario
+    case 1: // 1-lane scenario
+      sumoClient->SetAttribute ("SumoConfigPath",
+                                StringValue ("rl_fyp/sumo_files/sumo_one_lane_highway/"
+                                             "one_lane_highway.sumo.cfg"));
+      break;
+    case 2: // 2-lane scenario
+      sumoClient->SetAttribute ("SumoConfigPath",
+                                StringValue ("rl_fyp/sumo_files/sumo_two_lane_highway/"
+                                             "two_lane_highway.sumo.cfg"));
+      break;
+    case 3: // Square scenario
     default:
       sumoClient->SetAttribute (
           "SumoConfigPath", StringValue ("rl_fyp/sumo_files/training_loop/training-loop.sumo.cfg"));
@@ -148,16 +149,16 @@ main (int argc, char *argv[])
   Ptr<MobilityModel> mobilityRsuNode1 = nodePool.Get (0)->GetObject<MobilityModel> ();
   switch (scenario)
     {
-    case 1: // Circle scenario
-      mobilityRsuNode1->SetPosition (Vector (70.0, 70.0, 3.0)); // set RSU to fixed position
-      break;
-    case 2: // Merge scenario
-      mobilityRsuNode1->SetPosition (Vector (100.0, 20.0, 3.0)); // set RSU to fixed position
-      break;
-    case 3: // osm
+    case 0: // osm
       mobilityRsuNode1->SetPosition (Vector (1600.0, 700.0, 3.0)); // set RSU to fixed position
       break;
-    case 4: // Square scenario
+    case 1: // 1-lane scenario
+      mobilityRsuNode1->SetPosition (Vector (100.0, 20.0, 3.0)); // set RSU to fixed position
+      break;
+    case 2: // 2-lane scenario
+      mobilityRsuNode1->SetPosition (Vector (100.0, 20.0, 3.0)); // set RSU to fixed position
+      break;
+    case 3: // Square scenario
     default:
       mobilityRsuNode1->SetPosition (Vector (100.0, 100.0, 3.0)); // set RSU to fixed position
       break;
