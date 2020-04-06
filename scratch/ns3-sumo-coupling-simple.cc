@@ -1,3 +1,13 @@
+﻿/**
+    EECE 502 
+    ns3-sumo-coupling-simple.cc
+    Purpose: Responsible for coupling ns-3 and SUMO.
+
+    @author Rayyan Nasr 
+    @author Jihad Eddine Al-Khurfan
+    @version 1.0 3/12/20
+*/
+
 #include "ns3/core-module.h"
 #include "ns3/internet-module.h"
 #include "ns3/wifi-module.h"
