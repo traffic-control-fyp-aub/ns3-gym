@@ -28,8 +28,8 @@
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE ("ns3-sumo-coupling-simple");
 
-int
-main (int argc, char *argv[])
+//Controls operation of the program.
+int main (int argc, char *argv[])
 {
   LogComponentEnable ("TraciClient", LOG_LEVEL_INFO);
   LogComponentEnable ("TrafficControlApplication", LOG_LEVEL_INFO);
