@@ -1,0 +1,6 @@
+<additionals>
+	<taz id="taz1">
+		<tazSource id="gneE1" />
+		<tazSink id="gneE3" />
+	</taz>
+</additionals>

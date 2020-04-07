@@ -11,7 +11,7 @@ list_of_algorithms = ['TD3', 'DDPG', 'PPO2', 'PPO1',
                       'GAIL', 'HER', 'SAC', 'TRPO']
 
 
-def model_setup(algorithm_name, env, policy='MlpPolicy', **kwargs):
+def model_setup(algorithm_name, env, policy, **kwargs):
     """
         This function takes in the algorithm name specified by the
         user in the CLI, the environment to train on, the policy, and
@@ -40,21 +40,50 @@ def model_setup(algorithm_name, env, policy='MlpPolicy', **kwargs):
 
     if algorithm_name in [list_of_algorithms[0]]:
         # TD3 algorithm
-        pass
+        # Get the default values in case no user specifications
+        signature = inspect.signature(TD3.__init__)
+
+        g = kwargs.pop('g', signature.parameters['gamma'].default)
+        bf = kwargs.pop('bf', signature.parameters['buffer_size'].default)
+        nstd = kwargs.pop('nstd', signature.parameters['target_policy_noise'].default)
+        lst = kwargs.pop('lst', signature.parameters['learning_starts'].default)
+        bch = kwargs.pop('bch', signature.parameters['batch_size'].default)
+        lr = kwargs.pop('lr', signature.parameters['learning_rate'].default)
+        tf = kwargs.pop('tf', signature.parameters['train_freq'].default)
+        grad = kwargs.pop('grad', signature.parameters['gradient_steps'].default)
+        pkwargs = kwargs.pop('pkwargs', signature.parameters['policy_kwargs'].default)
+        v = kwargs.pop('v', signature.parameters['verbose'].default)
+
+        model = TD3(policy=policy,
+                    env=env,
+                    gamma=g,
+                    buffer_size=bf,
+                    target_policy_noise=nstd,
+                    learning_starts=lst,
+                    batch_size=bch,
+                    learning_rate=lr,
+                    train_freq=tf,
+                    gradient_steps=grad,
+                    verbose=v,
+                    policy_kwargs=pkwargs)
+
     elif algorithm_name in [list_of_algorithms[1]]:
         # DDPG algorithm
         pass
     elif algorithm_name in [list_of_algorithms[2]]:
         # PPO2 algorithm
-
         # Get the default values in case no user specifications
         signature = inspect.signature(PPO2.__init__)
 
         lr = kwargs.pop('lr', signature.parameters['learning_rate'].default)
-        v = kwargs.pop('v', signature.parameters['verbose'].default)
-        ent = kwargs.pop('ent', signature.parameters['ent_coef'].default)
+        nsteps = kwargs.pop('nsteps', signature.parameters['n_steps'].default)
+        nbtch = kwargs.pop('nbtch', signature.parameters['nminibatches'].default)
         lbd = kwargs.pop('lbd', signature.parameters['lam'].default)
         g = kwargs.pop('g', signature.parameters['gamma'].default)
+        nep = kwargs.pop('nep', signature.parameters['noptepochs'].default)
+        ent = kwargs.pop('ent', signature.parameters['ent_coef'].default)
+        cl = kwargs.pop('cl', signature.parameters['cliprange'].default)
+        v = kwargs.pop('v', signature.parameters['verbose'].default)
 
         model = PPO2(policy=policy,
                      env=env,
@@ -62,7 +91,11 @@ def model_setup(algorithm_name, env, policy='MlpPolicy', **kwargs):
                      verbose=v,
                      ent_coef=ent,
                      lam=lbd,
-                     gamma=g)
+                     gamma=g,
+                     n_steps=nsteps,
+                     nminibatches=nbtch,
+                     noptepochs=nep,
+                     cliprange=cl)
 
     elif algorithm_name in [list_of_algorithms[3]]:
         # PPO1 algorithm
@@ -87,7 +120,29 @@ def model_setup(algorithm_name, env, policy='MlpPolicy', **kwargs):
         pass
     elif algorithm_name in [list_of_algorithms[10]]:
         # SAC algorithm
-        pass
+        # Get the default values in case no user specifications
+        signature = inspect.signature(SAC.__init__)
+
+        lr = kwargs.pop('lr', signature.parameters['learning_rate'].default)
+        bf = kwargs.pop('bf', signature.parameters['buffer_size'].default)
+        bch = kwargs.pop('bch', signature.parameters['batch_size'].default)
+        ent = kwargs.pop('ent', signature.parameters['ent_coef'].default)
+        tf = kwargs.pop('tf', signature.parameters['train_freq'].default)
+        grad = kwargs.pop('grad', signature.parameters['gradient_steps'].default)
+        lst = kwargs.pop('lst', signature.parameters['learning_starts'].default)
+        v = kwargs.pop('v', signature.parameters['verbose'].default)
+
+        model = SAC(policy=policy,
+                    env=env,
+                    learning_rate=lr,
+                    buffer_size=bf,
+                    batch_size=bch,
+                    ent_coef=ent,
+                    train_freq=tf,
+                    gradient_steps=grad,
+                    learning_starts=lst,
+                    verbose=v)
+
     elif algorithm_name in [list_of_algorithms[11]]:
         # TRPO algorithm
         pass

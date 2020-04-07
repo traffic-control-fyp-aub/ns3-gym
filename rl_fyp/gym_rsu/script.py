@@ -1,7 +1,7 @@
 """
     Usage:
     ------
-    >> python3 script.py [ test | train ] [ online | offline ] [ algorithm name ] [ algorithm_params ]
+    >> python3 script.py [ test | train ] [ online | offline ] [ algorithm name ] [scenario_name] [ algorithm_params ]
         + test: Load and test the performance of a previously trained algorithm into
             `   the ns3-SUMO simulator.
         + train: Train an agent from scratch either directly on the ns3-SUMO simulator
@@ -19,13 +19,26 @@
 
     *Note that model naming convention whenever training and then saving will
     always be:
-                    rsu_agents/[algorithm_name]_ns3_[online | offline].zip
+                    rsu_agents/[scenario_name]_agents/[algorithm]_ns3_[scenario_name]_[num_of_cars]
 
     This will later be used to help facilitate testing the agents directly from
     the CLI instead of having to edit this script file every time.
+
+    e.g.: (training)
+    -----
+    - PPO2
+    >> python3 script.py train online PPO2 scenario=square lr=2.5e-4 v=1 ent=0.0 lbd=0.95 g=0.99
+
+    - SAC ( we automatically fetch the algorithm's default parameters )
+    >> python3 script.py train online SAC scenario=square
+
+    e.g.: (testing)
+    >> python3 script.py test scenario=square cars=10
+
 """
 import sys
 from agent_utils.model_setup import model_setup
+
 
 import gym
 
@@ -42,7 +55,7 @@ import gym_rsu
 # ---------------------------------------------------------------
 from ns3gym import ns3env
 
-from stable_baselines import PPO2
+from stable_baselines import PPO2, SAC, TD3
 from stable_baselines.common.evaluation import evaluate_policy
 from stable_baselines.common.vec_env import DummyVecEnv
 
@@ -74,8 +87,15 @@ if argumentList.__len__() == 1:
     print("Please specify one of the following: [ test | train ]"
           " and if you specified to train then [ --online | --offline ]")
     exit(0)
-elif argumentList.__len__() is 2:
+elif argumentList.__len__() is 4:
     if sys.argv[1] in ['test']:
+
+        # Collect from the CLI the name of the traffic scenario
+        scenario_name = sys.argv[2].split("=")[1]
+
+        # Collect from the CLI the number of cars that the agent was trained on
+        num_of_vehicles = sys.argv[3].split("=")[1]
+
         # Load the previously trained agent parameters and start
         # running the traffic simulation
         # Creating the ns3 environment that will act as a link
@@ -95,7 +115,28 @@ elif argumentList.__len__() is 2:
         stepIdx, currIt = 0, 0
 
         try:
-            model = PPO2.load(f'rsu_agents/ppo_ns3_online_old')
+
+            # model = PPO2.load(f'rsu_agents/{scenario_name}_agents/'
+            #                   f'PPO2_ns3_online_{scenario_name}_cars={num_of_vehicles}')
+
+            # model = PPO2.load(
+            #     (f'rsu_agents/single_lane_highway_agents/optimized_interval/PPO2_ns3_single_lane_highway_cars=25_optimized'))
+
+            # model = SAC.load(
+            #     (f'rsu_agents/single_lane_highway_agents/optimized_interval/SAC_ns3_single_lane_highway_cars=25_optimized'))
+
+            model = TD3.load(
+                f'rsu_agents/single_lane_highway_agents/optimized_interval/TD3_ns3_single_lane_highway_cars=25_optimized')
+
+            # model = PPO2.load(
+            #     (f'rsu_agents/square_agents/optimized_interval/PPO2_ns3_square_cars=25_optimized'))
+
+            # model = SAC.load(
+            #     (f'rsu_agents/square_agents/optimized_interval/SAC_ns3_square_cars=25_optimized'))
+
+            # model = TD3.load(
+            #     f'rsu_agents/square_agents/optimized_interval/TD3_ns3_square_cars=25_optimized')
+
             while True:
                 print("Start iteration: ", currIt)
                 obs = env.reset()
@@ -128,13 +169,22 @@ elif argumentList.__len__() is 2:
         # Online means running it directly in the ns3 environment
         # with SUMO and offline means running it with the RSU custom
         # gym environment.
-        print("Please specify one of the following training methods: [ online | offline ]")
+        print(
+            "Please specify one of the following training methods: [ online | offline ]")
         exit(0)
-elif argumentList.__len__() >= 4:
+elif argumentList.__len__() >= 5:
     if sys.argv[1] in ['train'] and sys.argv[2] in ['online']:
 
         # Find the index of the agent name parameter
         agent_index = argumentList.index("online") + 1
+
+        # Find the index of the traffic scenario specified
+        traffic_scenario_index = agent_index + 1
+
+        # Extracting the name of the traffic scenario to use for saving
+        # the name of the agent
+        traffic_scenario_name = argumentList[traffic_scenario_index].split("=")
+        traffic_scenario_name = traffic_scenario_name[1]
 
         # Temp list of user specified parameters through the CLI
         params = None
@@ -151,7 +201,7 @@ elif argumentList.__len__() >= 4:
             # Get the rest of the parameters specified by the user in the CLI
             # only if the user actually specified any. Otherwise no point in doing
             # so and use the default parameters
-            for list_index in range(agent_index+1, argumentList.__len__()):
+            for list_index in range(traffic_scenario_index+1, argumentList.__len__()):
                 # Split the string into the variable name and the variable value
                 params = argumentList[list_index].split("=")
 
@@ -181,41 +231,54 @@ elif argumentList.__len__() >= 4:
 
         try:
             print('Setting up the model')
-            # Use the stable-baseline PPO policy to train
-            # model_online = PPO2('MlpPolicy',
-            #                     env=env,
-            #                     learning_rate=3e-4,
-            #                     verbose=1,
-            #                     ent_coef=0.0,
-            #                     lam=0.94,
-            #                     gamma=0.99)
 
             if entered_cli:
                 # Case where user has specified some CLI arguments for the agent
+
+                # --------------------------------------------------------------
+                # Use the part below when looking to perform base learning
+                # --------------------------------------------------------------
                 model_online = model_setup(str(argumentList[agent_index]),
                                            env,
                                            'MlpPolicy',
                                            lr=float(params_dict["lr"]),
-                                           v=int(params_dict["v"]),
-                                           ent=float(params_dict["ent"]),
-                                           lbd=float(params_dict["lbd"]),
-                                           g=float(params_dict["g"]))
+                                           bf=int(params_dict["bf"]),
+                                           bch=int(params_dict["bch"]),
+                                           ent=str(params_dict["ent"]),
+                                           tf=int(params_dict["tf"]),
+                                           grad=int(params_dict["grad"]),
+                                           lst=int(params_dict["lst"]),
+                                           v=int(params_dict["v"]))
+
+                # --------------------------------------------------------------
+                # Use the part below when looking to perform continuous learning
+                # --------------------------------------------------------------
+                # print(f'Loading {str(argumentList[agent_index])} agent with cars={params_dict["cars"]}')
+                # model_online = PPO2.load(f'rsu_agents/{traffic_scenario_name}_agents/optimized_interval/'
+                #                          f'{str(argumentList[agent_index])}_ns3_{traffic_scenario_name}_cars='
+                #                          f'{params_dict["cars"]}_optimized')
+                #
+                # # Setting the environment to allow the loaded agent to train
+                # model_online.set_env(env=env)
             else:
-                print(f'Setting up default {str(argumentList[agent_index])} parameters')
+                print(
+                    f'Setting up default {str(argumentList[agent_index])} parameters')
                 # Otherwise just set up the model and use the default values
-                model_online = model_setup(str(argumentList[agent_index]), env, 'MlpPolicy')
+                model_online = model_setup(
+                    str(argumentList[agent_index]), env, 'MlpPolicy')
 
             print('Training model')
             # Start the learning process on the ns3 + SUMO environment
-            model_online.learn(total_timesteps=int(128*300000))
+            model_online.learn(total_timesteps=30000)
             print(' ** Done Training ** ')
         except KeyboardInterrupt:
-            model_online.save(f'rsu_agents/{str(argumentList[agent_index])}_ns3_online')
+            model_online.save(f'rsu_agents/{traffic_scenario_name}_agents/optimized_interval/'
+                              f'{str(argumentList[agent_index])}_ns3_'
+                              f'{traffic_scenario_name}_cars={str(ac_space.shape)[1:3]}_optimized_headway_3')
             env.close()
             print("Ctrl-C -> Exit")
 
         finally:
-            model_online.save(f'rsu_agents/{str(argumentList[agent_index])}_ns3_online')
             env.close()
             print("Environment closed")
     elif sys.argv[1] in ['train'] and sys.argv[2] in ['offline']:
