@@ -188,6 +188,11 @@ RsuEnv::GetReward ()
   return reward;
 }
 
+/**
+    Prematurely terminates the episode of training in the case where the RL agent reaches an end
+    state in training. In this case, the cause of reaching an end state could either be an accident
+    or an invariable state of the reward after many time steps.
+*/
 bool
 RsuEnv::GetGameOver ()
 {
