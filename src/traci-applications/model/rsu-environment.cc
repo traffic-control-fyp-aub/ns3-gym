@@ -93,6 +93,8 @@ RsuEnv::GetObservationSpace ()
 
 /**
     Sends the Action Space definition to the RL Agent.
+
+    @return Pointer to the Action Space.
 */
 Ptr<OpenGymSpace>
 RsuEnv::GetActionSpace ()
