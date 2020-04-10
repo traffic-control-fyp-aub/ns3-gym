@@ -212,6 +212,10 @@ RsuEnv::GetExtraInfo ()
   return myInfo;
 }
 
+/**
+    Receives the predicted actions from the RL agent and physically implements these actions on the
+    vehicles in SUMO.
+*/
 bool
 RsuEnv::ExecuteActions (Ptr<OpenGymDataContainer> action)
 {
