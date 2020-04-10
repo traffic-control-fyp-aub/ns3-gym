@@ -118,6 +118,8 @@ RsuEnv::GetActionSpace ()
 /**
     Collects the state of the environment. Used when the RL Agent needs to predict
     an action since the agent needs to know the current state of the environment.
+
+    @return Pointer to the observation shape.
 */
 Ptr<OpenGymDataContainer>
 RsuEnv::GetObservation ()
