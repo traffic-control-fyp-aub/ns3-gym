@@ -296,6 +296,11 @@ RsuEnv::ImportSpeedsAndHeadWays (std::vector<double> RSU_headways, std::vector<d
   Notify ();
 }
 
+/**
+    Returns the size of the Action Space.
+
+    @return The maximum number of vehicles in the Action Space.
+*/
 uint32_t
 RsuEnv::GetActionSpaceSize ()
 {
