@@ -262,6 +262,12 @@ RsuEnv::ExportNewSpeeds ()
   return new_speeds_no_paddings;
 }
 
+/**
+    Imports the speeds and headways from SUMO.
+
+    @param RSU_headways The headways of the vehicles in SUMO.
+    @param RSU_speeds The speeds of the vehicles in SUMO.
+*/
 void
 RsuEnv::ImportSpeedsAndHeadWays (std::vector<double> RSU_headways, std::vector<double> RSU_speeds)
 {
