@@ -115,6 +115,10 @@ RsuEnv::GetActionSpace ()
   return box;
 }
 
+/**
+    Collects the state of the environment. Used when the RL Agent needs to predict
+    an action since the agent needs to know the current state of the environment.
+*/
 Ptr<OpenGymDataContainer>
 RsuEnv::GetObservation ()
 {
