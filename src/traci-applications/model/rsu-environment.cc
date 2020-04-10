@@ -240,6 +240,14 @@ RsuEnv::ExecuteActions (Ptr<OpenGymDataContainer> action)
   return true;
 }
 
+/**
+    Exports the speeds of the vehicles from SUMO. This function handles any instance where there is a
+    mismatch between the number of vehicles on the traffic scenario and the size of the Observation
+    and Action Spaces.
+
+    @param The predicted actions.
+    @return Speeds of the vehicles.
+*/
 std::vector<float>
 RsuEnv::ExportNewSpeeds ()
 {
