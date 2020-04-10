@@ -69,6 +69,8 @@ RsuEnv::DoDispose ()
 
 /**
     Sends the Observation Space definition to the RL Agent.
+
+    @return Pointer to the Observation Space.
 */
 Ptr<OpenGymSpace>
 RsuEnv::GetObservationSpace ()
