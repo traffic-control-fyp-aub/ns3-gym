@@ -67,7 +67,9 @@ RsuEnv::DoDispose ()
   NS_LOG_FUNCTION (this);
 }
 
-
+/**
+    Sends the Observation Space definition to the RL Agent.
+*/
 Ptr<OpenGymSpace>
 RsuEnv::GetObservationSpace ()
 {
@@ -89,6 +91,9 @@ RsuEnv::GetObservationSpace ()
   return space;
 }
 
+/**
+    Sends the Action Space definition to the RL Agent.
+*/
 Ptr<OpenGymSpace>
 RsuEnv::GetActionSpace ()
 {
