@@ -51,6 +51,11 @@ RsuEnv::~RsuEnv ()
   NS_LOG_FUNCTION (this);
 }
 
+/**
+    Gets type id of the RSU environment.
+
+    @return type id.
+*/
 TypeId
 RsuEnv::GetTypeId (void)
 {
