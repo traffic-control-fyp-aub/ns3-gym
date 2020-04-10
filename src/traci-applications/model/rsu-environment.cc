@@ -150,6 +150,10 @@ RsuEnv::GetObservation ()
   return box;
 }
 
+/**
+    Computes the reward and sends it to the RL agent over the ZMQ bridge. It is used by the agent
+    to know how good the previously predicted actions are in order to learn for better performance.
+*/
 float
 RsuEnv::GetReward ()
 {
