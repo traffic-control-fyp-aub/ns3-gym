@@ -245,7 +245,6 @@ RsuEnv::ExecuteActions (Ptr<OpenGymDataContainer> action)
     mismatch between the number of vehicles on the traffic scenario and the size of the Observation
     and Action Spaces.
 
-    @param The predicted actions.
     @return Speeds of the vehicles.
 */
 std::vector<float>
