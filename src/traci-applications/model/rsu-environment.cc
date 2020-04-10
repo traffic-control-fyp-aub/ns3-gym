@@ -1,3 +1,12 @@
+/**
+    EECE 502 
+    rsu-environment.cc
+    Purpose: Defines the agent's OpenAI Gym environment'
+    @author Rayyan Nasr 
+    @author Jihad Eddine Al-Khurfan
+    @version 1.0 4/1/20
+*/
+
 #include "ns3/log.h"
 #include "rsu-environment.h"
 #include <cmath>
