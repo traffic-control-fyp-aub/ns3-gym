@@ -17,12 +17,18 @@ namespace ns3 {
 NS_LOG_COMPONENT_DEFINE ("RsuRnvironment");
 NS_OBJECT_ENSURE_REGISTERED (RsuEnv);
 
+/**
+    The constructor of the Gym environment. It is used to define the environment
+    parameters (i.e. number of vehicles) that we will handle in the Observation Space
+    and the number of outputs in the Action Space. Once this consturctor is called,
+    the ZMQ bridge is set up between ns-3 and the RL agent.
+*/
 RsuEnv::RsuEnv ()
 {
   NS_LOG_FUNCTION (this);
   // Opening interface with simulation script
   this->SetOpenGymInterface (OpenGymInterface::Get ());
-  // Setting default values fot params
+  // Setting default values for params
   m_vehicles = 0;
   m_max_vehicles = 25;
   m_alpha = 0.9;
