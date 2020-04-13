@@ -204,14 +204,14 @@ RsuSpeedControl::Send ()
   while (it != m_vehicles_data.end ())
     {
       // Log new speeds
-      NS_LOG_INFO ("RSU" << this->GetNode ()->GetId () << "new data = " << it->first
+      NS_LOG_INFO ("RSU" << this->GetNode ()->GetId () << " new data = " << it->first
                          << " :: " << (it->second).velocity);
 
       // append vehicle id then new speed respectively
       msg << "|" << it->first << ":" << std::to_string ((it->second).velocity);
       it++;
     }
-
+    NS_LOG_INFO ("\n");
   // terminate message by appending '\0' character
   msg << '\0';
 
