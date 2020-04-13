@@ -41,10 +41,11 @@ struct vehicle_data
   double emission_co; // emission of carbon monoxide
   double emission_nox; // emission of nitrogen oxides
   double emission_pmx; // emission of particulate matter
+  double emission_hc; // emission of hydrocarbon
 
   vehicle_data (std::string _vehicle_id, double _velocity, double _headway, int _lane_index,
                 double _fuel_consumption, double _emission_co2, double _emission_co,
-                double _emission_nox, double _emission_pmx)
+                double _emission_nox, double _emission_pmx, double _emission_hc)
   {
     vehicle_id = _vehicle_id;
     velocity = _velocity;
@@ -55,6 +56,7 @@ struct vehicle_data
     emission_co = _emission_co;
     emission_nox = _emission_nox;
     emission_pmx = _emission_pmx;
+    emission_hc = _emission_hc;
   }
 };
 

@@ -122,11 +122,11 @@ elif argumentList.__len__() is 4:
             # model = PPO2.load(
             #     (f'rsu_agents/single_lane_highway_agents/optimized_interval/PPO2_ns3_single_lane_highway_cars=25_optimized'))
 
-            model = SAC.load(
-                (f'rsu_agents/single_lane_highway_agents/optimized_interval/SAC_ns3_single_lane_highway_cars=25_optimized'))
+            # model = SAC.load(
+            #     (f'rsu_agents/single_lane_highway_agents/optimized_interval/SAC_ns3_single_lane_highway_cars=25_optimized'))
 
-            # model = TD3.load(
-            #     f'rsu_agents/single_lane_highway_agents/optimized_interval/TD3_ns3_single_lane_highway_cars=25_optimized')
+            model = TD3.load(
+                f'rsu_agents/single_lane_highway_agents/optimized_interval/TD3_ns3_single_lane_highway_cars=25_optimized')
 
             # model = PPO2.load(
             #     (f'rsu_agents/square_agents/optimized_interval/PPO2_ns3_square_cars=25_optimized'))

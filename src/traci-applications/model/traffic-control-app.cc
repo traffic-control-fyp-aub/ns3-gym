@@ -254,11 +254,13 @@ RsuSpeedControl::ChangeSpeed ()
     {
 
       // print the initial content in the RSU map
-      NS_LOG_INFO ("RSU" << this->GetNode ()->GetId () << " table data = " << it->first
-                         << " :: " << (it->second).velocity << " :: " << (it->second).headway
-                         << " :: " << (it->second).lane_index << " :: " << (it->second).fuel_consumption
-                         << " :: " << (it->second).emission_co2 << " :: " << (it->second).emission_co2
-                         << " :: " << (it->second).emission_nox << " :: " << (it->second).emission_pmx);
+      NS_LOG_INFO (
+          "RSU" << this->GetNode ()->GetId () << " table data = " << it->first
+                << " :: " << (it->second).velocity << " :: " << (it->second).headway
+                << " :: " << (it->second).fuel_consumption << " :: " << (it->second).emission_co2
+                << " :: " << (it->second).emission_co << " :: " << (it->second).emission_nox
+                << " :: " << (it->second).emission_pmx << " :: " << (it->second).emission_hc
+                );
 
       // store speed and headway for each vehicle
       speeds.push_back ((it->second).velocity);
@@ -318,10 +320,11 @@ RsuSpeedControl::HandleRead (Ptr<Socket> socket)
     }
 
   // save vehicle data in struct (vehicle_id, speed, headway, lane_index, emission_co2 ....)
-  vehicle_data values = vehicle_data (
-      data[1], (double) std::stod (data[2]), (double) std::stod (data[3]),
-      (int) std::stoi (data[4]), (double) std::stod (data[5]), (double) std::stod (data[6]),
-      (double) std::stod (data[7]), (double) std::stod (data[8]), (double) std::stod (data[9]));
+  vehicle_data values = vehicle_data (data[1], (double) std::stod (data[2]),
+                                      (double) std::stod (data[3]), (int) std::stoi (data[4]),
+                                      (double) std::stod (data[5]), (double) std::stod (data[6]),
+                                      (double) std::stod (data[7]), (double) std::stod (data[8]),
+                                      (double) std::stod (data[9]), (double) std::stod (data[10]));
 
   // Inserting vehicle data to RSU database
   // using map iterator, find any matching id in the map
@@ -563,18 +566,20 @@ VehicleSpeedControl::Send ()
       << "*"
       << std::to_string (
              m_client->TraCIAPI::vehicle.getPMxEmission (m_client->GetVehicleId (this->GetNode ())))
+      << "*"
+      << std::to_string (
+             m_client->TraCIAPI::vehicle.getHCEmission (m_client->GetVehicleId (this->GetNode ())))
       << '\0';
   Ptr<Packet> packet = Create<Packet> ((uint8_t *) msg.str ().c_str (), msg.str ().length ());
 
   // send packet
   tx_socket->Send (packet);
-  NS_LOG_INFO (
-      "2 TX ***** Vehicle->RSU at time "
-      << Simulator::Now ().GetSeconds () << "s - "
-      << "[vehicle ip:" << ipAddr << "]"
-      << "[vehicle id:" << m_client->GetVehicleId (this->GetNode ()) << "]"
-      << "[tx vel:" << last_velocity << "m/s]"
-      << "[tx headway:" << last_headway << "s]\n");
+  NS_LOG_INFO ("2 TX ***** Vehicle->RSU at time "
+               << Simulator::Now ().GetSeconds () << "s - "
+               << "[vehicle ip:" << ipAddr << "]"
+               << "[vehicle id:" << m_client->GetVehicleId (this->GetNode ()) << "]"
+               << "[tx vel:" << last_velocity << "m/s]"
+               << "[tx headway:" << last_headway << "s]\n");
 
   ScheduleTransmit (m_interval);
 }
