@@ -200,15 +200,15 @@ RsuSpeedControl::Send ()
   NS_LOG_INFO ("\nRSU" << this->GetNode ()->GetId () << " new entries based on agent actions: \n");
   // The message will be of form: "0*id1:velocity1|id2:velocity2|...."
 
-  std::map<std::string, std::pair<double, double>>::iterator it = m_vehicles_data.begin ();
+  std::map<std::string, vehicle_data>::iterator it = m_vehicles_data.begin ();
   while (it != m_vehicles_data.end ())
     {
       // Log new speeds
       NS_LOG_INFO ("RSU" << this->GetNode ()->GetId () << "new data = " << it->first
-                         << " :: " << (it->second).first);
+                         << " :: " << (it->second).velocity);
 
       // append vehicle id then new speed respectively
-      msg << "|" << it->first << ":" << std::to_string ((it->second).first);
+      msg << "|" << it->first << ":" << std::to_string ((it->second).velocity);
       it++;
     }
 
@@ -248,20 +248,21 @@ RsuSpeedControl::ChangeSpeed ()
 
   NS_LOG_INFO ("RSU" << this->GetNode ()->GetId ()
                      << " table at time = " << Simulator::Now ().GetSeconds () << " :\n");
-  // loop over all map entries (id:(velocity:headway)) via a map iterator
-  std::map<std::string, std::pair<double, double>>::iterator it = m_vehicles_data.begin ();
+  // loop over all map entries via a map iterator
+  std::map<std::string, vehicle_data>::iterator it = m_vehicles_data.begin ();
   while (it != m_vehicles_data.end ())
     {
 
       // print the initial content in the RSU map
       NS_LOG_INFO ("RSU" << this->GetNode ()->GetId () << " table data = " << it->first
-                         << " :: " << (it->second).first << " :: " << (it->second).second);
+                         << " :: " << (it->second).velocity << " :: " << (it->second).headway
+                         << " :: " << (it->second).lane_index << " :: " << (it->second).fuel_consumption
+                         << " :: " << (it->second).emission_co2 << " :: " << (it->second).emission_co2
+                         << " :: " << (it->second).emission_nox << " :: " << (it->second).emission_pmx);
 
       // store speed and headway for each vehicle
-      // if ((it->second).first < 0)
-      //   (it->second).first = abs ((it->second).first);
-      speeds.push_back ((it->second).first);
-      headways.push_back ((it->second).second);
+      speeds.push_back ((it->second).velocity);
+      headways.push_back ((it->second).headway);
       i++;
       it++;
     }
@@ -279,7 +280,7 @@ RsuSpeedControl::ChangeSpeed ()
   while (it != m_vehicles_data.end ())
     {
       // if (static_cast<double> (new_speeds[i]) + (it->second).first > 0)
-      (it->second).first += static_cast<double> (new_speeds[i]);
+      (it->second).velocity += static_cast<double> (new_speeds[i]);
 
       i++;
       it++;
@@ -316,32 +317,27 @@ RsuSpeedControl::HandleRead (Ptr<Socket> socket)
       return;
     }
 
-  // get id of the sender vehcile
-  std::string receivedID = data[1];
-
-  // get speed of sender vehicle
-  double velocity = (double) std::stod (data[2]);
-
-  // get headway of sender vehicle
-  double headway = (double) std::stod (data[3]);
+  // save vehicle data in struct (vehicle_id, speed, headway, lane_index, emission_co2 ....)
+  vehicle_data values = vehicle_data (
+      data[1], (double) std::stod (data[2]), (double) std::stod (data[3]),
+      (int) std::stoi (data[4]), (double) std::stod (data[5]), (double) std::stod (data[6]),
+      (double) std::stod (data[7]), (double) std::stod (data[8]), (double) std::stod (data[9]));
 
   // Inserting vehicle data to RSU database
   // using map iterator, find any matching id in the map
-  std::map<std::string, std::pair<double, double>>::iterator it = m_vehicles_data.find (receivedID);
+  std::map<std::string, vehicle_data>::iterator it = m_vehicles_data.find (values.vehicle_id);
 
   // if previous data of this vehicle is found, update
   if (it != m_vehicles_data.end ())
     {
-
-      (it->second).first = velocity;
-      (it->second).second = headway;
+      (it->second) = values;
     }
   else
     {
       if (m_vehicles_data.size () < m_rsu_gym_env->GetActionSpaceSize ())
         {
-          // else insert a new entry as follows : <id>:<<speed>:<headway>>
-          m_vehicles_data.insert (std::make_pair (receivedID, std::make_pair (velocity, headway)));
+          // else insert a new entry as follows : <id>:<vehicle_data>
+          m_vehicles_data.insert (std::make_pair (values.vehicle_id, values));
         }
     }
 
@@ -352,9 +348,9 @@ RsuSpeedControl::HandleRead (Ptr<Socket> socket)
 
   NS_LOG_INFO ("3 RX ##### vehicle->RSU at time " << Simulator::Now ().GetSeconds ()
                                                   << "s - [RSU ip:" << ipAddr << "]"
-                                                  << "[from vehicle:" << receivedID << "]"
-                                                  << "[rx vel:" << velocity << "m/s]"
-                                                  << "[rx headway:" << headway << "]\n");
+                                                  << "[from vehicle:" << values.vehicle_id << "]"
+                                                  << "[rx vel:" << values.velocity << "m/s]"
+                                                  << "[rx headway:" << values.headway << "]\n");
 }
 
 TypeId
@@ -547,21 +543,38 @@ VehicleSpeedControl::Send ()
   // new message string
   std::ostringstream msg;
 
-  // append 1 which is the identifier of a vehicle, append the current velocity and headway
+  // append 1 which is the identifier of a vehicle, append the current velocity and headway and other parameters
   msg << "1*" << m_client->GetVehicleId (this->GetNode ()) << "*" << std::to_string (last_velocity)
-      << "*" << std::to_string (last_headway) << '\0';
+      << "*" << std::to_string (last_headway) << "*"
+      << std::to_string (
+             m_client->TraCIAPI::vehicle.getLaneIndex (m_client->GetVehicleId (this->GetNode ())))
+      << "*"
+      << std::to_string (m_client->TraCIAPI::vehicle.getFuelConsumption (
+             m_client->GetVehicleId (this->GetNode ())))
+      << "*"
+      << std::to_string (
+             m_client->TraCIAPI::vehicle.getCO2Emission (m_client->GetVehicleId (this->GetNode ())))
+      << "*"
+      << std::to_string (
+             m_client->TraCIAPI::vehicle.getCOEmission (m_client->GetVehicleId (this->GetNode ())))
+      << "*"
+      << std::to_string (
+             m_client->TraCIAPI::vehicle.getNOxEmission (m_client->GetVehicleId (this->GetNode ())))
+      << "*"
+      << std::to_string (
+             m_client->TraCIAPI::vehicle.getPMxEmission (m_client->GetVehicleId (this->GetNode ())))
+      << '\0';
   Ptr<Packet> packet = Create<Packet> ((uint8_t *) msg.str ().c_str (), msg.str ().length ());
 
   // send packet
   tx_socket->Send (packet);
-  NS_LOG_INFO ("2 TX ***** Vehicle->RSU at time "
-               << Simulator::Now ().GetSeconds () << "s - "
-               << "[vehicle ip:" << ipAddr << "]"
-               << "[vehicle id:" << m_client->GetVehicleId (this->GetNode ()) << "]"
-               << "[tx vel:" << last_velocity << "m/s]"
-               << "[tx headway:" << last_headway << "s]\n"
-               << "lane number: "  << m_client->TraCIAPI::vehicle.getRouteIndex(m_client->GetVehicleId (this->GetNode ()))
-               << m_client->TraCIAPI::vehicle.getLaneIndex(m_client->GetVehicleId (this->GetNode ())));
+  NS_LOG_INFO (
+      "2 TX ***** Vehicle->RSU at time "
+      << Simulator::Now ().GetSeconds () << "s - "
+      << "[vehicle ip:" << ipAddr << "]"
+      << "[vehicle id:" << m_client->GetVehicleId (this->GetNode ()) << "]"
+      << "[tx vel:" << last_velocity << "m/s]"
+      << "[tx headway:" << last_headway << "s]\n");
 
   ScheduleTransmit (m_interval);
 }

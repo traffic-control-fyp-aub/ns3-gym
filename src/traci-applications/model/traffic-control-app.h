@@ -29,11 +29,11 @@ class Packet;
 	 *
 	 * THis structure saves vehicle related parameters such as speeds , headways and other emission related data.
  */
-struct vehicel_data
+struct vehicle_data
 {
 
   std::string vehicle_id; // id of vehicle
-  double speed; // vehicle speed m/s
+  double velocity; // vehicle velocity m/s
   double headway; // time to reach leading vehicle in s
   int lane_index; // index of lane within road [1,2,..]
   double fuel_consumption; // consumption of fuel
@@ -42,12 +42,12 @@ struct vehicel_data
   double emission_nox; // emission of nitrogen oxides
   double emission_pmx; // emission of particulate matter
 
-  vehicel_data (std::string _vehicle_id, double _speed, double _headway, int _lane_index,
+  vehicle_data (std::string _vehicle_id, double _velocity, double _headway, int _lane_index,
                 double _fuel_consumption, double _emission_co2, double _emission_co,
                 double _emission_nox, double _emission_pmx)
   {
     vehicle_id = _vehicle_id;
-    speed = _speed;
+    velocity = _velocity;
     headway = _headway;
     lane_index = _lane_index;
     fuel_consumption = _fuel_consumption;
@@ -105,7 +105,7 @@ private:
   Ptr<Socket> rx_socket; //!< IPv4 Socket
   EventId m_sendEvent; //!< Event to send the next packet
   Ptr<TraciClient> m_client;
-  std::map<std::string, std::pair<double, double>> m_vehicles_data;
+  std::map<std::string, vehicle_data> m_vehicles_data;
 
   /// Callbacks for tracing the packet Tx events
   TracedCallback<Ptr<const Packet>> m_txTrace;
