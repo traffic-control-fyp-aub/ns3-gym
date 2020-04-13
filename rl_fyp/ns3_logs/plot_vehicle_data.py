@@ -14,6 +14,8 @@
 import sys
 import statistics
 import matplotlib.pylab as plt
+import numpy as np
+
 
 rsu_data_file = ''
 
@@ -24,7 +26,7 @@ if argumentList.__len__() < 2:
     exit(0)
 else:
     rsu_data_file = argumentList[1]
-    
+
 speeds_avg = {}
 speeds_std = {}
 headways_avg = {}
@@ -70,16 +72,22 @@ with open(rsu_data_file, 'r') as f:
         print(headways_avg)
         print(headways_std)
 
-        lists = sorted(speeds_avg.items())
-        t, avg = zip(*lists)
-
         fig = plt.figure(1)
         fig.suptitle('Velocity', fontsize=16)
-        plt.plot(t, avg, 'b-', label="Average")
+
+        lists = sorted(speeds_avg.items())
+        t, avg = zip(*lists)
+        plt.plot(t, avg, 'b-', label="Average/second")
+
+        t = t[100:]
+        avg = avg[100:]
+        pfit = np.polyfit(t, avg, 1)
+        trend_line_model = np.poly1d(pfit)
+        plt.plot(t, trend_line_model(t), "g--",  label="System Average Trend")
 
         lists = sorted(speeds_std.items())
         t, std = zip(*lists)
-        plt.plot(t, std, 'r--', label="Standard Deviation")
+        plt.plot(t, std, 'r-', label="Standard Deviation")
 
         plt.legend()
 
@@ -90,9 +98,15 @@ with open(rsu_data_file, 'r') as f:
         t, avg = zip(*lists)
         plt.plot(t, avg, 'b-', label="Average")
 
+        t = t[100:]
+        avg = avg[100:]
+        pfit = np.polyfit(t, avg, 1)
+        trend_line_model = np.poly1d(pfit)
+        plt.plot(t, trend_line_model(t), "g--",  label="System Average Trend")
+
         lists = sorted(headways_std.items())
         t, std = zip(*lists)
-        plt.plot(t, std, 'r--', label="Standard Deviation")
+        plt.plot(t, std, 'r-', label="Standard Deviation")
 
         plt.legend()
         plt.show()

@@ -24,6 +24,41 @@ class Packet;
 	 */
 
 /**
+ * \ingroup TrafficInfo
+	 * \brief A structure to hold vehicle related values
+	 *
+	 * THis structure saves vehicle related parameters such as speeds , headways and other emission related data.
+ */
+struct vehicel_data
+{
+
+  std::string vehicle_id; // id of vehicle
+  double speed; // vehicle speed m/s
+  double headway; // time to reach leading vehicle in s
+  int lane_index; // index of lane within road [1,2,..]
+  double fuel_consumption; // consumption of fuel
+  double emission_co2; // emmission of carbon dioxide
+  double emission_co; // emission of carbon monoxide
+  double emission_nox; // emission of nitrogen oxides
+  double emission_pmx; // emission of particulate matter
+
+  vehicel_data (std::string _vehicle_id, double _speed, double _headway, int _lane_index,
+                double _fuel_consumption, double _emission_co2, double _emission_co,
+                double _emission_nox, double _emission_pmx)
+  {
+    vehicle_id = _vehicle_id;
+    speed = _speed;
+    headway = _headway;
+    lane_index = _lane_index;
+    fuel_consumption = _fuel_consumption;
+    emission_co2 = _emission_co2;
+    emission_co = _emission_co;
+    emission_nox = _emission_nox;
+    emission_pmx = _emission_pmx;
+  }
+};
+
+/**
 	 * \ingroup TrafficInfo
 	 * \brief A Traffic Info server
 	 *
@@ -120,10 +155,6 @@ private:
   Ptr<TraciClient> m_client;
   double last_velocity;
   double last_headway;
-
-  double m_desired_speed = 40;
-  double m_speed_delta = 15;
-  double m_desired_headway = 2.0;
 };
 
 } // namespace ns3
