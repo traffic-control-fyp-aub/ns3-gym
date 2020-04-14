@@ -24,6 +24,43 @@ class Packet;
 	 */
 
 /**
+ * \ingroup TrafficInfo
+	 * \brief A structure to hold vehicle related values
+	 *
+	 * THis structure saves vehicle related parameters such as speeds , headways and other emission related data.
+ */
+struct vehicle_data
+{
+
+  std::string vehicle_id; // id of vehicle
+  double velocity; // vehicle velocity m/s
+  double headway; // time to reach leading vehicle in s
+  int lane_index; // index of lane within road [1,2,..]
+  double fuel_consumption; // consumption of fuel
+  double emission_co2; // emmission of carbon dioxide
+  double emission_co; // emission of carbon monoxide
+  double emission_nox; // emission of nitrogen oxides
+  double emission_pmx; // emission of particulate matter
+  double emission_hc; // emission of hydrocarbon
+
+  vehicle_data (std::string _vehicle_id, double _velocity, double _headway, int _lane_index,
+                double _fuel_consumption, double _emission_co2, double _emission_co,
+                double _emission_nox, double _emission_pmx, double _emission_hc)
+  {
+    vehicle_id = _vehicle_id;
+    velocity = _velocity;
+    headway = _headway;
+    lane_index = _lane_index;
+    fuel_consumption = _fuel_consumption;
+    emission_co2 = _emission_co2;
+    emission_co = _emission_co;
+    emission_nox = _emission_nox;
+    emission_pmx = _emission_pmx;
+    emission_hc = _emission_hc;
+  }
+};
+
+/**
 	 * \ingroup TrafficInfo
 	 * \brief A Traffic Info server
 	 *
@@ -70,7 +107,7 @@ private:
   Ptr<Socket> rx_socket; //!< IPv4 Socket
   EventId m_sendEvent; //!< Event to send the next packet
   Ptr<TraciClient> m_client;
-  std::map<std::string, std::pair<double, double>> m_vehicles_data;
+  std::map<std::string, vehicle_data> m_vehicles_data;
 
   /// Callbacks for tracing the packet Tx events
   TracedCallback<Ptr<const Packet>> m_txTrace;
@@ -120,10 +157,6 @@ private:
   Ptr<TraciClient> m_client;
   double last_velocity;
   double last_headway;
-
-  double m_desired_speed = 40;
-  double m_speed_delta = 15;
-  double m_desired_headway = 2.0;
 };
 
 } // namespace ns3
