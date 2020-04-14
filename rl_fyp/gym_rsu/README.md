@@ -26,5 +26,5 @@ To run the **script.py** file in the custom environment directory type the follo
 ```bash
 # If you want to train your agent then you also need to
 # specify if you are training online or offline.
-python3 script.py [ test | train ] [ --online | --offline ]
+python3 script.py train [ online | offline ] [ alg_name ] scenario=[name] [ policy_kwargs ]
 ```
