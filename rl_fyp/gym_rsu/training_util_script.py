@@ -82,39 +82,38 @@ def make_ns3_env():
     return ns3_obj
 
 
-if argumentList.__len__() == 1:
+def error_on_specification():
     # User did not specify the file properly
     print("Please specify one of the following: [ test | train ]"
           " and if you specified to train then [ --online | --offline ]")
-    exit(0)
-elif argumentList.__len__() is 4:
-    if sys.argv[1] in ['test']:
 
-        # Collect from the CLI the name of the traffic scenario
-        scenario_name = sys.argv[2].split("=")[1]
 
-        # Collect from the CLI the number of cars that the agent was trained on
-        num_of_vehicles = sys.argv[3].split("=")[1]
+def test_algorithm():
+    # Collect from the CLI the name of the traffic scenario
+    scenario_name = input("\nEnter the name of the traffic scenario you which to test on: ")
 
-        # Load the previously trained agent parameters and start
-        # running the traffic simulation
-        # Creating the ns3 environment that will act as a link
-        # between our agent and the live simulation
-        env = ns3env.Ns3Env(port=5555,
-                            stepTime=0.5,
-                            startSim=0,
-                            simSeed=12,
-                            debug=False)
+    # Collect from the CLI the number of cars that the agent was trained on
+    num_of_vehicles = input("\nEnter the number of vehicles that the agent was trained on: ")
 
-        ob_space = env.observation_space
-        ac_space = env.action_space
+    # Load the previously trained agent parameters and start
+    # running the traffic simulation
+    # Creating the ns3 environment that will act as a link
+    # between our agent and the live simulation
+    env = ns3env.Ns3Env(port=5555,
+                        stepTime=0.5,
+                        startSim=0,
+                        simSeed=12,
+                        debug=False)
 
-        print("Observation Space: ", ob_space, ob_space.dtype)
-        print("Action Space: ", ac_space, ac_space.dtype)
+    ob_space = env.observation_space
+    ac_space = env.action_space
 
-        stepIdx, currIt = 0, 0
+    print("Observation Space: ", ob_space, ob_space.dtype)
+    print("Action Space: ", ac_space, ac_space.dtype)
 
-        try:
+    stepIdx, currIt = 0, 0
+
+    try:
 
             # model = PPO2.load(f'rsu_agents/{scenario_name}_agents/'
             #                   f'PPO2_ns3_online_{scenario_name}_cars={num_of_vehicles}')
@@ -125,7 +124,7 @@ elif argumentList.__len__() is 4:
             # model = SAC.load(
             #     (f'rsu_agents/single_lane_highway_agents/optimized_interval/SAC_ns3_single_lane_highway_cars=25_optimized'))
 
-            model = TD3.load(
+        model = TD3.load(
                 f'rsu_agents/single_lane_highway_agents/optimized_interval/TD3_ns3_single_lane_highway_cars=25_optimized')
 
             # model = PPO2.load(
@@ -137,42 +136,35 @@ elif argumentList.__len__() is 4:
             # model = TD3.load(
             #     f'rsu_agents/square_agents/optimized_interval/TD3_ns3_square_cars=25_optimized')
 
+        while True:
+            print("Start iteration: ", currIt)
+            obs = env.reset()
+            reward = 0
+            done = False
+            info = None
+            print("Step: ", stepIdx)
+            print("-- obs: ", obs)
+
             while True:
-                print("Start iteration: ", currIt)
-                obs = env.reset()
-                reward = 0
-                done = False
-                info = None
+                stepIdx += 1
+                action, _states = model.predict(obs)
+                print("Predicted action: ", action, type(action))
+
                 print("Step: ", stepIdx)
-                print("-- obs: ", obs)
+                obs, reward, done, _ = env.step(action)
 
-                while True:
-                    stepIdx += 1
-                    action, _states = model.predict(obs)
-                    print("Predicted action: ", action, type(action))
+                print(f'{obs}, {reward}, {done}')
 
-                    print("Step: ", stepIdx)
-                    obs, reward, done, _ = env.step(action)
+    except KeyboardInterrupt:
+        env.close()
+        print("Ctrl-C -> Exit")
 
-                    print(f'{obs}, {reward}, {done}')
+    finally:
+        env.close()
+        print("Done")
 
-        except KeyboardInterrupt:
-            env.close()
-            print("Ctrl-C -> Exit")
 
-        finally:
-            env.close()
-            print("Done")
-    elif sys.argv[1] in ['train']:
-        # Raise and exception because the user needs to specify
-        # whether the training needs to be online or offline.
-        # Online means running it directly in the ns3 environment
-        # with SUMO and offline means running it with the RSU custom
-        # gym environment.
-        print(
-            "Please specify one of the following training methods: [ online | offline ]")
-        exit(0)
-elif argumentList.__len__() >= 5:
+if argumentList.__len__() >= 5:
     if sys.argv[1] in ['train'] and sys.argv[2] in ['online']:
 
         # Find the index of the agent name parameter

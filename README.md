@@ -1,4 +1,4 @@
-# NGS (ns3 + OpenAI Gym + SUMO)
+## NGS (ns3 + OpenAI Gym + SUMO)
 
 Welcome to NGS, an augmented version of the repository originally developed by [tkn-tub](https://github.com/tkn-tub/ns3-gym). 
 
@@ -18,7 +18,8 @@ Continuing to scroll down, you will find the three different subsections that wi
 
 The above command must be run the working directory of ns3-gym.
 
-## Run simple traffic simulation
+---
+### Run simple traffic simulation
 ```bash
 # The following two commands are needed only
 # if this is the first time running
@@ -32,36 +33,30 @@ The above command must be run the working directory of ns3-gym.
 # 3 = square scenario
 ./launch_sumo scenario=[ 0 | 1 | 2 | 3 ]
 ```
-
-## Train a traffic agent
+---
+### Train a traffic agent
 #### Speed Control
 You must have two terminal windows open to perform the following:
 
-Terminal 1 (ns3 side): 
+##### Terminal 1 (ns3 side): 
 ```bash
-# This should be run the main working directory
+# This should be run the main working directory of NGS
+# i.e: path/to/ns3-gym
 ./launch_sumo scenario=[ 0 | 1 | 2 | 3 ]
 ```
 
-Terminal 2 (gym side):
+##### Terminal 2 (gym side):
+
+We recommend that you follow the steps below to get a feel of how to train your agent using NGS:
 ```bash
 # This should be run under rl_fyp/gym_rsu
-python3 script.py train online [ alg_name ] scenario=[name] [ policy_kwargs ]
+python3 -W ignore bash.py
+
+Type in one of the following: [ start | help | exit ]
+>> help
 ```
-
-#### Lane Changing (Added)
-If you also want to train the agent to learn a strategic lane changing
-policy then open a third terminal and run the following command:
-
-Terminal 3 (gym side):
-```bash
-# This should be run under rl_fyp/gym_rsu
-python3 script.py train online [ alg_name ] scenario=[name] [ policy_kwargs ]
-```
-
-## NGS UML Diagram
-
-
+---
+### NGS UML Diagram
 Below you can find a UML diagram giving a high level explanation of how NGS works:
 
 ![UML Diagram](docs/uml.png)
