@@ -11,8 +11,8 @@ import math
     Custom OpenAI Gym environment from the perspective
     of the road side unit (RSU).
 """
-DIRECT_PATH_TO_DATA_FRAME = "/home/rayyan/Desktop/FYP/repos/ns3-gym/rl_fyp/training_data/training_data_frame.csv"
-PATH_TO_DATA_FRAME = "rl_fyp/training_data/training_data_frame.csv"
+DIRECT_PATH_TO_DATA_FRAME = "/home/rayyan/Desktop/FYP/repos/ns3-gym/rl_fyp/offline_training_data/training_data_frame.csv"
+PATH_TO_DATA_FRAME = "rl_fyp/offline_training_data/training_data_frame.csv"
 MAX_HEADWAY_TIME = 2  # maximum allowed headway time for vehicles in seconds
 MAX_VELOCITY_VALUE = 100  # maximum allowed velocity for vehicles in meters per second
 ALPHA = 0.1  # gain used to diminish the magnitude of the penalty
