@@ -8,11 +8,11 @@ namespace ns3 {
 		 * \brief The RL environment for the RSU to contril speeds 
 		 * an object of this class is used in the RsuControl class 
 		 */
-class RsuEnv : public OpenGymEnv
+class RsuSpeedControlEnv : public OpenGymEnv
 {
 public:
-  RsuEnv ();
-  virtual ~RsuEnv ();
+  RsuSpeedControlEnv ();
+  virtual ~RsuSpeedControlEnv ();
   static TypeId GetTypeId (void);
   virtual void DoDispose ();
 

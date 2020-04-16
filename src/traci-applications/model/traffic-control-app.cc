@@ -108,7 +108,7 @@ RsuSpeedControl::DoDispose (void)
   Application::DoDispose ();
 }
 
-Ptr<RsuEnv>
+Ptr<RsuSpeedControlEnv>
 RsuSpeedControl::GetEnv ()
 {
   NS_LOG_FUNCTION (this);
@@ -147,7 +147,7 @@ RsuSpeedControl::StartApplication (void)
   rx_socket->SetRecvCallback (MakeCallback (&RsuSpeedControl::HandleRead, this));
 
   // set up RSU environment
-  Ptr<RsuEnv> env = CreateObject<RsuEnv> ();
+  Ptr<RsuSpeedControlEnv> env = CreateObject<RsuSpeedControlEnv> ();
   m_rsu_gym_env = env;
 
   NS_LOG_INFO ("New Gym Enviroment" << env << "\n");
