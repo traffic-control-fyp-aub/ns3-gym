@@ -35,7 +35,6 @@ The above command must be run the working directory of ns3-gym.
 ```
 ---
 ### Train a traffic agent
-#### Speed Control
 You must have two terminal windows open to perform the following:
 
 ##### Terminal 1 (ns3 side): 
@@ -52,7 +51,7 @@ We recommend that you follow the steps below to get a feel of how to train your 
 # This should be run under rl_fyp/gym_rsu
 python3 -W ignore bash.py
 
-Type in one of the following: [ start | help | exit ]
+# Type in one of the following: [ start | help | exit ]
 >> help
 ```
 ---
