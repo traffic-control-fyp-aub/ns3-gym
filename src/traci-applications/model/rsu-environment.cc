@@ -6,9 +6,9 @@
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("RsuRnvironment");
-NS_OBJECT_ENSURE_REGISTERED (RsuEnv);
+NS_OBJECT_ENSURE_REGISTERED (RsuSpeedControlEnv);
 
-RsuEnv::RsuEnv ()
+RsuSpeedControlEnv::RsuSpeedControlEnv ()
 {
   NS_LOG_FUNCTION (this);
   // Opening interface with simulation script
@@ -31,30 +31,30 @@ RsuEnv::RsuEnv ()
   NS_LOG_INFO ("Set Up Interface : " << OpenGymInterface::Get () << "\n");
 }
 
-RsuEnv::~RsuEnv ()
+RsuSpeedControlEnv::~RsuSpeedControlEnv ()
 {
   NS_LOG_FUNCTION (this);
 }
 
 TypeId
-RsuEnv::GetTypeId (void)
+RsuSpeedControlEnv::GetTypeId (void)
 {
   static TypeId tid = TypeId ("RsuEnv")
                           .SetParent<OpenGymEnv> ()
                           .SetGroupName ("Applications")
-                          .AddConstructor<RsuEnv> ();
+                          .AddConstructor<RsuSpeedControlEnv> ();
   return tid;
 }
 
 void
-RsuEnv::DoDispose ()
+RsuSpeedControlEnv::DoDispose ()
 {
   NS_LOG_FUNCTION (this);
 }
 
 
 Ptr<OpenGymSpace>
-RsuEnv::GetObservationSpace ()
+RsuSpeedControlEnv::GetObservationSpace ()
 {
   NS_LOG_FUNCTION (this);
 
@@ -75,7 +75,7 @@ RsuEnv::GetObservationSpace ()
 }
 
 Ptr<OpenGymSpace>
-RsuEnv::GetActionSpace ()
+RsuSpeedControlEnv::GetActionSpace ()
 {
   NS_LOG_FUNCTION (this);
 
@@ -96,7 +96,7 @@ RsuEnv::GetActionSpace ()
 }
 
 Ptr<OpenGymDataContainer>
-RsuEnv::GetObservation ()
+RsuSpeedControlEnv::GetObservation ()
 {
   NS_LOG_FUNCTION (this);
 
@@ -127,7 +127,7 @@ RsuEnv::GetObservation ()
 }
 
 float
-RsuEnv::GetReward ()
+RsuSpeedControlEnv::GetReward ()
 {
   NS_LOG_FUNCTION (this);
 
@@ -161,7 +161,7 @@ RsuEnv::GetReward ()
 }
 
 bool
-RsuEnv::GetGameOver ()
+RsuSpeedControlEnv::GetGameOver ()
 {
   NS_LOG_FUNCTION (this);
   bool isGameOver = false;
@@ -171,7 +171,7 @@ RsuEnv::GetGameOver ()
 }
 
 std::string
-RsuEnv::GetExtraInfo ()
+RsuSpeedControlEnv::GetExtraInfo ()
 {
   NS_LOG_FUNCTION (this);
   std::string myInfo = "info";
@@ -180,7 +180,7 @@ RsuEnv::GetExtraInfo ()
 }
 
 bool
-RsuEnv::ExecuteActions (Ptr<OpenGymDataContainer> action)
+RsuSpeedControlEnv::ExecuteActions (Ptr<OpenGymDataContainer> action)
 {
   NS_LOG_FUNCTION (this);
 
@@ -201,7 +201,7 @@ RsuEnv::ExecuteActions (Ptr<OpenGymDataContainer> action)
 }
 
 std::vector<float>
-RsuEnv::ExportNewSpeeds ()
+RsuSpeedControlEnv::ExportNewSpeeds ()
 {
   NS_LOG_FUNCTION (this);
   std::vector<float> new_speeds_no_paddings;
@@ -216,7 +216,7 @@ RsuEnv::ExportNewSpeeds ()
 }
 
 void
-RsuEnv::ImportSpeedsAndHeadWays (std::vector<double> RSU_headways, std::vector<double> RSU_speeds)
+RsuSpeedControlEnv::ImportSpeedsAndHeadWays (std::vector<double> RSU_headways, std::vector<double> RSU_speeds)
 {
   NS_LOG_FUNCTION (this);
   NS_LOG_INFO ("###################################################################################"
@@ -244,7 +244,7 @@ RsuEnv::ImportSpeedsAndHeadWays (std::vector<double> RSU_headways, std::vector<d
 }
 
 uint32_t
-RsuEnv::GetActionSpaceSize ()
+RsuSpeedControlEnv::GetActionSpaceSize ()
 {
   return m_max_vehicles;
 }

@@ -76,7 +76,7 @@ public:
   static TypeId GetTypeId (void);
   RsuSpeedControl ();
   virtual ~RsuSpeedControl ();
-  Ptr<RsuEnv> GetEnv ();
+  Ptr<RsuSpeedControlEnv> GetEnv ();
 
 protected:
   virtual void DoDispose (void);
@@ -113,7 +113,7 @@ private:
   TracedCallback<Ptr<const Packet>> m_txTrace;
 
   // GymEnv
-  Ptr<RsuEnv> m_rsu_gym_env; //!< Gym environment object
+  Ptr<RsuSpeedControlEnv> m_rsu_gym_env; //!< Gym environment object
 };
 
 class VehicleSpeedControl : public Application
