@@ -111,7 +111,18 @@ def model_setup(algorithm_name, env, policy, **kwargs):
         pass
     elif algorithm_name in [list_of_algorithms[7]]:
         # DQN algorithm
-        pass
+        import tensorflow as tf
+
+        policy_kwargs = dict(act_fun=tf.nn.elu, net_arch=[100, 100])
+
+        model = DQN(policy=policy,
+                    env=env,
+                    batch_size=5,
+                    learning_rate=1e-5,
+                    gamma=0.99,
+                    verbose=1,
+                    policy_kwargs=policy_kwargs)
+
     elif algorithm_name in [list_of_algorithms[8]]:
         # GAIL algorithm
         pass

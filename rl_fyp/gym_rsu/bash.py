@@ -65,7 +65,7 @@
         Some example parameters could be `learning_rate` and `batch_size`. The user may pass on specifying
         any options simply by typing in the keyword `pass`.
 """
-from training_util_script import error_on_specification, test_algorithm, train_agent_speed_online
+from training_util_script import *
 
 ABSOLUTE_PATH_TO_SUMO_SCRIPTS = "/home/rayyan/Desktop/FYP/repos/ns3-gym/rl_fyp/gym_rsu/sumo_launch_script_utils"
 HELP_MESSAGE = 'Command(s):\n\n-----\n\n+ exit: Terminate the custom NGS shell and return the user to their own ' \
@@ -108,7 +108,17 @@ def execute_cmd():
     if input_asker.lower() == 'test':
         test_algorithm()
     elif input_asker.lower() == 'train':
-        train_agent_speed_online()
+        input_asker = input("\nDo you want to train speed or lane changing behavior: ")
+        if 'lane' in input_asker.lower():
+            # Lane Changing Model Training
+            train_agent_lane_online()
+        elif 'speed' in input_asker.lower():
+            # Speed Changing Model Training
+            input_asker = input("\nDo you want to perform offline or online training: ")
+            if input_asker.lower() == 'online':
+                train_agent_speed_online()
+            elif input_asker.lower() == 'offline':
+                train_agent_speed_offline()
     else:
         error_on_specification()
 

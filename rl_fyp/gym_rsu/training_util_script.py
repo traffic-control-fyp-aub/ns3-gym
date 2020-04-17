@@ -1,42 +1,3 @@
-"""
-    Usage:
-    ------
-    >> python3 script.py [ test | train ] [ online | offline ] [ algorithm name ] [scenario_name] [ algorithm_params ]
-        + test: Load and test the performance of a previously trained algorithm into
-            `   the ns3-SUMO simulator.
-        + train: Train an agent from scratch either directly on the ns3-SUMO simulator
-                 or through an offline custom openAI gym environment called RSUEnv
-
-        * if you specified the 'test' parameter then you do no need to enter the choice of
-          offline or online however you do still need to specify the algorithm name because
-          we use that to load in the saved agent directly from the command line.
-
-        * if you specified the 'train' parameter then you need to fill in all the remaining
-          parameters [ online | offline ] and the algorithm you which to train with.
-
-        * Here is a list of algorithms we already support:
-            - PPO2
-
-    *Note that model naming convention whenever training and then saving will
-    always be:
-                    rsu_agents/[scenario_name]_agents/[algorithm]_ns3_[scenario_name]_[num_of_cars]
-
-    This will later be used to help facilitate testing the agents directly from
-    the CLI instead of having to edit this script file every time.
-
-    e.g.: (training)
-    -----
-    - PPO2
-    >> python3 script.py train online PPO2 scenario=square lr=2.5e-4 v=1 ent=0.0 lbd=0.95 g=0.99
-
-    - SAC ( we automatically fetch the algorithm's default parameters )
-    >> python3 script.py train online SAC scenario=square
-
-    e.g.: (testing)
-    >> python3 script.py test scenario=square cars=10
-
-"""
-import sys
 from agent_utils.model_setup import model_setup
 
 
@@ -58,9 +19,6 @@ from ns3gym import ns3env
 from stable_baselines import PPO2, SAC, TD3
 from stable_baselines.common.evaluation import evaluate_policy
 from stable_baselines.common.vec_env import DummyVecEnv
-
-# Collect the list of command line arguments passed
-argumentList = sys.argv
 
 
 # Dummy variable that we use in order to get rid of a bug we
@@ -89,12 +47,6 @@ def error_on_specification():
 
 
 def test_algorithm():
-    # Collect from the CLI the name of the traffic scenario
-    scenario_name = input("\nEnter the name of the traffic scenario you which to test on: ")
-
-    # Collect from the CLI the number of cars that the agent was trained on
-    num_of_vehicles = input("\nEnter the number of vehicles that the agent was trained on: ")
-
     # Load the previously trained agent parameters and start
     # running the traffic simulation
     # Creating the ns3 environment that will act as a link
@@ -114,27 +66,8 @@ def test_algorithm():
     stepIdx, currIt = 0, 0
 
     try:
-
-            # model = PPO2.load(f'rsu_agents/{scenario_name}_agents/'
-            #                   f'PPO2_ns3_online_{scenario_name}_cars={num_of_vehicles}')
-
-            # model = PPO2.load(
-            #     (f'rsu_agents/single_lane_highway_agents/optimized_interval/PPO2_ns3_single_lane_highway_cars=25_optimized'))
-
-            # model = SAC.load(
-            #     (f'rsu_agents/single_lane_highway_agents/optimized_interval/SAC_ns3_single_lane_highway_cars=25_optimized'))
-
-        model = TD3.load(
-                f'rsu_agents/single_lane_highway_agents/optimized_interval/TD3_ns3_single_lane_highway_cars=25_optimized')
-
-            # model = PPO2.load(
-            #     (f'rsu_agents/square_agents/optimized_interval/PPO2_ns3_square_cars=25_optimized'))
-
-            # model = SAC.load(
-            #     (f'rsu_agents/square_agents/optimized_interval/SAC_ns3_square_cars=25_optimized'))
-
-            # model = TD3.load(
-            #     f'rsu_agents/square_agents/optimized_interval/TD3_ns3_square_cars=25_optimized')
+        model = TD3.load(f'rsu_agents/single_lane_highway_agents/optimized_interval/'
+                         f'TD3_ns3_single_lane_highway_cars=25_optimized')
 
         while True:
             print("Start iteration: ", currIt)
@@ -164,6 +97,7 @@ def test_algorithm():
 
 
 def train_agent_speed_online():
+    global speed_online_model
 
     # Get the name of the RL policy algorithm
     rl_agent_name = input("\nEnter the name of the RL algorithm to use: ")
@@ -260,48 +194,111 @@ def train_agent_speed_online():
 
     finally:
         env.close()
-    #     print("Environment closed")
-    # if sys.argv[1] in ['train'] and sys.argv[2] in ['offline']:
-    #     # Train using the RSU custom gym environment
-    #     # Create environment
-    #     env = gym.make("rsu-v0")
-    #
-    #     # Use the stable-baseline PPO policy to train
-    #     model = PPO2('MlpPolicy',
-    #                  env,
-    #                  verbose=1,
-    #                  ent_coef=0.0,
-    #                  lam=0.94,
-    #                  gamma=0.99,
-    #                  tensorboard_log='rsu_agents/ppo_offline_tensorboard/')
-    #
-    #     # Train the agent
-    #     print("Beginning model training")
-    #     model.learn(total_timesteps=int(2e5))
-    #     print("** Done training the model **")
-    #
-    #     # Save the agent
-    #     model.save('rsu_agents/ppo_ns3_offline')
-    #
-    #     # deleting it just to make sure we can load successfully again
-    #     del model
-    #
-    #     # Re-load the trained PPO algorithm with
-    #     # parameters saved as 'ppo_rsu'
-    #     model = PPO2.load('rsu_agents/ppo_ns3_offline')
-    #
-    #     # Evaluate the agent
-    #     mean_reward, n_steps = evaluate_policy(model, env, n_eval_episodes=10)
-    #     print(f'Mean Reward = {round(mean_reward, 4)}')
-    #
-    #     # Enjoy the trained agent
-    #     # ------------------------------------------------
-    #     # This has nothing to do with testing the agent in
-    #     # a live simulation. This is just a visualization
-    #     # in the terminal window.
-    #     # ------------------------------------------------
-    #     obs = env.reset()
-    #     for _ in range(3):
-    #         action, _states = model.predict(obs)
-    #         obs, reward, dones, info = env.step(action)
-    #         env.render()
+
+
+def train_agent_speed_offline():
+    # Train using the RSU custom gym environment
+    # Create environment
+    env = gym.make("rsu-v0")
+
+    # Use the stable-baseline PPO policy to train
+    model = PPO2('MlpPolicy',
+                 env,
+                 verbose=1,
+                 ent_coef=0.0,
+                 lam=0.94,
+                 gamma=0.99,
+                 tensorboard_log='rsu_agents/ppo_offline_tensorboard/')
+
+    # Train the agent
+    print("Beginning model training")
+    model.learn(total_timesteps=int(2e5))
+    print("** Done training the model **")
+
+    # Save the agent
+    model.save('rsu_agents/ppo_ns3_offline')
+
+    # deleting it just to make sure we can load successfully again
+    del model
+
+    # Re-load the trained PPO algorithm with
+    # parameters saved as 'ppo_rsu'
+    model = PPO2.load('rsu_agents/ppo_ns3_offline')
+
+    # Evaluate the agent
+    mean_reward, n_steps = evaluate_policy(model, env, n_eval_episodes=10)
+    print(f'Mean Reward = {round(mean_reward, 4)}')
+
+    # Enjoy the trained agent
+    # ------------------------------------------------
+    # This has nothing to do with testing the agent in
+    # a live simulation. This is just a visualization
+    # in the terminal window.
+    # ------------------------------------------------
+    obs = env.reset()
+    for _ in range(3):
+        action, _states = model.predict(obs)
+        obs, reward, dones, info = env.step(action)
+        env.render()
+
+
+def train_agent_lane_online():
+    global lane_online_model
+
+    # Get the name of the RL policy algorithm
+    rl_agent_name = input("\nEnter the name of the RL algorithm to use: ")
+
+    if rl_agent_name.capitalize() != 'DQN':
+        raise Exception("We currently only support DQN for lane changing.")
+
+    # Get the name of the traffic scenario
+    traffic_scenario_name = input("\nEnter the name of the traffic scenario: ")
+
+    # Train using the ns3 SUMO environment
+    # Creating the ns3 environment that will act as a link
+    # between our agent and the live simulation
+    ns3_obj = ns3env.Ns3Env(port=5555,  # FIXME - Are we still going to connect to port 5555?
+                            stepTime=0.5,
+                            startSim=0,
+                            simSeed=12,
+                            debug=True)
+
+    ob_space = ns3_obj.observation_space
+    ac_space = ns3_obj.action_space
+
+    # Vectorized environment to be able to set it to PPO
+    env = DummyVecEnv([make_ns3_env])
+
+    print("Observation Space: ", ob_space, ob_space.dtype)
+    print("Action Space: ", ac_space, ac_space.dtype)
+
+    try:
+        print('Setting up the model')
+
+        if entered_cli:
+            # Case where user has specified some CLI arguments for the agent
+
+            # --------------------------------------------------------------
+            # Use the part below when looking to perform base learning
+            # --------------------------------------------------------------
+            lane_online_model = model_setup(str(rl_agent_name).capitalize(),
+                                            env,
+                                            'MlpPolicy')
+
+        else:
+            print(f'Setting up default {str(rl_agent_name)} parameters')
+            # Otherwise just set up the model and use the default values
+            lane_online_model = model_setup(str(rl_agent_name).capitalize(), env, 'MlpPolicy')
+
+        print('Training model')
+        # Start the learning process on the ns3 + SUMO environment
+        lane_online_model.learn(total_timesteps=30000)
+        print(' ** Done Training ** ')
+    except KeyboardInterrupt:
+        lane_online_model.save(f'rsu_agents/lane_control_agents/{traffic_scenario_name}_agents/'
+                               f'optimized_interval/{rl_agent_name.capitalize()}_cars='
+                               f'{str(ac_space.shape)[1:3]}_optimized')
+        env.close()
+
+    finally:
+        env.close()
