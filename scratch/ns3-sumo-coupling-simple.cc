@@ -1,3 +1,13 @@
+/**
+    EECE 502 
+    ns3-sumo-coupling-simple.cc
+    Purpose: Responsible for coupling ns-3 and SUMO.
+
+    @author Rayyan Nasr 
+    @author Jihad Eddine Al-Khurfan
+    @version 1.0 3/12/20
+*/
+
 #include "ns3/core-module.h"
 #include "ns3/internet-module.h"
 #include "ns3/wifi-module.h"
@@ -18,8 +28,18 @@
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE ("ns3-sumo-coupling-simple");
 
-int
-main (int argc, char *argv[])
+/**
+    Controls operation of the program.
+
+    In ns3, a node pool and counter which are large enough to cover all sumo vehicles, are created, according to the user's desired scenario.
+    A channel and MAC are then created and set up, after which the Internet layer stack that includes routing is added.
+    An IP address is assigned to each device, after which the mobility and position node pool is set up.
+    Traci is then set up and SUMO is started according to the corresponding scenario, which was previously chosen by the user.
+    Applications for the RSU nodes are created, and the position of each node is set.
+    The interface and applications for the dynamic nodes are also created and set up after that.
+    The simulation and animation are then started.
+*/
+int main (int argc, char *argv[])
 {
   LogComponentEnable ("TraciClient", LOG_LEVEL_INFO);
   LogComponentEnable ("TrafficControlApplication", LOG_LEVEL_INFO);

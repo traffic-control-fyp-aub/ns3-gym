@@ -1,3 +1,12 @@
+/**
+    EECE 502 
+    rsu-environment.cc
+    Purpose: Defines the agent's OpenAI Gym environment
+    @author Rayyan Nasr 
+    @author Jihad Eddine Al-Khurfan
+    @version 1.0 4/1/20
+*/
+
 #include "ns3/log.h"
 #include "rsu-environment.h"
 #include <cmath>
@@ -8,12 +17,18 @@ namespace ns3 {
 NS_LOG_COMPONENT_DEFINE ("RsuRnvironment");
 NS_OBJECT_ENSURE_REGISTERED (RsuEnv);
 
+/**
+    The constructor of the Gym environment. It is used to define the environment
+    parameters (i.e. number of vehicles) that we will handle in the Observation Space
+    and the number of outputs in the Action Space. Once this consturctor is called,
+    the ZMQ bridge is set up between ns-3 and the RL agent.
+*/
 RsuEnv::RsuEnv ()
 {
   NS_LOG_FUNCTION (this);
   // Opening interface with simulation script
   this->SetOpenGymInterface (OpenGymInterface::Get ());
-  // Setting default values fot params
+  // Setting default values for params
   m_vehicles = 0;
   m_max_vehicles = 25;
   m_alpha = 0.9;
@@ -36,6 +51,11 @@ RsuEnv::~RsuEnv ()
   NS_LOG_FUNCTION (this);
 }
 
+/**
+    Gets type id of the RSU environment.
+
+    @return type id.
+*/
 TypeId
 RsuEnv::GetTypeId (void)
 {
@@ -52,7 +72,11 @@ RsuEnv::DoDispose ()
   NS_LOG_FUNCTION (this);
 }
 
+/**
+    Sends the Observation Space definition to the RL Agent.
 
+    @return Pointer to the Observation Space.
+*/
 Ptr<OpenGymSpace>
 RsuEnv::GetObservationSpace ()
 {
@@ -74,6 +98,11 @@ RsuEnv::GetObservationSpace ()
   return space;
 }
 
+/**
+    Sends the Action Space definition to the RL Agent.
+
+    @return Pointer to the Action Space.
+*/
 Ptr<OpenGymSpace>
 RsuEnv::GetActionSpace ()
 {
@@ -95,6 +124,12 @@ RsuEnv::GetActionSpace ()
   return box;
 }
 
+/**
+    Collects the state of the environment. Used when the RL Agent needs to predict
+    an action since the agent needs to know the current state of the environment.
+
+    @return Pointer to the observation shape.
+*/
 Ptr<OpenGymDataContainer>
 RsuEnv::GetObservation ()
 {
@@ -126,6 +161,12 @@ RsuEnv::GetObservation ()
   return box;
 }
 
+/**
+    Computes the reward and sends it to the RL agent over the ZMQ bridge. It is used by the agent
+    to know how good the previously predicted actions are in order to learn for better performance.
+
+    @return The value of the reward.
+*/
 float
 RsuEnv::GetReward ()
 {
@@ -160,6 +201,13 @@ RsuEnv::GetReward ()
   return reward;
 }
 
+/**
+    Prematurely terminates the episode of training in the case where the RL agent reaches an end
+    state in training. In this case, the cause of reaching an end state could either be an accident
+    or an invariable state of the reward after many time steps.
+
+    @return Boolean value of isGameOver, which is initially set to false.
+*/
 bool
 RsuEnv::GetGameOver ()
 {
@@ -179,6 +227,13 @@ RsuEnv::GetExtraInfo ()
   return myInfo;
 }
 
+/**
+    Receives the predicted actions from the RL agent and physically implements these actions on the
+    vehicles in SUMO.
+
+    @param action The predicted action from the RL agent.
+    @return Boolean value true.
+*/
 bool
 RsuEnv::ExecuteActions (Ptr<OpenGymDataContainer> action)
 {
@@ -200,6 +255,13 @@ RsuEnv::ExecuteActions (Ptr<OpenGymDataContainer> action)
   return true;
 }
 
+/**
+    Exports the speeds of the vehicles from SUMO. This function handles any instance where there is a
+    mismatch between the number of vehicles on the traffic scenario and the size of the Observation
+    and Action Spaces.
+
+    @return Speeds of the vehicles.
+*/
 std::vector<float>
 RsuEnv::ExportNewSpeeds ()
 {
@@ -215,6 +277,12 @@ RsuEnv::ExportNewSpeeds ()
   return new_speeds_no_paddings;
 }
 
+/**
+    Imports the speeds and headways from SUMO.
+
+    @param RSU_headways The headways of the vehicles in SUMO.
+    @param RSU_speeds The speeds of the vehicles in SUMO.
+*/
 void
 RsuEnv::ImportSpeedsAndHeadWays (std::vector<double> RSU_headways, std::vector<double> RSU_speeds)
 {
@@ -243,6 +311,11 @@ RsuEnv::ImportSpeedsAndHeadWays (std::vector<double> RSU_headways, std::vector<d
   Notify ();
 }
 
+/**
+    Returns the size of the Action Space.
+
+    @return The maximum number of vehicles in the Action Space.
+*/
 uint32_t
 RsuEnv::GetActionSpaceSize ()
 {
