@@ -211,7 +211,7 @@ RsuSpeedControl::Send ()
       msg << "|" << it->first << ":" << std::to_string ((it->second).velocity);
       it++;
     }
-    NS_LOG_INFO ("\n");
+  NS_LOG_INFO ("\n");
   // terminate message by appending '\0' character
   msg << '\0';
 
@@ -259,8 +259,7 @@ RsuSpeedControl::ChangeSpeed ()
                 << " :: " << (it->second).velocity << " :: " << (it->second).headway
                 << " :: " << (it->second).fuel_consumption << " :: " << (it->second).emission_co2
                 << " :: " << (it->second).emission_co << " :: " << (it->second).emission_nox
-                << " :: " << (it->second).emission_pmx << " :: " << (it->second).emission_hc
-                );
+                << " :: " << (it->second).emission_pmx << " :: " << (it->second).emission_hc);
 
       // store speed and headway for each vehicle
       speeds.push_back ((it->second).velocity);
@@ -510,8 +509,11 @@ VehicleSpeedControl::HandleRead (Ptr<Socket> socket)
                << "m/s]"
                << "[rx vel:" << velocity << "m/s]\n");
 
-  m_client->TraCIAPI::vehicle.setSpeed (m_client->GetVehicleId (this->GetNode ()), velocity);
-  last_velocity = velocity;
+  if (velocity >= 0)
+    {
+      m_client->TraCIAPI::vehicle.setSpeed (m_client->GetVehicleId (this->GetNode ()), velocity);
+      last_velocity = velocity;
+    }
 }
 
 void
