@@ -280,8 +280,17 @@ RsuSpeedControl::ChangeSpeed ()
   i = 0;
   while (it != m_vehicles_data.end ())
     {
-      // if (static_cast<double> (new_speeds[i]) + (it->second).first > 0)
-      (it->second).velocity += static_cast<double> (new_speeds[i]);
+      // apply modulo to the new speed value increment against the actual speed 
+      double new_speed_increment = fmod(static_cast<double> (new_speeds[i]),(it->second).velocity);
+
+      // If the increment is originallly negative, let the new increment be negative
+      if (static_cast<double> (new_speeds[i])<0){
+          new_speed_increment= -new_speed_increment;
+
+      }
+
+      // add increment to current speed (notice speed will never be negative now)
+      (it->second).velocity += new_speed_increment;
 
       i++;
       it++;
