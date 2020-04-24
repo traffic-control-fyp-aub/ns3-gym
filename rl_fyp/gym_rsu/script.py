@@ -33,11 +33,11 @@
     >> python3 script.py train online SAC scenario=square
 
     e.g.: (testing)
-    >> python3 script.py test scenario=square cars=10
+    >> python3 script.py test [ PPO2 | SAC | TD3 ] scenario=[ square | highway ]
 
 """
 import sys
-from agent_utils.model_setup import model_setup
+from agent_utils.model_utils import model_setup
 
 
 import gym
@@ -87,14 +87,30 @@ if argumentList.__len__() == 1:
     print("Please specify one of the following: [ test | train ]"
           " and if you specified to train then [ --online | --offline ]")
     exit(0)
-elif argumentList.__len__() is 4:
+elif argumentList.__len__() == 4:
+    print("Testing Agent")
+
     if sys.argv[1] in ['test']:
 
-        # Collect from the CLI the name of the traffic scenario
-        scenario_name = sys.argv[2].split("=")[1]
+        # Collect from the CLI the name of the RL agent
+        agent_name = str(sys.argv[2]).upper()
+        agent = None
+        if agent_name == 'PPO2':
+            agent = PPO2
+        elif agent_name == 'SAC':
+            agent = SAC
+        else:
+            agent = TD3
 
-        # Collect from the CLI the number of cars that the agent was trained on
-        num_of_vehicles = sys.argv[3].split("=")[1]
+        # Collect from the CLI the name of the traffic scenario
+        scenario_name = sys.argv[3].split("=")[1].lower()
+
+        # Based on the CLI scenario name navigate to the correct directory
+        scenario_directory = 'square_agents' if scenario_name.lower() == 'square' else 'single_lane_highway_agents'
+
+        # Constructed string path to the saved agent to load for testing
+        path_to_agent = f'rsu_agents/{scenario_directory}/optimized_interval/' \
+                        f'{agent_name}_ns3_{scenario_directory.rstrip("_agents")}_cars=25_optimized'
 
         # Load the previously trained agent parameters and start
         # running the traffic simulation
@@ -115,28 +131,7 @@ elif argumentList.__len__() is 4:
         stepIdx, currIt = 0, 0
 
         try:
-
-            # model = PPO2.load(f'rsu_agents/{scenario_name}_agents/'
-            #                   f'PPO2_ns3_online_{scenario_name}_cars={num_of_vehicles}')
-
-            # model = PPO2.load(
-            #     (f'rsu_agents/single_lane_highway_agents/optimized_interval/PPO2_ns3_single_lane_highway_cars=25_optimized'))
-
-            # model = SAC.load(
-            #     (f'rsu_agents/single_lane_highway_agents/optimized_interval/SAC_ns3_single_lane_highway_cars=25_optimized'))
-
-            model = TD3.load(
-                f'rsu_agents/single_lane_highway_agents/optimized_interval/TD3_ns3_single_lane_highway_cars=25_optimized')
-
-            # model = PPO2.load(
-            #     (f'rsu_agents/square_agents/optimized_interval/PPO2_ns3_square_cars=25_optimized'))
-
-            # model = SAC.load(
-            #     (f'rsu_agents/square_agents/optimized_interval/SAC_ns3_square_cars=25_optimized'))
-
-            # model = TD3.load(
-            #     f'rsu_agents/square_agents/optimized_interval/TD3_ns3_square_cars=25_optimized')
-
+            model = agent.load(path_to_agent)
             while True:
                 print("Start iteration: ", currIt)
                 obs = env.reset()
@@ -173,6 +168,7 @@ elif argumentList.__len__() is 4:
             "Please specify one of the following training methods: [ online | offline ]")
         exit(0)
 elif argumentList.__len__() >= 5:
+    print("Training Agent")
     if sys.argv[1] in ['train'] and sys.argv[2] in ['online']:
 
         # Find the index of the agent name parameter

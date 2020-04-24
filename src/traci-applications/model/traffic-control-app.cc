@@ -211,7 +211,7 @@ RsuSpeedControl::Send ()
       msg << "|" << it->first << ":" << std::to_string ((it->second).velocity);
       it++;
     }
-    NS_LOG_INFO ("\n");
+  NS_LOG_INFO ("\n");
   // terminate message by appending '\0' character
   msg << '\0';
 
@@ -259,8 +259,7 @@ RsuSpeedControl::ChangeSpeed ()
                 << " :: " << (it->second).velocity << " :: " << (it->second).headway
                 << " :: " << (it->second).fuel_consumption << " :: " << (it->second).emission_co2
                 << " :: " << (it->second).emission_co << " :: " << (it->second).emission_nox
-                << " :: " << (it->second).emission_pmx << " :: " << (it->second).emission_hc
-                );
+                << " :: " << (it->second).emission_pmx << " :: " << (it->second).emission_hc);
 
       // store speed and headway for each vehicle
       speeds.push_back ((it->second).velocity);
@@ -281,8 +280,17 @@ RsuSpeedControl::ChangeSpeed ()
   i = 0;
   while (it != m_vehicles_data.end ())
     {
-      // if (static_cast<double> (new_speeds[i]) + (it->second).first > 0)
-      (it->second).velocity += static_cast<double> (new_speeds[i]);
+      // apply modulo to the new speed value increment against the actual speed 
+      double new_speed_increment = fmod(static_cast<double> (new_speeds[i]),(it->second).velocity);
+
+      // If the increment is originallly negative, let the new increment be negative
+      if (static_cast<double> (new_speeds[i])<0){
+          new_speed_increment= -new_speed_increment;
+
+      }
+
+      // add increment to current speed (notice speed will never be negative now)
+      (it->second).velocity += new_speed_increment;
 
       i++;
       it++;
@@ -510,8 +518,11 @@ VehicleSpeedControl::HandleRead (Ptr<Socket> socket)
                << "m/s]"
                << "[rx vel:" << velocity << "m/s]\n");
 
-  m_client->TraCIAPI::vehicle.setSpeed (m_client->GetVehicleId (this->GetNode ()), velocity);
-  last_velocity = velocity;
+  if (velocity >= 0)
+    {
+      m_client->TraCIAPI::vehicle.setSpeed (m_client->GetVehicleId (this->GetNode ()), velocity);
+      last_velocity = velocity;
+    }
 }
 
 void
